@@ -28,15 +28,17 @@ namespace Imago.IO
         {
             try
             {
-                string query = (_credentials.ApiVersion == Credentials.ImagoApiVersion2 ? "/context" : "/query?type=project");
+                string query = "/context";
 
-                    HttpResponseMessage response = await _client.GetAsync(_apiUrl + query).ConfigureAwait(false);
+                HttpResponseMessage response = await _client.GetAsync(_apiUrl + query).ConfigureAwait(false);
                 _lastResponse = response;
 
                 string body = await response.Content.ReadAsStringAsync();
                 _lastResponseBody = body;
 
-                List<Project> projects = _jsonConverter.Deserialize<List<Project>>(body);
+                JObject context = JObject.Parse(body);
+
+                List<Project> projects = _jsonConverter.Deserialize<List<Project>>(context["projects"].ToString());
                 return new Result<UserContext> { Value = new UserContext { Projects = projects }, Code = projects == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
             }
             catch

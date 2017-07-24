@@ -40,8 +40,6 @@ namespace Imago.IO
                     return new Result<string> { Code = ResultCode.failed };
 
                 NameValueCollection query = new NameValueCollection();
-                if (_credentials.ApiVersion == Credentials.ImagoApiVersion1)
-                    query["type"] = "imagery";
 
                 query["dataitemid"] = parameters.dataItemId.ToString();
                 query["imtypeid"] = parameters.imageryTypeId.ToString();
@@ -51,15 +49,13 @@ namespace Imago.IO
                     query["width"] = parameters.resizeWidth.Value.ToString();
 
                 UriBuilder builder = new UriBuilder(_apiUrl);
-                builder.Path += _credentials.ApiVersion == Credentials.ImagoApiVersion2 ? "/imagery" : "/query";
+                builder.Path += "/imagery";
                 builder.Query = BuildQueryString(query);
 
                 HttpResponseMessage response = await _client.GetAsync(builder.ToString(), ct).ConfigureAwait(false);
                 _lastResponse = response;
 
-                if (response.StatusCode == HttpStatusCode.NotFound)
-                    return new Result<string> { Code = ResultCode.ok };
-                if (response.Content.Headers.ContentDisposition == null || String.IsNullOrWhiteSpace(response.Content.Headers.ContentDisposition.FileName) || response.StatusCode != HttpStatusCode.OK)
+                if (response.StatusCode != HttpStatusCode.OK || response.Content.Headers.ContentDisposition == null || String.IsNullOrWhiteSpace(response.Content.Headers.ContentDisposition.FileName) || response.StatusCode != HttpStatusCode.OK)
                     return new Result<string> { Code = ResultCode.failed };
 
                 string fsExt = Path.GetExtension(response.Content.Headers.ContentDisposition.FileName.Replace("\"",""));
@@ -103,8 +99,6 @@ namespace Imago.IO
                     return new Result<Imagery> { Code = ResultCode.failed };
 
                 NameValueCollection query = new NameValueCollection();
-                if (_credentials.ApiVersion == Credentials.ImagoApiVersion1)
-                    query["type"] = "image";
                 query["dataitemid"] = parameters.dataItemId.ToString();
                 query["imtypeid"] = parameters.imageryTypeId.ToString();
                 query["mimetype"] = parameters.mimeType;
@@ -112,7 +106,7 @@ namespace Imago.IO
                     query["history"] = "replace";
 
                 UriBuilder builder = new UriBuilder(_apiUrl);
-                builder.Path += _credentials.ApiVersion == Credentials.ImagoApiVersion2 ? "/imagery" : "/update";
+                builder.Path += "/imagery";
                 builder.Query = BuildQueryString(query);
 
                 fs = new FileStream(parameters.imageFileName, FileMode.Open);

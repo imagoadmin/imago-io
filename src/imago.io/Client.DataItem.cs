@@ -43,8 +43,6 @@ namespace Imago.IO
                     return new Result<List<DataItem>> { Code = ResultCode.failed };
 
                 NameValueCollection query = new NameValueCollection();
-                if (_credentials.ApiVersion == Credentials.ImagoApiVersion1)
-                    query["type"] = "dataitem";
 
                 query["dataentityid"] = parameters.dataEntityId.ToString();
                 query["dstypeid"] = parameters.dataSeriesTypeId.ToString();
@@ -62,15 +60,21 @@ namespace Imago.IO
                     query["z"] = parameters.z.ToString();
 
                 UriBuilder builder = new UriBuilder(_apiUrl);
-                builder.Path += _credentials.ApiVersion == Credentials.ImagoApiVersion2 ? "/dataitem" : "/query";
+                builder.Path += "/dataitem";
                 builder.Query = BuildQueryString(query);
 
                 HttpResponseMessage response = await _client.GetAsync(builder.ToString(),ct).ConfigureAwait(false);
                 _lastResponse = response;
+
                 string body = await response.Content.ReadAsStringAsync();
                 _lastResponseBody = body;
 
-                List<DataItem> dataItems = _jsonConverter.Deserialize<List<DataItem>>(body);
+                if (response.StatusCode != HttpStatusCode.OK)
+                    return new Result<List<DataItem>> { Code = ResultCode.failed };
+
+                JObject responseObject = JObject.Parse(body);
+
+                List<DataItem> dataItems = _jsonConverter.Deserialize<List<DataItem>>(responseObject["dataItems"].ToString());
                 return new Result<List<DataItem>> { Value = dataItems, Code = dataItems == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
             }
             catch
@@ -103,8 +107,7 @@ namespace Imago.IO
             try
             {
                 NameValueCollection query = new NameValueCollection();
-                if (_credentials.ApiVersion == Credentials.ImagoApiVersion1)
-                    query["type"] = "dataitem";
+
                 if (parameters.dataEntityId != Guid.Empty && parameters.dataSeriesTypeId != Guid.Empty)
                 {
                     query["dataentityid"] = parameters.dataEntityId.ToString();
@@ -128,7 +131,7 @@ namespace Imago.IO
                 if (parameters.z != null)
                     data.z = parameters.z;
                 UriBuilder builder = new UriBuilder(_apiUrl);
-                builder.Path += _credentials.ApiVersion == Credentials.ImagoApiVersion2 ? "/dataitem" : "/update";
+                builder.Path += "/dataitem";
                 builder.Query = BuildQueryString(query);
 
                 string body = _jsonConverter.Serialize(data);
