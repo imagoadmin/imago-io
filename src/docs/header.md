@@ -1,4 +1,4 @@
-![Imago](src/docs/imago.png)
+![Imago](http://github.com/imagolive/imago-io/src/docs/imago.png)
 # Imago IO for Developers
 
 Imago extract value from geoscientific imagery. It manages 
