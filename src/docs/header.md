@@ -1,7 +1,6 @@
 ![Imago](http://github.com/imagolive/imago-io/src/docs/imago.png)
-# Imago IO for Developers
 
-Imago extract value from geoscientific imagery. It manages 
+Imago extracts value from geoscientific imagery. It consolidates, transforms and delivers imagery into those applications most relevant to each image type. This external integration is achieved via the Imago Io Developer APIs.
 
 There are two ways to interface with Imago:
 

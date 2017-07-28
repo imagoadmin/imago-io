@@ -1,8 +1,8 @@
 {
-  "name": "Imago IO",
+  "name": "Imago IO for Developers",
   "version": "1.0.0",
   "description": "Imago's integration and embedding API.",
-  "title": "Imago Io Developer Documentation",
+  "title": "Imago IO",
   "url" : "https://io.imago.live",
   "order": [
     "Session",
