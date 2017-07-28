@@ -1,0 +1,25 @@
+{
+  "name": "Imago IO",
+  "version": "1.0.0",
+  "description": "Imago's integration and embedding API.",
+  "title": "Imago Io Developer Documentation",
+  "url" : "https://io.imago.live",
+  "order": [
+    "Session",
+    "PutSession",
+    "GetSession",
+    "DeleteSession",
+    "UserContext",
+    "DataEntity",
+    "DataItem",
+    "Imagery"
+  ],
+  "header": {
+      "title" : "Imago IO",
+      "filename" : "src/docs/header.md"
+  },
+  "footer": {
+      "title" : "Linking to Light Table",
+      "filename" : "src/docs/light-table-linking.md"
+  }
+}

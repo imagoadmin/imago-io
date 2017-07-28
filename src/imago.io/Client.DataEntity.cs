@@ -69,10 +69,6 @@ namespace Imago.IO
             public Guid datasetId { get; set; }
             public string name { get; set; }
         }
-        public class DataEntityUpdateBody
-        {
-            public string name { get; set; }
-        }
         public async Task<Result<DataEntity>> AddDataEntity(DataEntityUpdateParameters parameters,CancellationToken ct)
         {
             try
@@ -80,18 +76,10 @@ namespace Imago.IO
                 if (parameters.datasetId == Guid.Empty)
                     return new Result<DataEntity> { Code = ResultCode.failed };
 
-                NameValueCollection query = new NameValueCollection();
-                query["datasetid"] = parameters.datasetId.ToString();
-
-                DataEntityUpdateBody data = new DataEntityUpdateBody();
-
-                if (!String.IsNullOrWhiteSpace(parameters.name))
-                    data.name = parameters.name;
                 UriBuilder builder = new UriBuilder(_apiUrl);
                 builder.Path += "/dataentity";
-                builder.Query = BuildQueryString(query);
 
-                string body = _jsonConverter.Serialize(data);
+                string body = _jsonConverter.Serialize(parameters);
                 HttpResponseMessage response = await _client.PostAsync(builder.ToString(), new StringContent(body, Encoding.UTF8, "application/json"),ct).ConfigureAwait(false);
                 _lastResponse = response;
 

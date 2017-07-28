@@ -23,6 +23,7 @@ namespace Imago.IO
 #endif
             ApiVersion = Credentials.DefaultApiVersion1;
         }
+        public string ProxyUri { get; set; } = null;
         public string HostName { get; set; }
         public string ApiVersion { get; protected set; }
         public string UserName { get; set; }

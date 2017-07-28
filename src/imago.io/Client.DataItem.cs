@@ -93,48 +93,18 @@ namespace Imago.IO
             public double? y { get; set; }
             public double? z { get; set; }
         }
-        private class DataItemUpdateBody
-        {
-            public string name { get; set; }
-            public double? startdepth { get; set; }
-            public double? enddepth { get; set; }
-            public double? x { get; set; }
-            public double? y { get; set; }
-            public double? z { get; set; }
-        }
+
         public async Task<Result<DataItem>> AddDataItem(DataItemUpdateParameters parameters, CancellationToken ct)
         {
             try
             {
-                NameValueCollection query = new NameValueCollection();
-
-                if (parameters.dataEntityId != Guid.Empty && parameters.dataSeriesTypeId != Guid.Empty)
-                {
-                    query["dataentityid"] = parameters.dataEntityId.ToString();
-                    query["dstypeid"] = parameters.dataSeriesTypeId.ToString();
-                }
-                else
+                if (parameters.dataEntityId == Guid.Empty && parameters.dataSeriesTypeId == Guid.Empty)
                     return new Result<DataItem> { Code = ResultCode.failed };
 
-                DataItemUpdateBody data = new DataItemUpdateBody();
-
-                if (!String.IsNullOrWhiteSpace(parameters.name))
-                    data.name = parameters.name;
-                if (parameters.startDepth != null)
-                    data.startdepth = parameters.startDepth;
-                if (parameters.endDepth != null)
-                    data.enddepth = parameters.endDepth;
-                if (parameters.x != null)
-                    data.x = parameters.x;
-                if (parameters.y != null)
-                    data.y = parameters.y;
-                if (parameters.z != null)
-                    data.z = parameters.z;
                 UriBuilder builder = new UriBuilder(_apiUrl);
                 builder.Path += "/dataitem";
-                builder.Query = BuildQueryString(query);
 
-                string body = _jsonConverter.Serialize(data);
+                string body = _jsonConverter.Serialize(parameters);
                 HttpResponseMessage response = await _client.PostAsync(builder.ToString(), new StringContent(body, Encoding.UTF8, "application/json"),ct).ConfigureAwait(false);
                 _lastResponse = response;
                 body = await response.Content.ReadAsStringAsync();

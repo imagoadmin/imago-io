@@ -52,33 +52,34 @@ namespace Imago.IO
 
                 _cookieJar = new CookieContainer();
 
-                HttpClientHandler responseHandler = new HttpClientHandler();
+                HttpClientHandler responseHandler = null; ;
+                if (!String.IsNullOrWhiteSpace(credentials.ProxyUri))
+                    responseHandler = new HttpClientHandler { Proxy = new WebProxy(credentials.ProxyUri, false), UseProxy = true };
+                else
+                    responseHandler = new HttpClientHandler();
+
                 responseHandler.CookieContainer = _cookieJar;
 
                 _client = new HttpClient(responseHandler);
                 _client.Timeout = new TimeSpan(0, 10, 0);
                 _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                Dictionary<string, string> formData = new Dictionary<string, string>();
-                formData["username"] = credentials.UserName;
-                formData["password"] = credentials.Password;
-                HttpContent content = new FormUrlEncodedContent(formData);
-
                 Uri signInURI = new Uri(_apiUrl + "/signin");
-                HttpResponseMessage request = await _client.PutAsync(signInURI, content).ConfigureAwait(false);
-                HttpResponseMessage response = request;
+                dynamic data = new { username=credentials.UserName, password=credentials.Password };
+                string body = _jsonConverter.Serialize(data);
+                HttpResponseMessage response = await _client.PutAsync(signInURI, new StringContent(body, Encoding.UTF8, "application/json")).ConfigureAwait(false);
 
                 _lastResponse = response;
 
                 Task<string> reading = response.Content.ReadAsStringAsync();
                 reading.Wait();
-                string body = reading.Result;
+                body = reading.Result;
                 _lastResponseBody = body;
 
                 if (response.StatusCode != HttpStatusCode.OK)
                     return false;
 
-                dynamic data = JObject.Parse(body);
+                data = JObject.Parse(body);
                 string apiToken = data.apiToken;
 
                 CookieCollection cookies = _cookieJar.GetCookies(signInURI);
