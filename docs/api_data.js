@@ -57,7 +57,14 @@ define({ "api": [
             "description": "<p>Only search within the dataset.</p>"
           }
         ]
-      }
+      },
+      "examples": [
+        {
+          "title": "Query String:",
+          "content": "?datasetid=9a08e64f-e6e9-41d8-a47c-044db8a882c4&name=DH&match=startswidth",
+          "type": "json"
+        }
+      ]
     },
     "success": {
       "fields": {
@@ -160,7 +167,14 @@ define({ "api": [
             "description": "<p>Add the new data entity to this dataset.</p>"
           }
         ]
-      }
+      },
+      "examples": [
+        {
+          "title": "Request Body:",
+          "content": "{\n    \"name\" : \"DH001\",\n    \"datasetId\" : \"9a08e64f-e6e9-41d8-a47c-044db8a882c4\"\n}",
+          "type": "json"
+        }
+      ]
     },
     "success": {
       "fields": {
@@ -222,7 +236,7 @@ define({ "api": [
     "examples": [
       {
         "title": "Example Usage (requires the authorisation token header):",
-        "content": "curl -O  http://io.imago.live/integrate/1/imagery?dataentityid=d856d001-22bf-4339-8382-9e29532e539b&dstypeid=78742fab-4c55-4b57-830d-5ab6b6c1fb09",
+        "content": "curl -O  http://io.imago.live/integrate/1/imagery?dataentityid=d856d001-22bf-4339-8382-9e29532e539b&dataseriestypeid=78742fab-4c55-4b57-830d-5ab6b6c1fb09",
         "type": "curl"
       }
     ],
@@ -252,7 +266,7 @@ define({ "api": [
             "group": "Parameter",
             "type": "Guid",
             "optional": false,
-            "field": "dstypeid",
+            "field": "dataseriestypeid",
             "description": "<p>Only search for data items with this data series type.</p>"
           },
           {
@@ -306,7 +320,14 @@ define({ "api": [
             "description": "<p>Tolerance used when matching numbers.</p>"
           }
         ]
-      }
+      },
+      "examples": [
+        {
+          "title": "Query String:",
+          "content": "?dataentityid=d856d001-22bf-4339-8382-9e29532e539b&dataseriestypeid=78742fab-4c55-4b57-830d-5ab6b6c1fb09",
+          "type": "json"
+        }
+      ]
     },
     "success": {
       "fields": {
@@ -493,7 +514,14 @@ define({ "api": [
             "description": "<p>Elevation/Z coordinate of new data item.</p>"
           }
         ]
-      }
+      },
+      "examples": [
+        {
+          "title": "Request Body:",
+          "content": "{\n    \"dataEntityId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n    \"dataSeriesTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\"\n    \"name\" : \"DH001\",\n    \"startDepth\" : 0,\n    \"endDepth\" : 10.1\n}",
+          "type": "json"
+        }
+      ]
     },
     "success": {
       "fields": {
@@ -566,7 +594,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "{\n    \"id\" : \"c2019bd6-34aa-4561-ab2f-8802fa5ff3a9\",\n    \"dataEntityId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n    \"dataSeriesTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\"\n    \"startDepth\" : 0,\n    \"endDepth\" : 10.1,\n}",
+          "content": "{\n    \"id\" : \"c2019bd6-34aa-4561-ab2f-8802fa5ff3a9\",\n    \"dataEntityId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n    \"dataSeriesTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\"\n    \"startDepth\" : 0,\n    \"endDepth\" : 10.1\n}",
           "type": "json"
         }
       ]
@@ -593,11 +621,135 @@ define({ "api": [
     "title": "Download an image",
     "name": "GetImagery",
     "group": "Imagery",
+    "description": "<p>Return a group of attributes associated with data within Imago.</p>",
+    "examples": [
+      {
+        "title": "Example Usage (requires the authorisation token header):",
+        "content": "curl -O  http://io.imago.live/integrate/1/attributes?id=e1865861-0d53-4d49-a554-af79dae9aa81&type=image",
+        "type": "curl"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "optional": false,
+            "field": "imago-api-token",
+            "description": "<p>b4ecb7d7-b8bb-460f-9506-134df358f471</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Guid",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Data identifier.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "allowedValues": [
+              "\"image\""
+            ],
+            "optional": true,
+            "field": "type",
+            "defaultValue": "image",
+            "description": "<p>Type of data to search for.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "allowedValues": [
+              "\"properties\""
+            ],
+            "optional": true,
+            "field": "group",
+            "defaultValue": "properties",
+            "description": "<p>Specifies which group of attributes to return for the data.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Query String:",
+          "content": "?id=e1865861-0d53-4d49-a554-af79dae9aa81&type=image",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Guid",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Data identifier.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "group",
+            "description": "<p>Name of group of attributes.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "attributes",
+            "description": "<p>Attributes associated with the specified group. The fields depend on the attributes group and its definition.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n    \"id\" : \"108501d0-4d6c-475c-8ad2-96bb983b1fc5\",\n    \"group\" : \"properties\",\n    \"attributes\" : {\n        \"mimeType\" : \"image/jpeg\",\n        \"fileName\" : \"DH001_coretray_wet.jpeg\",\n        \"fileExt\" : \".jpeg\",\n        \"fileSize\" : \"16253742783\"\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "404": [
+          {
+            "group": "404",
+            "optional": false,
+            "field": "NotFound",
+            "description": "<p>The specified attributes were not found.</p>"
+          },
+          {
+            "group": "404",
+            "optional": false,
+            "field": "ErrorDuringRequest",
+            "description": "<p>Internal error occurred during the request.</p>"
+          }
+        ]
+      }
+    },
+    "version": "1.0.0",
+    "filename": "../imago-agent/api/routes/io/2/get-attributes.js",
+    "groupTitle": "Imagery"
+  },
+  {
+    "type": "get",
+    "url": "/integrate/1/imagery",
+    "title": "Download an image",
+    "name": "GetImagery",
+    "group": "Imagery",
     "description": "<p>Downloads an image</p>",
     "examples": [
       {
         "title": "Example Usage (requires the authorisation token header):",
-        "content": "curl -O  http://io.imago.live/integrate/1/imagery?dataitemid=c2019bd6-34aa-4561-ab2f-8802fa5ff3a9&imtypeid=mimetype=image%2Fjpeg&width=200",
+        "content": "curl -O  http://io.imago.live/integrate/1/imagery?dataitemid=c2019bd6-34aa-4561-ab2f-8802fa5ff3a9&imagerytypeid=f0b6aec1-ce5c-4874-b107-162090623a9b&mimetype=image%2Fjpeg&width=200",
         "type": "curl"
       }
     ],
@@ -627,7 +779,7 @@ define({ "api": [
             "group": "Parameter",
             "type": "Guid",
             "optional": false,
-            "field": "imtypeid",
+            "field": "imagerytypeid",
             "description": "<p>Only search for an image with this imagery type.</p>"
           },
           {
@@ -645,7 +797,14 @@ define({ "api": [
             "description": "<p>Scale the image to this height (width is adjusted according to aspect ratio if not specified).</p>"
           }
         ]
-      }
+      },
+      "examples": [
+        {
+          "title": "Query String: ",
+          "content": "?dataitemid=c2019bd6-34aa-4561-ab2f-8802fa5ff3a9&imagerytypeid=f0b6aec1-ce5c-4874-b107-162090623a9b&mimetype=image%2Fjpeg&width=200",
+          "type": "json"
+        }
+      ]
     },
     "error": {
       "fields": {
@@ -679,7 +838,7 @@ define({ "api": [
     "examples": [
       {
         "title": "Example Usage (requires the authorisation token header):",
-        "content": "curl -i -F filedata=@sample.jpeg  http://io.imago.live/integrate/1/imagery?dataitemid=c2019bd6-34aa-4561-ab2f-8802fa5ff3a9&imtypeid=mimetype=image%2Fjpeg&history=replace",
+        "content": "curl -i -F filedata=@sample.jpeg  http://io.imago.live/integrate/1/imagery?dataitemid=c2019bd6-34aa-4561-ab2f-8802fa5ff3a9&imagerytypeid=f0b6aec1-ce5c-4874-b107-162090623a9b&mimetype=image%2Fjpeg&history=replace",
         "type": "curl"
       }
     ],
@@ -709,7 +868,7 @@ define({ "api": [
             "group": "Parameter",
             "type": "Guid",
             "optional": false,
-            "field": "imtypeid",
+            "field": "imagerytypeid",
             "description": "<p>Add an image of this imagery type.</p>"
           },
           {
@@ -736,7 +895,14 @@ define({ "api": [
             "description": "<p>Defines what do to if an image of the same imagery type already exists in the data item. By default &quot;replace&quot;, all previous images of the same imagery type are replaced. If &quot;append&quot; is specified then the image is added to the imagery type's history on the data item and made the most current image.</p>"
           }
         ]
-      }
+      },
+      "examples": [
+        {
+          "title": "Query String:",
+          "content": "?dataitemid=c2019bd6-34aa-4561-ab2f-8802fa5ff3a9&imagerytypeid=f0b6aec1-ce5c-4874-b107-162090623a9b&mimetype=image%2Fjpeg&history=replace",
+          "type": "json"
+        }
+      ]
     },
     "success": {
       "fields": {
@@ -953,7 +1119,7 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "context",
+    "url": "/integrate/1/context",
     "title": "Get the user's context",
     "name": "GetUserContext",
     "group": "UserContext",

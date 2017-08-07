@@ -42,6 +42,23 @@ namespace Imago.IO
                 return _credentials == null ? null : _credentials.UserName;
             }
         }
+
+        public HttpClient Direct
+        {
+            get
+            {
+                return _client;
+            }
+        }
+
+        public string APIUrl
+        {
+            get
+            {
+                return _apiUrl;
+            }
+        }
+
         public async Task<bool> SignIn(Credentials credentials)
         {
             try
@@ -54,7 +71,7 @@ namespace Imago.IO
 
                 HttpClientHandler responseHandler = null; ;
                 if (!String.IsNullOrWhiteSpace(credentials.ProxyUri))
-                    responseHandler = new HttpClientHandler { Proxy = new WebProxy(credentials.ProxyUri, false), UseProxy = true };
+                    responseHandler = new HttpClientHandler { Proxy = new WebProxy(credentials.ProxyUri, false), UseProxy = true, UseDefaultCredentials=true };
                 else
                     responseHandler = new HttpClientHandler();
 
@@ -64,7 +81,7 @@ namespace Imago.IO
                 _client.Timeout = new TimeSpan(0, 10, 0);
                 _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                Uri signInURI = new Uri(_apiUrl + "/signin");
+                Uri signInURI = new Uri(_apiUrl + "/session");
                 dynamic data = new { username=credentials.UserName, password=credentials.Password };
                 string body = _jsonConverter.Serialize(data);
                 HttpResponseMessage response = await _client.PutAsync(signInURI, new StringContent(body, Encoding.UTF8, "application/json")).ConfigureAwait(false);
@@ -83,9 +100,15 @@ namespace Imago.IO
                 string apiToken = data.apiToken;
 
                 CookieCollection cookies = _cookieJar.GetCookies(signInURI);
-                Cookie sessionCookie = cookies["connect.sid"];
+                foreach(Cookie cookie in cookies)
+                {
+                    if (cookie.Name == "connect.sid")
+                    {
+                        _client.DefaultRequestHeaders.GetCookies().Add(new CookieHeaderValue(cookie.Name, cookie.Value));
+                        break;
+                    }
+                }
 
-                _client.DefaultRequestHeaders.GetCookies().Add(new CookieHeaderValue(sessionCookie.Name, sessionCookie.Value));
                 _client.DefaultRequestHeaders.Add("imago-api-token", apiToken);
                 return true;
             }
@@ -102,7 +125,7 @@ namespace Imago.IO
                 if (_client == null)
                     return false;
 
-                HttpResponseMessage result = await _client.GetAsync(_apiUrl + "/signedin").ConfigureAwait(false);
+                HttpResponseMessage result = await _client.GetAsync(_apiUrl + "/session").ConfigureAwait(false);
                 _lastResponse = result;
 
                 _lastResponseBody = null;

@@ -45,7 +45,7 @@ namespace Imago.IO
                 NameValueCollection query = new NameValueCollection();
 
                 query["dataentityid"] = parameters.dataEntityId.ToString();
-                query["dstypeid"] = parameters.dataSeriesTypeId.ToString();
+                query["dataseriestypeid"] = parameters.dataSeriesTypeId.ToString();
                 if (!String.IsNullOrWhiteSpace(parameters.name))
                     query["name"] = parameters.name;
                 if (parameters.startDepth != null)

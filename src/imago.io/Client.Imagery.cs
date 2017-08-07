@@ -42,7 +42,7 @@ namespace Imago.IO
                 NameValueCollection query = new NameValueCollection();
 
                 query["dataitemid"] = parameters.dataItemId.ToString();
-                query["imtypeid"] = parameters.imageryTypeId.ToString();
+                query["imagerytypeid"] = parameters.imageryTypeId.ToString();
                 if (parameters.resizeHeight != null)
                     query["height"] = parameters.resizeHeight.Value.ToString();
                 if (parameters.resizeWidth != null)
@@ -100,7 +100,7 @@ namespace Imago.IO
 
                 NameValueCollection query = new NameValueCollection();
                 query["dataitemid"] = parameters.dataItemId.ToString();
-                query["imtypeid"] = parameters.imageryTypeId.ToString();
+                query["imagerytypeid"] = parameters.imageryTypeId.ToString();
                 query["mimetype"] = parameters.mimeType;
                 if (parameters.replaceHistory)
                     query["history"] = "replace";
@@ -135,6 +135,53 @@ namespace Imago.IO
 
             }
             return result;
+        }
+
+        public class ImageProperties
+        {
+            public string mimeType { get; set; }
+            public Guid id { get; set; }
+            public string fileName { get; set; }
+            public string fileExt { get; set; }
+            public Int64 fileSize { get; set; } = 0;
+        }
+        public async Task<Result<ImageProperties>> GetImageProperties(Guid id, CancellationToken ct)
+        {
+            try
+            {
+                if (id == Guid.Empty)
+                    return new Result<ImageProperties> { Code = ResultCode.failed };
+
+                NameValueCollection query = new NameValueCollection();
+
+                query["id"] = id.ToString();
+                query["type"] = "image";
+                query["group"] = "properties";
+
+                UriBuilder builder = new UriBuilder(_apiUrl);
+                builder.Path += "/attributes";
+                builder.Query = BuildQueryString(query);
+
+                HttpResponseMessage response = await _client.GetAsync(builder.ToString(), ct).ConfigureAwait(false);
+                _lastResponse = response;
+
+                string body = await response.Content.ReadAsStringAsync();
+                _lastResponseBody = body;
+
+                if (response.StatusCode != HttpStatusCode.OK)
+                    return new Result<ImageProperties> { Code = ResultCode.failed };
+
+                JObject responseObject = JObject.Parse(body);
+                Imagery dataItem = _jsonConverter.Deserialize<Imagery>(body);
+
+                ImageProperties imageProperties = _jsonConverter.Deserialize<ImageProperties>(responseObject["attributes"].ToString());
+
+                return new Result<ImageProperties> { Value = imageProperties, Code = responseObject == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
+            }
+            catch
+            {
+                return new Result<ImageProperties> { Code = ResultCode.failed };
+            }
         }
     }
 }
