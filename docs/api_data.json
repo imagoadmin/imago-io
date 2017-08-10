@@ -31,9 +31,9 @@
           {
             "group": "Parameter",
             "type": "String",
-            "optional": false,
+            "optional": true,
             "field": "name",
-            "description": "<p>Search pattern to match data entity names.</p>"
+            "description": "<p>Search pattern to match data entity names. If no search pattern is supplied then all data entities are returned for the dataset.</p>"
           },
           {
             "group": "Parameter",

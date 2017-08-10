@@ -99,16 +99,6 @@ namespace Imago.IO
                 data = JObject.Parse(body);
                 string apiToken = data.apiToken;
 
-                CookieCollection cookies = _cookieJar.GetCookies(signInURI);
-                foreach(Cookie cookie in cookies)
-                {
-                    if (cookie.Name == "connect.sid")
-                    {
-                        _client.DefaultRequestHeaders.GetCookies().Add(new CookieHeaderValue(cookie.Name, cookie.Value));
-                        break;
-                    }
-                }
-
                 _client.DefaultRequestHeaders.Add("imago-api-token", apiToken);
                 return true;
             }
@@ -135,6 +125,29 @@ namespace Imago.IO
             catch(Exception ex)
             {
                 return false;
+            }
+        }
+        public async Task<bool> SignOut()
+        {
+            try
+            {
+                if (_client == null)
+                    return false;
+
+                HttpResponseMessage result = await _client.DeleteAsync(_apiUrl + "/signout").ConfigureAwait(false);
+                _lastResponse = result;
+
+                _lastResponseBody = null;
+
+                return (result.StatusCode == HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+            finally
+            {
+                _client = null;
             }
         }
         private string BuildQueryString(NameValueCollection nvc)
