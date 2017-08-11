@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImagoDisplay", "ImagoDisplay\ImagoDisplay.csproj", "{C583BCE3-BA4C-4A43-9D61-461BC96C1084}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Imago.IO", "..\src\imago.io\Imago.IO.csproj", "{679F73B5-E869-4378-84D8-24265A3A43EE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Imago.IO", "..\..\src\imago.io\Imago.IO.csproj", "{679F73B5-E869-4378-84D8-24265A3A43EE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
