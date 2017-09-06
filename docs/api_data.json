@@ -1,7 +1,7 @@
 [
   {
     "type": "get",
-    "url": "/integrate/1/imagery",
+    "url": "/integrate/1/attributes",
     "title": "Get data attributes",
     "name": "GetAttributes",
     "group": "Attributes",
