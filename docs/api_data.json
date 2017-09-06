@@ -1,6 +1,130 @@
 [
   {
     "type": "get",
+    "url": "/integrate/1/imagery",
+    "title": "Get data attributes",
+    "name": "GetAttributes",
+    "group": "Attributes",
+    "description": "<p>Return a group of attributes associated with data within Imago.</p>",
+    "examples": [
+      {
+        "title": "Example Usage (requires the authorisation token header):",
+        "content": "curl -O  http://io.imago.live/integrate/1/attributes?id=e1865861-0d53-4d49-a554-af79dae9aa81&type=image",
+        "type": "curl"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "optional": false,
+            "field": "imago-api-token",
+            "description": "<p>b4ecb7d7-b8bb-460f-9506-134df358f471</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Guid",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Data identifier.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "allowedValues": [
+              "\"image\""
+            ],
+            "optional": true,
+            "field": "type",
+            "defaultValue": "image",
+            "description": "<p>Type of data to search for.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "allowedValues": [
+              "\"properties\""
+            ],
+            "optional": true,
+            "field": "group",
+            "defaultValue": "properties",
+            "description": "<p>Specifies which group of attributes to return for the data.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Query String:",
+          "content": "?id=e1865861-0d53-4d49-a554-af79dae9aa81&type=image",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Guid",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Data identifier.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "group",
+            "description": "<p>Name of group of attributes.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "attributes",
+            "description": "<p>Attributes associated with the specified group. The fields depend on the attributes group and its definition.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n    \"id\" : \"108501d0-4d6c-475c-8ad2-96bb983b1fc5\",\n    \"group\" : \"properties\",\n    \"attributes\" : {\n        \"mimeType\" : \"image/jpeg\",\n        \"fileName\" : \"DH001_coretray_wet.jpeg\",\n        \"fileExt\" : \".jpeg\",\n        \"fileSize\" : \"16253742783\"\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "404": [
+          {
+            "group": "404",
+            "optional": false,
+            "field": "NotFound",
+            "description": "<p>The specified attributes were not found.</p>"
+          },
+          {
+            "group": "404",
+            "optional": false,
+            "field": "ErrorDuringRequest",
+            "description": "<p>Internal error occurred during the request.</p>"
+          }
+        ]
+      }
+    },
+    "version": "1.0.0",
+    "filename": "../imago-agent/api/routes/io/2/get-attributes.js",
+    "groupTitle": "Attributes"
+  },
+  {
+    "type": "get",
     "url": "/integrate/1/dataentity",
     "title": "Search for data entities",
     "name": "GetDataEntity",
@@ -614,130 +738,6 @@
     "version": "1.0.0",
     "filename": "../imago-agent/api/routes/io/2/post-dataitem.js",
     "groupTitle": "DataItem"
-  },
-  {
-    "type": "get",
-    "url": "/integrate/1/imagery",
-    "title": "Download an image",
-    "name": "GetImagery",
-    "group": "Imagery",
-    "description": "<p>Return a group of attributes associated with data within Imago.</p>",
-    "examples": [
-      {
-        "title": "Example Usage (requires the authorisation token header):",
-        "content": "curl -O  http://io.imago.live/integrate/1/attributes?id=e1865861-0d53-4d49-a554-af79dae9aa81&type=image",
-        "type": "curl"
-      }
-    ],
-    "header": {
-      "fields": {
-        "Header": [
-          {
-            "group": "Header",
-            "optional": false,
-            "field": "imago-api-token",
-            "description": "<p>b4ecb7d7-b8bb-460f-9506-134df358f471</p>"
-          }
-        ]
-      }
-    },
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "Guid",
-            "optional": false,
-            "field": "id",
-            "description": "<p>Data identifier.</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "allowedValues": [
-              "\"image\""
-            ],
-            "optional": true,
-            "field": "type",
-            "defaultValue": "image",
-            "description": "<p>Type of data to search for.</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "allowedValues": [
-              "\"properties\""
-            ],
-            "optional": true,
-            "field": "group",
-            "defaultValue": "properties",
-            "description": "<p>Specifies which group of attributes to return for the data.</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Query String:",
-          "content": "?id=e1865861-0d53-4d49-a554-af79dae9aa81&type=image",
-          "type": "json"
-        }
-      ]
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "Guid",
-            "optional": false,
-            "field": "id",
-            "description": "<p>Data identifier.</p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "String",
-            "optional": false,
-            "field": "group",
-            "description": "<p>Name of group of attributes.</p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "Object",
-            "optional": false,
-            "field": "attributes",
-            "description": "<p>Attributes associated with the specified group. The fields depend on the attributes group and its definition.</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "{\n    \"id\" : \"108501d0-4d6c-475c-8ad2-96bb983b1fc5\",\n    \"group\" : \"properties\",\n    \"attributes\" : {\n        \"mimeType\" : \"image/jpeg\",\n        \"fileName\" : \"DH001_coretray_wet.jpeg\",\n        \"fileExt\" : \".jpeg\",\n        \"fileSize\" : \"16253742783\"\n    }\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "error": {
-      "fields": {
-        "404": [
-          {
-            "group": "404",
-            "optional": false,
-            "field": "NotFound",
-            "description": "<p>The specified attributes were not found.</p>"
-          },
-          {
-            "group": "404",
-            "optional": false,
-            "field": "ErrorDuringRequest",
-            "description": "<p>Internal error occurred during the request.</p>"
-          }
-        ]
-      }
-    },
-    "version": "1.0.0",
-    "filename": "../imago-agent/api/routes/io/2/get-attributes.js",
-    "groupTitle": "Imagery"
   },
   {
     "type": "get",
