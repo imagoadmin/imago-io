@@ -9,6 +9,7 @@ using System.Net.Http.Headers;
 using System.Net;
 using System.Web;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using System.Web.Script.Serialization;
 using System.Data.Entity.Design.PluralizationServices;
 using System.Globalization;
@@ -31,6 +32,8 @@ namespace Imago.IO
         private HttpClient _client;
         private CookieContainer _cookieJar;
         private JavaScriptSerializer _jsonConverter = new JavaScriptSerializer();
+        private JsonSerializerSettings _jsonSettings = new JsonSerializerSettings();
+ 
         private PluralizationService _jsonPluralizer = PluralizationService.CreateService(CultureInfo.GetCultureInfo("en"));
         private HttpResponseMessage _lastResponse;
         private string _lastResponseBody;
@@ -66,6 +69,9 @@ namespace Imago.IO
                 _credentials = credentials;
 
                 _apiUrl = credentials.HostName + credentials.ApiVersion;
+
+                _jsonSettings.MissingMemberHandling = MissingMemberHandling.Ignore;
+                _jsonSettings.NullValueHandling = NullValueHandling.Ignore;
 
                 _cookieJar = new CookieContainer();
 

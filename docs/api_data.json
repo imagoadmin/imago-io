@@ -133,7 +133,7 @@
     "examples": [
       {
         "title": "Example Usage (requires the authorisation token header):",
-        "content": "curl -O  http://io.imago.live/integrate/1/imagery?datasetid=9a08e64f-e6e9-41d8-a47c-044db8a882c4&name=DH&match=startswidth",
+        "content": "curl -O  http://io.imago.live/integrate/1/dataentity?name=DH&match=startswidth",
         "type": "curl"
       }
     ],
@@ -360,7 +360,7 @@
     "examples": [
       {
         "title": "Example Usage (requires the authorisation token header):",
-        "content": "curl -O  http://io.imago.live/integrate/1/imagery?dataentityid=d856d001-22bf-4339-8382-9e29532e539b&dataseriestypeid=78742fab-4c55-4b57-830d-5ab6b6c1fb09",
+        "content": "curl -O  http://io.imago.live/integrate/1/dataitem?dataentityid=d856d001-22bf-4339-8382-9e29532e539b&dataseriestypeid=78742fab-4c55-4b57-830d-5ab6b6c1fb09",
         "type": "curl"
       }
     ],

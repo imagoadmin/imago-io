@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net;
 using System.Web;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Web.Script.Serialization;
 using System.Data.Entity.Design.PluralizationServices;
@@ -38,10 +39,10 @@ namespace Imago.IO
 
                 JObject context = JObject.Parse(body);
 
-                List<Project> projects = _jsonConverter.Deserialize<List<Project>>(context["projects"].ToString());
+                List<Project> projects = JsonConvert.DeserializeObject<List<Project>>(context["projects"].ToString(), _jsonSettings);
                 return new Result<UserContext> { Value = new UserContext { Projects = projects }, Code = projects == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
             }
-            catch
+            catch(Exception ex)
             {
                 return new Result<UserContext> { Code = ResultCode.failed };
             }
