@@ -1,0 +1,148 @@
+#
+# Imago Link Display
+# October, 2017
+#
+# This script lets a person select a drillhole and display its images in a web browser.
+#
+# Modifications:
+#
+# 21/11/2017 - Renamed the file and check if imago.defaults exists before trying to read from it.
+#
+
+use Lava;
+use strict;
+use HTTP::Tiny;
+
+my %DEFAULTS;
+
+my $apiURL = 'https://portal.imago.live/api/display';
+my $browserPath = 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe';
+my $project;
+my $dataset;
+my $dataSeriesType;
+my $imageryType;
+
+#
+# Read imago defaults
+#
+
+my $config_file = "imago.defaults";
+if (-e $config_file) {
+	open CONFIG, "$config_file" or die "Program stopping, couldn't read the configuration file '$config_file'.\n";
+	while( my $line = <CONFIG>) {
+		my @tokens = split /\=/, $line;
+		$tokens[0] = lc trim($tokens[0]);
+		$tokens[1] = trim($tokens[1]);
+
+		if ($tokens[0] eq 'project') {
+			$project = $tokens[1];
+		} elsif ($tokens[0] eq 'dataset') {
+			$dataset = $tokens[1];
+		} elsif ($tokens[0] eq 'dataseriestype') {
+			$dataSeriesType = $tokens[1];
+		} elsif ($tokens[0] eq 'imagerytype') {
+			$imageryType = $tokens[1];
+		}
+	}
+	close CONFIG;
+}
+
+
+#
+# Print out the defaults so a person can check them
+#
+
+print "Imago Project : " . $project . "\n";
+print "Imago Dataset : $dataset\n";
+print "Imago Data Series Type : $dataSeriesType\n";
+print "Imago Imagery Type : $imageryType\n";
+
+#
+# If no defaults are set then ask for some
+#
+
+if ($project eq "" or $dataset eq "" or $dataSeriesType eq "" or $imageryType eq "") {
+
+	my $panel = new Lava::Panel;
+	$panel->item(" Enter the project name",\$project,80);
+	$panel->item(" Enter the dataset name",\$dataset,80);
+	$panel->item(" Enter the data series type name",\$dataSeriesType,80);
+	$panel->item(" Enter the imagery type name",\$imageryType,80);
+	if (!$panel->execute("Set Imago Link Defaults")) {
+		exit;
+	}
+
+	# Update the defaults
+
+	open CONFIG, ">$config_file" or die "Program stopping, couldn't update to the configuration file '$config_file'.\n";
+	print CONFIG "project=" . $project . "\n";
+	print CONFIG "dataset=" . $dataset . "\n";
+	print CONFIG "dataseriestype=" . $dataSeriesType . "\n";
+	print CONFIG "imagerytype=" . $imageryType . "\n";
+	close CONFIG;
+}
+
+#
+# Loop around selecting drillholes to display until they click cancel
+#
+
+my $ok = 0;
+while(!$ok)
+{
+	my $hole = new Lava::Selection "Select drillhole to display";
+	if ($hole->has_more)
+	{
+		my $layer = $hole->layer();
+		
+		# Check it is a drillhole !
+		
+		if ($layer =~ /^DIG\$DRILL/)
+		{
+		
+			# Get the drillhole's details
+			
+			my $name = $hole->name();
+			my $url = $apiURL . '?de=' . $name;
+			if ($project) {
+				$url = $url . '&pj=' . url_encode($project);
+			}
+			if ($dataset) {			
+				$url = $url . '&da=' . url_encode($dataset);
+			}
+			if ($dataSeriesType) {
+				$url = $url . '&ds=' . url_encode($dataSeriesType);
+			}
+			if ($imageryType) {
+				$url = $url . '&im=' . url_encode($imageryType);
+			}
+							
+			# Open the browser and display the drillhole's images
+			
+			if (-e $browserPath) {
+				system('start ""' . '/B "' . $browserPath . '" "' . $url . '"');
+			} else {
+				system('start ""' . '/B "' . $url . '"');
+			}
+			
+			Lava::Report(' ' . $url);
+		}
+		else
+		{
+			Lava::Error("You must select a drillhole to display.");
+		}
+		$hole = 0;
+	}
+	else
+	{
+		exit;
+	}
+}
+
+#
+# A few useful functions
+#
+
+sub url_encode { my ($rv) = @_;	$rv =~ s/([^A-Za-z0-9])/sprintf("%%%2.2X", ord($1))/ge;	return $rv; };
+
+sub  trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s };
+
