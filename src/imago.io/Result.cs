@@ -12,5 +12,6 @@ namespace Imago.IO
 
         public T Value { get; set; }
         public ResultCode Code { get; set; } = ResultCode.ok;
+        public string Message { get; set; }
     }
 }
