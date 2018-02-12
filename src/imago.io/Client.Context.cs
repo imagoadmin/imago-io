@@ -47,5 +47,38 @@ namespace Imago.IO
                 return new Result<UserContext> { Code = ResultCode.failed };
             }
         }
+
+        public async Task<Result<string>> GetProjectSASUrl(Guid id, Guid? imageId = null, string mimeType = null)
+        {
+            try
+            {
+                NameValueCollection query = new NameValueCollection();
+                query["projectid"] = id.ToString();
+                if (imageId != null)
+                {
+                    query["imageid"] = imageId.ToString();
+                    query["mimetype"] = mimeType;
+                }
+
+                UriBuilder builder = new UriBuilder(_apiUrl);
+                builder.Path += "/access";
+                builder.Query = BuildQueryString(query);
+
+                HttpResponseMessage response = await _client.GetAsync(builder.ToString());
+                _lastResponse = response;
+                string body = await response.Content.ReadAsStringAsync();
+                _lastResponseBody = body;
+
+                if (response.StatusCode != HttpStatusCode.OK)
+                    return new Result<string> { Code = ResultCode.failed };
+
+                JObject responseObject = JObject.Parse(body);
+                return new Result<string> { Value = responseObject["url"].ToString(), Code = responseObject == null || response.StatusCode != HttpStatusCode.OK? ResultCode.failed : ResultCode.ok };
+            }
+            catch (Exception ex)
+            {
+                return new Result<string> { Code = ResultCode.failed };
+            }
+        }
     }
 }
