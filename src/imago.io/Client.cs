@@ -26,10 +26,10 @@ namespace Imago.IO
         private Credentials _credentials;
         private string _apiUrl;
 
-        private HttpClient _client;
         private CookieContainer _cookieJar;
         private JavaScriptSerializer _jsonConverter = new JavaScriptSerializer();
         private JsonSerializerSettings _jsonSettings = new JsonSerializerSettings();
+        private string _apiToken;
 
         private HttpResponseMessage _lastResponse;
         private string _lastResponseBody;
@@ -46,7 +46,7 @@ namespace Imago.IO
         {
             get
             {
-                return _client;
+                return GetClient();
             }
         }
 
@@ -69,24 +69,22 @@ namespace Imago.IO
                 _jsonSettings.MissingMemberHandling = MissingMemberHandling.Ignore;
                 _jsonSettings.NullValueHandling = NullValueHandling.Ignore;
 
-                _cookieJar = new CookieContainer();
-
                 HttpClientHandler responseHandler = null; ;
                 if (!String.IsNullOrWhiteSpace(credentials.ProxyUri))
                     responseHandler = new HttpClientHandler { Proxy = new WebProxy(credentials.ProxyUri, false), UseProxy = true, UseDefaultCredentials = true };
                 else
                     responseHandler = new HttpClientHandler();
 
-                responseHandler.CookieContainer = _cookieJar;
+                responseHandler.CookieContainer = new CookieContainer();
 
-                _client = new HttpClient(responseHandler);
-                _client.Timeout = timeout ?? new TimeSpan(0, 10, 0);
-                _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                HttpClient client = new HttpClient(responseHandler);
+                client.Timeout = timeout ?? new TimeSpan(0, 10, 0);
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 Uri signInURI = new Uri(_apiUrl + "/session");
                 var signindata = new { username = credentials.UserName, password = credentials.Password };
                 string body = _jsonConverter.Serialize(signindata, _jsonSettings);
-                HttpResponseMessage response = await _client.PutAsync(signInURI, new StringContent(body, Encoding.UTF8, "application/json")).ConfigureAwait(false);
+                HttpResponseMessage response = await client.PutAsync(signInURI, new StringContent(body, Encoding.UTF8, "application/json")).ConfigureAwait(false);
 
                 _lastResponse = response;
 
@@ -99,49 +97,79 @@ namespace Imago.IO
                     return false;
 
                 var data = JObject.Parse(body);
-                string apiToken = (string)data["apiToken"];
+                _apiToken = (string)data["apiToken"];
 
-                _client.DefaultRequestHeaders.Add("imago-api-token", apiToken);
+                client.DefaultRequestHeaders.Add("imago-api-token", _apiToken);
                 return true;
             }
-            catch
+            catch(Exception ex)
             {
                 return false;
             }
         }
 
-        public async Task<bool> IsSessionValid()
+        private HttpClient GetClient(TimeSpan? timeout = null)
+        {
+            if (String.IsNullOrWhiteSpace(_apiToken))
+                return null;
+
+            HttpClientHandler responseHandler = null; ;
+            if (!String.IsNullOrWhiteSpace(_credentials.ProxyUri))
+                responseHandler = new HttpClientHandler { Proxy = new WebProxy(_credentials.ProxyUri, false), UseProxy = true, UseDefaultCredentials = true };
+            else
+                responseHandler = new HttpClientHandler();
+
+            responseHandler.CookieContainer = new CookieContainer();
+
+            HttpClient client = new HttpClient(responseHandler);
+            client.Timeout = timeout ?? new TimeSpan(0, 10, 0);
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            client.DefaultRequestHeaders.Add("imago-api-token", _apiToken);
+            return client;
+        }
+
+        public async Task<bool> IsSessionValid(TimeSpan? timeout = null)
         {
             try
             {
-                if (_client == null)
-                    return false;
+                using (HttpClient client = GetClient(timeout))
+                {
+                    if (client == null)
+                        return false;
 
-                HttpResponseMessage result = await _client.GetAsync(_apiUrl + "/session").ConfigureAwait(false);
-                _lastResponse = result;
+                    HttpResponseMessage result = await client.GetAsync(_apiUrl + "/session").ConfigureAwait(false);
+                    _lastResponse = result;
 
-                _lastResponseBody = null;
-
-                return (result.StatusCode == HttpStatusCode.OK);
+                    _lastResponseBody = null;
+                    if (result.StatusCode != HttpStatusCode.OK)
+                        _apiToken = null;
+                
+                    return (result.StatusCode == HttpStatusCode.OK);
+                }
             }
             catch (Exception ex)
             {
                 return false;
             }
         }
-        public async Task<bool> SignOut()
+        public async Task<bool> SignOut(TimeSpan? timeout = null)
         {
             try
             {
-                if (_client == null)
-                    return false;
+                using (HttpClient client = GetClient(timeout))
+                {
+                    if (client == null)
+                        return false;
 
-                HttpResponseMessage result = await _client.DeleteAsync(_apiUrl + "/signout").ConfigureAwait(false);
-                _lastResponse = result;
+                    HttpResponseMessage result = await client.DeleteAsync(_apiUrl + "/signout").ConfigureAwait(false);
+                    _lastResponse = result;
+                    _apiToken = null;
 
-                _lastResponseBody = null;
+                    _lastResponseBody = null;
 
-                return (result.StatusCode == HttpStatusCode.OK);
+                    return (result.StatusCode == HttpStatusCode.OK);
+                }
             }
             catch (Exception ex)
             {
@@ -149,7 +177,6 @@ namespace Imago.IO
             }
             finally
             {
-                _client = null;
             }
         }
         private string BuildQueryString(NameValueCollection nvc)

@@ -32,7 +32,7 @@ namespace Imago.IO
             public double? y { get; set; }
             public double? z { get; set; }
         }
-        public async Task<Result<List<DataItem>>> SearchForDataItem(DataItemQueryParameters parameters, CancellationToken ct)
+        public async Task<Result<List<DataItem>>> SearchForDataItem(DataItemQueryParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
         {
             try
             {
@@ -60,19 +60,22 @@ namespace Imago.IO
                 builder.Path += "/dataitem";
                 builder.Query = BuildQueryString(query);
 
-                HttpResponseMessage response = await _client.GetAsync(builder.ToString(),ct).ConfigureAwait(false);
-                _lastResponse = response;
+                using (HttpClient client = GetClient(timeout))
+                {
+                    HttpResponseMessage response = await client.GetAsync(builder.ToString(), ct).ConfigureAwait(false);
+                    _lastResponse = response;
 
-                string body = await response.Content.ReadAsStringAsync();
-                _lastResponseBody = body;
+                    string body = await response.Content.ReadAsStringAsync();
+                    _lastResponseBody = body;
 
-                if (response.StatusCode != HttpStatusCode.OK)
-                    return new Result<List<DataItem>> { Code = ResultCode.failed };
+                    if (response.StatusCode != HttpStatusCode.OK)
+                        return new Result<List<DataItem>> { Code = ResultCode.failed };
 
-                JObject responseObject = JObject.Parse(body);
+                    JObject responseObject = JObject.Parse(body);
 
-                List<DataItem> dataItems = _jsonConverter.Deserialize<List<DataItem>>(responseObject["dataItems"].ToString());
-                return new Result<List<DataItem>> { Value = dataItems, Code = dataItems == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
+                    List<DataItem> dataItems = _jsonConverter.Deserialize<List<DataItem>>(responseObject["dataItems"].ToString());
+                    return new Result<List<DataItem>> { Value = dataItems, Code = dataItems == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
+                }
             }
             catch
             {
@@ -91,7 +94,7 @@ namespace Imago.IO
             public double? z { get; set; }
         }
 
-        public async Task<Result<DataItem>> AddDataItem(DataItemUpdateParameters parameters, CancellationToken ct)
+        public async Task<Result<DataItem>> AddDataItem(DataItemUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
         {
             try
             {
@@ -102,13 +105,17 @@ namespace Imago.IO
                 builder.Path += "/dataitem";
 
                 string body = _jsonConverter.Serialize(parameters);
-                HttpResponseMessage response = await _client.PostAsync(builder.ToString(), new StringContent(body, Encoding.UTF8, "application/json"),ct).ConfigureAwait(false);
-                _lastResponse = response;
-                body = await response.Content.ReadAsStringAsync();
-                _lastResponseBody = body;
 
-                DataItem dataItem = _jsonConverter.Deserialize<DataItem>(body);
-                return new Result<DataItem> { Value = dataItem, Code = dataItem == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
+                using (HttpClient client = GetClient(timeout))
+                {
+                    HttpResponseMessage response = await client.PostAsync(builder.ToString(), new StringContent(body, Encoding.UTF8, "application/json"), ct).ConfigureAwait(false);
+                    _lastResponse = response;
+                    body = await response.Content.ReadAsStringAsync();
+                    _lastResponseBody = body;
+
+                    DataItem dataItem = _jsonConverter.Deserialize<DataItem>(body);
+                    return new Result<DataItem> { Value = dataItem, Code = dataItem == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
+                }
             }
             catch
             {

@@ -28,7 +28,7 @@ namespace Imago.IO
             public Guid datasetId { get; set; }
         }
 
-        public async Task<Result<List<DataEntity>>> SearchForDataEntity(DataEntityQueryParameters parameters, CancellationToken ct)
+        public async Task<Result<List<DataEntity>>> SearchForDataEntity(DataEntityQueryParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
         {
             try
             {
@@ -42,18 +42,21 @@ namespace Imago.IO
                 builder.Path += "/dataentity";
                 builder.Query = BuildQueryString(query);
 
-                HttpResponseMessage response = await _client.GetAsync(builder.ToString(),ct);
-                _lastResponse = response;
-                string body = await response.Content.ReadAsStringAsync();
-                _lastResponseBody = body;
+                using (HttpClient client = GetClient(timeout))
+                {
+                    HttpResponseMessage response = await client.GetAsync(builder.ToString(), ct);
+                    _lastResponse = response;
+                    string body = await response.Content.ReadAsStringAsync();
+                    _lastResponseBody = body;
 
-                if (response.StatusCode != HttpStatusCode.OK)
-                    return new Result<List<DataEntity>> { Code = ResultCode.failed };
+                    if (response.StatusCode != HttpStatusCode.OK)
+                        return new Result<List<DataEntity>> { Code = ResultCode.failed };
 
-                JObject responseObject = JObject.Parse(body);
+                    JObject responseObject = JObject.Parse(body);
 
-                List<DataEntity> dataEntities = _jsonConverter.Deserialize<List<DataEntity>>(responseObject["dataEntities"].ToString());
-                return new Result<List<DataEntity>> { Value = dataEntities, Code = dataEntities == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
+                    List<DataEntity> dataEntities = _jsonConverter.Deserialize<List<DataEntity>>(responseObject["dataEntities"].ToString());
+                    return new Result<List<DataEntity>> { Value = dataEntities, Code = dataEntities == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
+                }
             }
             catch
             {
@@ -66,7 +69,7 @@ namespace Imago.IO
             public Guid datasetId { get; set; }
             public string name { get; set; }
         }
-        public async Task<Result<DataEntity>> AddDataEntity(DataEntityUpdateParameters parameters,CancellationToken ct)
+        public async Task<Result<DataEntity>> AddDataEntity(DataEntityUpdateParameters parameters,CancellationToken ct, TimeSpan? timeout = null)
         {
             try
             {
@@ -77,17 +80,21 @@ namespace Imago.IO
                 builder.Path += "/dataentity";
 
                 string body = _jsonConverter.Serialize(parameters);
-                HttpResponseMessage response = await _client.PostAsync(builder.ToString(), new StringContent(body, Encoding.UTF8, "application/json"),ct).ConfigureAwait(false);
-                _lastResponse = response;
 
-                body = await response.Content.ReadAsStringAsync();
-                _lastResponseBody = body;
+                using (HttpClient client = GetClient(timeout))
+                {
+                    HttpResponseMessage response = await client.PostAsync(builder.ToString(), new StringContent(body, Encoding.UTF8, "application/json"), ct).ConfigureAwait(false);
+                    _lastResponse = response;
 
-                if (response.StatusCode != HttpStatusCode.OK)
-                    return new Result<DataEntity> { Code = ResultCode.failed };
+                    body = await response.Content.ReadAsStringAsync();
+                    _lastResponseBody = body;
 
-                DataEntity dataEntity = _jsonConverter.Deserialize<DataEntity>(body);
-                return new Result<DataEntity> { Value = dataEntity, Code = dataEntity == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
+                    if (response.StatusCode != HttpStatusCode.OK)
+                        return new Result<DataEntity> { Code = ResultCode.failed };
+
+                    DataEntity dataEntity = _jsonConverter.Deserialize<DataEntity>(body);
+                    return new Result<DataEntity> { Value = dataEntity, Code = dataEntity == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
+                }
             }
             catch
             {
