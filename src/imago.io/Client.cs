@@ -16,6 +16,7 @@ using System.Drawing;
 using System.Diagnostics;
 using System.IO;
 using Imago.IO.Classes;
+using System.Web.Script.Serialization;
 
 namespace Imago.IO
 {
@@ -153,6 +154,7 @@ namespace Imago.IO
                 return false;
             }
         }
+
         public async Task<bool> SignOut(TimeSpan? timeout = null)
         {
             try
@@ -179,6 +181,7 @@ namespace Imago.IO
             {
             }
         }
+
         private string BuildQueryString(NameValueCollection nvc)
         {
             return string.Join("&", nvc.AllKeys.Where(key => !string.IsNullOrWhiteSpace(nvc[key])).Select(key => string.Format("{0}={1}", HttpUtility.UrlEncode(key), HttpUtility.UrlEncode(nvc[key]))));

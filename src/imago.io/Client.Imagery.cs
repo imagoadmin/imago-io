@@ -71,7 +71,7 @@ namespace Imago.IO
                     return new Result<string> { Value = fileName, Code = response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new Result<string> { Code = ResultCode.failed };
             }
@@ -88,12 +88,13 @@ namespace Imago.IO
             public Guid dataItemId { get; set; }
             public bool replaceHistory { get; set; } = false;
         }
+
         public async Task<Result<Imagery>> AddImagery(ImageryUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
         {
             FileStream fs = null;
             Result<Imagery> result = null;
             try
-            { 
+            {
                 if (parameters.dataItemId == Guid.Empty || parameters.imageryTypeId == Guid.Empty || String.IsNullOrWhiteSpace(parameters.imageFileName))
                     return new Result<Imagery> { Code = ResultCode.failed };
 
@@ -123,12 +124,14 @@ namespace Imago.IO
                     _lastResponseBody = body;
 
                     Imagery dataItem = _jsonConverter.Deserialize<Imagery>(body);
-                    result = new Result<Imagery> { Value = dataItem, Code = dataItem == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok, Message = "{response.StatusCode} ${body}" };
+                    result = new Result<Imagery> { Value = dataItem, Code = dataItem == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok, Message = $"{response.StatusCode} {body}" };
+                }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                result = new Result<Imagery> { Code = ResultCode.failed, Message = ex.Message };
+                result = new Result<Imagery> { Code = ResultCode.failed, Message = ex.Message + Environment.NewLine + ex.ToString() };
+
             }
             finally
             {
