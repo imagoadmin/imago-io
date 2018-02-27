@@ -126,7 +126,6 @@ namespace Imago.IO
                     Imagery dataItem = _jsonConverter.Deserialize<Imagery>(body);
                     result = new Result<Imagery> { Value = dataItem, Code = dataItem == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok, Message = $"{response.StatusCode} {body}" };
                 }
-                }
             }
             catch (Exception ex)
             {

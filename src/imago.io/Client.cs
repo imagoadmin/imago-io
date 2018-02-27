@@ -16,7 +16,6 @@ using System.Drawing;
 using System.Diagnostics;
 using System.IO;
 using Imago.IO.Classes;
-using System.Web.Script.Serialization;
 
 namespace Imago.IO
 {
