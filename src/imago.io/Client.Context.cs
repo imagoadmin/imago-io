@@ -48,7 +48,7 @@ namespace Imago.IO
             }
         }
 
-        public async Task<Result<string>> GetProjectSASUrl(Guid id, Guid? imageId = null, string mimeType = null)
+        public async Task<Result<string>> GetProjectSASUrl(Guid id, Guid? imageId = null, string mimeType = null, TimeSpan ? timeout = null)
         {
             try
             {
@@ -64,16 +64,19 @@ namespace Imago.IO
                 builder.Path += "/access";
                 builder.Query = BuildQueryString(query);
 
-                HttpResponseMessage response = await _client.GetAsync(builder.ToString());
-                _lastResponse = response;
-                string body = await response.Content.ReadAsStringAsync();
-                _lastResponseBody = body;
+                using (HttpClient client = GetClient(timeout))
+                {
+                    HttpResponseMessage response = await client.GetAsync(builder.ToString());
+                    _lastResponse = response;
+                    string body = await response.Content.ReadAsStringAsync();
+                    _lastResponseBody = body;
 
-                if (response.StatusCode != HttpStatusCode.OK)
-                    return new Result<string> { Code = ResultCode.failed };
+                    if (response.StatusCode != HttpStatusCode.OK)
+                        return new Result<string> { Code = ResultCode.failed };
 
-                JObject responseObject = JObject.Parse(body);
-                return new Result<string> { Value = responseObject["url"].ToString(), Code = responseObject == null || response.StatusCode != HttpStatusCode.OK? ResultCode.failed : ResultCode.ok };
+                    JObject responseObject = JObject.Parse(body);
+                    return new Result<string> { Value = responseObject["url"].ToString(), Code = responseObject == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
+                }
             }
             catch (Exception ex)
             {
