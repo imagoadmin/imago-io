@@ -11,6 +11,7 @@
     <AssemblyName>Imago.io</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -67,6 +68,7 @@
     <Compile Include="Client.DataEntity.cs" />
     <Compile Include="Client.Context.cs" />
     <Compile Include="Credentials.cs" />
+    <Compile Include="JavaScriptSerializer.cs" />
     <Compile Include="Result.cs" />
     <Compile Include="UserContext.cs" />
     <Compile Include="Client.cs" />

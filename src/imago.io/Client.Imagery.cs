@@ -9,14 +9,10 @@ using System.Net.Http.Headers;
 using System.Net;
 using System.Web;
 using Newtonsoft.Json.Linq;
-using System.Web.Script.Serialization;
-using System.Data.Entity.Design.PluralizationServices;
 using System.Globalization;
 using System.Threading;
-using System.Net.Http.Formatting;
 using System.Drawing;
 using System.Diagnostics;
-using System.IO;
 using System.IO;
 using Imago.IO.Classes;
 

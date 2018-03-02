@@ -16,7 +16,6 @@ using System.Drawing;
 using System.Diagnostics;
 using System.IO;
 using Imago.IO.Classes;
-using System.Web.Script.Serialization;
 
 namespace Imago.IO
 {
@@ -58,6 +57,7 @@ namespace Imago.IO
                 return _apiUrl;
             }
         }
+
         public async Task<bool> SignIn(Credentials credentials, TimeSpan? timeout = null)
         {
             try
@@ -83,7 +83,7 @@ namespace Imago.IO
 
                 Uri signInURI = new Uri(_apiUrl + "/session");
                 var signindata = new { username = credentials.UserName, password = credentials.Password };
-                string body = _jsonConverter.Serialize(signindata);
+                string body = _jsonConverter.Serialize(signindata, _jsonSettings);
                 HttpResponseMessage response = await client.PutAsync(signInURI, new StringContent(body, Encoding.UTF8, "application/json")).ConfigureAwait(false);
 
                 _lastResponse = response;
