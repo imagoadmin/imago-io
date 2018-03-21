@@ -20,7 +20,11 @@ namespace Imago.IO
 {
     public partial class Client
     {
-     
+        public static class DataEntityQueryParametersMatchChoices {
+            public const string MatchEqual = "equals";
+            public const string MatchLike = "like";
+        }
+
         public class DataEntityQueryParameters
         {
             public string name { get; set; }
