@@ -120,17 +120,15 @@ namespace Imago.IO
                 {
                     HttpResponseMessage response = await client.PostAsync(builder.ToString(), content, ct).ConfigureAwait(false);
                     _lastResponse = response;
-                    string body = await response.Content.ReadAsStringAsync();
+                    string body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     _lastResponseBody = body;
-
                     Imagery dataItem = _jsonConverter.Deserialize<Imagery>(body);
-                    result = new Result<Imagery> { Value = dataItem, Code = dataItem == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok, Message = $"{response.StatusCode} {body}" };
+                    result = new Result<Imagery> { Value = dataItem, Code = dataItem == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok, Message = $"HTTP error {response.StatusCode} {body}" };
                 }
             }
             catch (Exception ex)
             {
-                result = new Result<Imagery> { Code = ResultCode.failed, Message = ex.Message + Environment.NewLine + ex.ToString() };
-
+                result = new Result<Imagery> { Code = ResultCode.failed, Message = "Exception " + ex.Message + Environment.NewLine + ex.ToString() };
             }
             finally
             {
