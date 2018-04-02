@@ -30,6 +30,7 @@ namespace Imago.IO
         private JavaScriptSerializer _jsonConverter = new JavaScriptSerializer();
         private JsonSerializerSettings _jsonSettings = new JsonSerializerSettings();
         private string _apiToken;
+        private string _uid;
 
         private HttpResponseMessage _lastResponse;
         private string _lastResponseBody;
@@ -39,6 +40,15 @@ namespace Imago.IO
             get
             {
                 return _credentials == null ? null : _credentials.UserName;
+            }
+        }
+
+        public Guid UserId
+        {
+            get
+            {
+                Guid.TryParse(_uid, out var uid);
+                return uid;
             }
         }
 
@@ -98,6 +108,7 @@ namespace Imago.IO
 
                 var data = JObject.Parse(body);
                 _apiToken = (string)data["apiToken"];
+                _uid = (string)data["uid"];
 
                 client.DefaultRequestHeaders.Add("imago-api-token", _apiToken);
                 return true;
