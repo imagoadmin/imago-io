@@ -86,12 +86,13 @@ namespace Imago.IO
             public string mimeType { get; set; }
             public Guid imageryTypeId { get; set; }
             public Guid dataItemId { get; set; }
+            public Stream dataStream { get; set; }
             public bool replaceHistory { get; set; } = false;
         }
 
         public async Task<Result<Imagery>> AddImagery(ImageryUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
         {
-            FileStream fs = null;
+            Stream fs = null;
             Result<Imagery> result = null;
             try
             {
@@ -109,7 +110,9 @@ namespace Imago.IO
                 builder.Path += "/imagery";
                 builder.Query = BuildQueryString(query);
 
-                fs = new FileStream(parameters.imageFileName, FileMode.Open);
+                fs = parameters.dataStream;
+                if (fs == null)
+                    fs = new FileStream(parameters.imageFileName, FileMode.Open);
 
                 string boundary = "Upload----" + DateTime.Now.ToString(CultureInfo.InvariantCulture);
                 MultipartFormDataContent content = new MultipartFormDataContent(boundary);
