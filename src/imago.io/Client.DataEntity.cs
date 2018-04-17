@@ -94,15 +94,15 @@ namespace Imago.IO
                     _lastResponseBody = body;
 
                     if (response.StatusCode != HttpStatusCode.OK)
-                        return new Result<DataEntity> { Code = ResultCode.failed };
+                        return new Result<DataEntity> { Code = ResultCode.failed, Message = response.StatusCode.ToString() };
 
                     DataEntity dataEntity = _jsonConverter.Deserialize<DataEntity>(body);
                     return new Result<DataEntity> { Value = dataEntity, Code = dataEntity == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                return new Result<DataEntity> { Code = ResultCode.failed };
+                return new Result<DataEntity> { Code = ResultCode.failed, Message = ex.Message };
             }
         }      
     }
