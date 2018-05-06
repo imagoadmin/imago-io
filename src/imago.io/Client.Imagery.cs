@@ -114,8 +114,9 @@ namespace Imago.IO
                 if (fs == null)
                     fs = new FileStream(parameters.imageFileName, FileMode.Open);
 
-                string boundary = "Upload-" + DateTime.Now.Ticks.ToString();
-                MultipartFormDataContent content = new MultipartFormDataContent(boundary);
+                // Don't pass in a custom boundary, because passing a custom boundary 
+                // caused an exception when running on Android.
+                MultipartFormDataContent content = new MultipartFormDataContent();
                 HttpContent streamedContent = new StreamContent(fs);
                 content.Add(streamedContent, "file", parameters.imageFileName);
 
