@@ -114,7 +114,7 @@ namespace Imago.IO
                 if (fs == null)
                     fs = new FileStream(parameters.imageFileName, FileMode.Open);
 
-                string boundary = "Upload----" + DateTime.Now.ToString(CultureInfo.InvariantCulture);
+                string boundary = "Upload-" + DateTime.Now.Ticks.ToString();
                 MultipartFormDataContent content = new MultipartFormDataContent(boundary);
                 HttpContent streamedContent = new StreamContent(fs);
                 content.Add(streamedContent, "file", parameters.imageFileName);
