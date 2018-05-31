@@ -53,7 +53,11 @@ namespace Imago.IO
                     HttpResponseMessage response = await client.GetAsync(builder.ToString(), ct).ConfigureAwait(false);
                     _lastResponse = response;
 
-                    if (response.StatusCode != HttpStatusCode.OK || response.Content.Headers.ContentDisposition == null || String.IsNullOrWhiteSpace(response.Content.Headers.ContentDisposition.FileName) || response.StatusCode != HttpStatusCode.OK)
+
+                    if (response.StatusCode != HttpStatusCode.OK)
+                        return new Result<string> { Code = response.GetResultCode(), Message = response.StatusCode.ToString() };
+
+                    if (response.Content.Headers.ContentDisposition == null || String.IsNullOrWhiteSpace(response.Content.Headers.ContentDisposition.FileName) || response.StatusCode != HttpStatusCode.OK)
                         return new Result<string> { Code = ResultCode.failed };
 
                     string fsExt = Path.GetExtension(response.Content.Headers.ContentDisposition.FileName.Replace("\"", ""));
@@ -62,13 +66,13 @@ namespace Imago.IO
 
                     fileName += fsExt;
                     using (FileStream imageFileStream = new FileStream(fileName, FileMode.Create))
-                        using (var httpStream = await response.Content.ReadAsStreamAsync())
-                        {
-                            httpStream.CopyTo(imageFileStream);
-                            imageFileStream.Flush();
-                        }
+                    using (var httpStream = await response.Content.ReadAsStreamAsync())
+                    {
+                        httpStream.CopyTo(imageFileStream);
+                        imageFileStream.Flush();
+                    }
 
-                    return new Result<string> { Value = fileName, Code = response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
+                    return new Result<string> { Value = fileName, Code = response.GetResultCode() };
                 }
             }
             catch (Exception ex)
@@ -127,7 +131,7 @@ namespace Imago.IO
                     string body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     _lastResponseBody = body;
                     Imagery dataItem = _jsonConverter.Deserialize<Imagery>(body);
-                    result = new Result<Imagery> { Value = dataItem, Code = dataItem == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok, Message = $"HTTP error {response.StatusCode} {body}" };
+                    result = new Result<Imagery> { Value = dataItem, Code = dataItem == null || response.StatusCode != HttpStatusCode.OK ? response.GetResultCode() : ResultCode.ok, Message = $"HTTP error {response.StatusCode} {body}" };
                 }
             }
             catch (Exception ex)
@@ -151,6 +155,7 @@ namespace Imago.IO
             public string fileExt { get; set; }
             public Int64 fileSize { get; set; } = 0;
         }
+
         public async Task<Result<ImageProperties>> GetImageProperties(Guid id, CancellationToken ct, TimeSpan? timeout = null)
         {
             try
@@ -164,28 +169,15 @@ namespace Imago.IO
                 query["type"] = "image";
                 query["group"] = "properties";
 
-                UriBuilder builder = new UriBuilder(_apiUrl);
-                builder.Path += "/attributes";
-                builder.Query = BuildQueryString(query);
-
-                using (HttpClient client = GetClient(timeout))
+                return await ClientGet("/attributes", query, ct, timeout, (response, body) =>
                 {
-                    HttpResponseMessage response = await client.GetAsync(builder.ToString(), ct).ConfigureAwait(false);
-                    _lastResponse = response;
-
-                    string body = await response.Content.ReadAsStringAsync();
-                    _lastResponseBody = body;
-
-                    if (response.StatusCode != HttpStatusCode.OK)
-                        return new Result<ImageProperties> { Code = ResultCode.failed };
-
                     JObject responseObject = JObject.Parse(body);
                     Imagery dataItem = _jsonConverter.Deserialize<Imagery>(body);
 
                     ImageProperties imageProperties = _jsonConverter.Deserialize<ImageProperties>(responseObject["attributes"].ToString());
 
-                    return new Result<ImageProperties> { Value = imageProperties, Code = responseObject == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
-                }
+                    return imageProperties;
+                });
             }
             catch
             {
