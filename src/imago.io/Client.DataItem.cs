@@ -32,6 +32,7 @@ namespace Imago.IO
             public double? y { get; set; }
             public double? z { get; set; }
         }
+
         public async Task<Result<List<DataItem>>> SearchForDataItem(DataItemQueryParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
         {
             try
@@ -56,26 +57,12 @@ namespace Imago.IO
                 if (parameters.z != null)
                     query["z"] = parameters.z.ToString();
 
-                UriBuilder builder = new UriBuilder(_apiUrl);
-                builder.Path += "/dataitem";
-                builder.Query = BuildQueryString(query);
-
-                using (HttpClient client = GetClient(timeout))
+                return await ClientGet("/dataitem", query, ct, timeout, (response, body) =>
                 {
-                    HttpResponseMessage response = await client.GetAsync(builder.ToString(), ct).ConfigureAwait(false);
-                    _lastResponse = response;
-
-                    string body = await response.Content.ReadAsStringAsync();
-                    _lastResponseBody = body;
-
-                    if (response.StatusCode != HttpStatusCode.OK)
-                        return new Result<List<DataItem>> { Code = ResultCode.failed };
-
                     JObject responseObject = JObject.Parse(body);
-
                     List<DataItem> dataItems = _jsonConverter.Deserialize<List<DataItem>>(responseObject["dataItems"].ToString());
-                    return new Result<List<DataItem>> { Value = dataItems, Code = dataItems == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
-                }
+                    return dataItems;
+                });
             }
             catch
             {
@@ -104,18 +91,11 @@ namespace Imago.IO
                 UriBuilder builder = new UriBuilder(_apiUrl);
                 builder.Path += "/dataitem";
 
-                string body = _jsonConverter.Serialize(parameters);
-
-                using (HttpClient client = GetClient(timeout))
+                return await ClientPost(builder, parameters, timeout, ct, (response, body) =>
                 {
-                    HttpResponseMessage response = await client.PostAsync(builder.ToString(), new StringContent(body, Encoding.UTF8, "application/json"), ct).ConfigureAwait(false);
-                    _lastResponse = response;
-                    body = await response.Content.ReadAsStringAsync();
-                    _lastResponseBody = body;
-
                     DataItem dataItem = _jsonConverter.Deserialize<DataItem>(body);
-                    return new Result<DataItem> { Value = dataItem, Code = dataItem == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
-                }
+                    return dataItem;
+                });
             }
             catch
             {

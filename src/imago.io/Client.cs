@@ -113,7 +113,7 @@ namespace Imago.IO
                 client.DefaultRequestHeaders.Add("imago-api-token", _apiToken);
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return false;
             }
@@ -140,6 +140,54 @@ namespace Imago.IO
             return client;
         }
 
+        private Task<Result<T>> ClientGet<T>(string relativePath, NameValueCollection query, CancellationToken ct, TimeSpan? timeout, Func<HttpResponseMessage, string, T> processResponse) where T : class
+        {
+            UriBuilder builder = new UriBuilder(_apiUrl);
+            builder.Path += relativePath;
+            builder.Query = BuildQueryString(query);
+
+            return ClientGet(builder, ct, timeout, processResponse);
+        }
+
+        private async Task<Result<T>> ClientGet<T>(UriBuilder builder, CancellationToken ct, TimeSpan? timeout, Func<HttpResponseMessage, string, T> processResponse) where T : class
+        {
+            using (HttpClient client = GetClient(timeout))
+            {
+                HttpResponseMessage response = await client.GetAsync(builder.ToString(), ct);
+                _lastResponse = response;
+                string body = await response.Content.ReadAsStringAsync();
+                _lastResponseBody = body;
+
+                if (response.StatusCode != HttpStatusCode.OK)
+                    return new Result<T> { Code = response.GetResultCode() };
+
+                var result = processResponse(response, body);
+
+                return new Result<T> { Value = result, Code = result != null ? ResultCode.ok : ResultCode.failed };
+            }
+        }
+
+
+        private async Task<Result<T>> ClientPost<T, TPostBody>(UriBuilder builder, TPostBody parameters, TimeSpan? timeout, CancellationToken ct, Func<HttpResponseMessage, string, T> processResponse) where T : class
+        {
+            string body = _jsonConverter.Serialize(parameters);
+
+            using (HttpClient client = GetClient(timeout))
+            {
+                HttpResponseMessage response = await client.PostAsync(builder.ToString(), new StringContent(body, Encoding.UTF8, "application/json"), ct).ConfigureAwait(false);
+                _lastResponse = response;
+
+                body = await response.Content.ReadAsStringAsync();
+                _lastResponseBody = body;
+
+                if (response.StatusCode != HttpStatusCode.OK)
+                    return new Result<T> { Code = response.GetResultCode(), Message = response.StatusCode.ToString() };
+
+                var result = processResponse(response, body);
+                return new Result<T> { Value = result, Code = result != null ? ResultCode.ok : ResultCode.failed };
+            }
+        }
+
         public async Task<bool> IsSessionValid(TimeSpan? timeout = null)
         {
             try
@@ -155,7 +203,7 @@ namespace Imago.IO
                     _lastResponseBody = null;
                     if (result.StatusCode != HttpStatusCode.OK)
                         _apiToken = null;
-                
+
                     return (result.StatusCode == HttpStatusCode.OK);
                 }
             }

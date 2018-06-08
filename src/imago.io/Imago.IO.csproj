@@ -70,6 +70,7 @@
     <Compile Include="Credentials.cs" />
     <Compile Include="JavaScriptSerializer.cs" />
     <Compile Include="Result.cs" />
+    <Compile Include="ResultExtensions.cs" />
     <Compile Include="UserContext.cs" />
     <Compile Include="Client.cs" />
     <Compile Include="Classes\Project.cs" />
