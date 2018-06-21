@@ -37,6 +37,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
+                this.LogTracer.TrackError(ex);
                 return new Result<UserContext> { Code = ResultCode.failed };
             }
         }
@@ -63,6 +64,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
+                this.LogTracer.TrackError(ex);
                 return new Result<string> { Code = ResultCode.failed };
             }
         }

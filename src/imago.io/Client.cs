@@ -35,6 +35,8 @@ namespace Imago.IO
         private HttpResponseMessage _lastResponse;
         private string _lastResponseBody;
 
+        public IEventLogger LogTracer => IO.EventLogger.Default;
+
         public string UserName
         {
             get
@@ -115,6 +117,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
+                this.LogTracer.TrackError(ex);
                 return false;
             }
         }
@@ -209,6 +212,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
+                this.LogTracer.TrackError(ex);
                 return false;
             }
         }
@@ -233,6 +237,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
+                this.LogTracer.TrackError(ex);
                 return false;
             }
             finally

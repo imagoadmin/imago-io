@@ -77,6 +77,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
+                this.LogTracer.TrackError(ex);
                 return new Result<string> { Code = ResultCode.failed };
             }
             finally
@@ -100,6 +101,15 @@ namespace Imago.IO
             Result<Imagery> result = null;
             try
             {
+                this.LogTracer.TrackEvent("Client.AddImagery()", new Dictionary<string, string> {
+                    { "imageFileName", parameters.imageFileName },
+                    { "imageryTypeId", parameters.imageryTypeId.ToString() },
+                    { "mimeType", parameters.mimeType },
+                    { "replaceHistory", parameters.replaceHistory.ToString() },
+                    { "dataItemId", parameters.dataItemId.ToString() },
+                    { "size", parameters.dataStream.Length.ToString() },
+                });
+
                 if (parameters.dataItemId == Guid.Empty || parameters.imageryTypeId == Guid.Empty || String.IsNullOrWhiteSpace(parameters.imageFileName))
                     return new Result<Imagery> { Code = ResultCode.failed };
 
@@ -136,6 +146,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
+                this.LogTracer.TrackError(ex);
                 result = new Result<Imagery> { Code = ResultCode.failed, Message = "Exception " + ex.Message + Environment.NewLine + ex.ToString() };
             }
             finally
@@ -179,8 +190,9 @@ namespace Imago.IO
                     return imageProperties;
                 });
             }
-            catch
+            catch (Exception ex)
             {
+                this.LogTracer.TrackError(ex);
                 return new Result<ImageProperties> { Code = ResultCode.failed };
             }
         }

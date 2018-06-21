@@ -64,8 +64,9 @@ namespace Imago.IO
                     return dataItems;
                 });
             }
-            catch
+            catch (Exception ex)
             {
+                this.LogTracer.TrackError(ex);
                 return new Result<List<DataItem>> { Code = ResultCode.failed };
             }
         }
@@ -97,8 +98,9 @@ namespace Imago.IO
                     return dataItem;
                 });
             }
-            catch
+            catch (Exception ex)
             {
+                this.LogTracer.TrackError(ex);
                 return new Result<DataItem> { Code = ResultCode.failed };
             }
         }
