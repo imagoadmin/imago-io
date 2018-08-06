@@ -69,6 +69,9 @@
     <Compile Include="Client.Context.cs" />
     <Compile Include="Credentials.cs" />
     <Compile Include="JavaScriptSerializer.cs" />
+    <Compile Include="Logging\DoNothingEventLogger.cs" />
+    <Compile Include="Logging\EventLogger.cs" />
+    <Compile Include="Logging\IEventLogger.cs" />
     <Compile Include="Result.cs" />
     <Compile Include="ResultExtensions.cs" />
     <Compile Include="UserContext.cs" />
@@ -85,6 +88,7 @@
   <ItemGroup>
     <Content Include="Copyright.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
