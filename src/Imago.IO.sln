@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Imago.NetStandard.IO", "Imago.NetStandard.IO.csproj", "{8C6AFF8C-60F7-4A78-85DB-5B196212D52A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Imago.IO", "imago-io\Imago.IO.csproj", "{8C6AFF8C-60F7-4A78-85DB-5B196212D52A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
