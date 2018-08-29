@@ -101,6 +101,11 @@ namespace Imago.IO
             Result<Imagery> result = null;
             try
             {
+                if (String.IsNullOrWhiteSpace(parameters.imageFileName))
+                    parameters.imageFileName = "unspecified.blob";
+                if (String.IsNullOrWhiteSpace(parameters.mimeType))
+                    parameters.mimeType = "image/jpeg";
+
                 this.LogTracer.TrackEvent("Client.AddImagery()", new Dictionary<string, string> {
                     { "imageFileName", parameters.imageFileName },
                     { "imageryTypeId", parameters.imageryTypeId.ToString() },
@@ -110,8 +115,9 @@ namespace Imago.IO
                     { "size", parameters.dataStream.Length.ToString() },
                 });
 
-                if (parameters.dataItemId == Guid.Empty || parameters.imageryTypeId == Guid.Empty || String.IsNullOrWhiteSpace(parameters.imageFileName))
+                if (parameters.dataItemId == Guid.Empty || parameters.imageryTypeId == Guid.Empty)
                     return new Result<Imagery> { Code = ResultCode.failed };
+
 
                 NameValueCollection query = new NameValueCollection();
                 query["dataitemid"] = parameters.dataItemId.ToString();
