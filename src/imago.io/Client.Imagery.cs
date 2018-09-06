@@ -112,7 +112,7 @@ namespace Imago.IO
                     { "mimeType", parameters.mimeType },
                     { "replaceHistory", parameters.replaceHistory.ToString() },
                     { "dataItemId", parameters.dataItemId.ToString() },
-                    { "size", parameters.dataStream.Length.ToString() },
+                    { "size", parameters.dataStream?.Length.ToString() },
                 });
 
                 if (parameters.dataItemId == Guid.Empty || parameters.imageryTypeId == Guid.Empty)
