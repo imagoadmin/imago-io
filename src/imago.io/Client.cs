@@ -70,7 +70,12 @@ namespace Imago.IO
             }
         }
 
-        public async Task<bool> SignIn(Credentials credentials, TimeSpan? timeout = null)
+        public Task<bool> SignIn(Credentials credentials, TimeSpan? timeout = null)
+        {
+            return SignIn(credentials, null, timeout);
+        }
+
+        public async Task<bool> SignIn(Credentials credentials, string product, TimeSpan? timeout = null)
         {
             try
             {
@@ -81,7 +86,7 @@ namespace Imago.IO
                 _jsonSettings.MissingMemberHandling = MissingMemberHandling.Ignore;
                 _jsonSettings.NullValueHandling = NullValueHandling.Ignore;
 
-                HttpClientHandler responseHandler = null; ;
+                HttpClientHandler responseHandler = null;
                 if (!String.IsNullOrWhiteSpace(credentials.ProxyUri))
                     responseHandler = new HttpClientHandler { Proxy = new WebProxy(credentials.ProxyUri, false), UseProxy = true, UseDefaultCredentials = true };
                 else
@@ -94,7 +99,7 @@ namespace Imago.IO
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 Uri signInURI = new Uri(_apiUrl + "/session");
-                var signindata = new { username = credentials.UserName, password = credentials.Password };
+                var signindata = new { username = credentials.UserName, password = credentials.Password, product = product };
                 string body = _jsonConverter.Serialize(signindata, _jsonSettings);
                 HttpResponseMessage response = await client.PutAsync(signInURI, new StringContent(body, Encoding.UTF8, "application/json")).ConfigureAwait(false);
 
