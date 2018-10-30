@@ -72,6 +72,7 @@ namespace Imago.IO
         }
         public class DataItemUpdateParameters
         {
+            public Guid? id { get; set; }
             public Guid dataEntityId { get; set; } = Guid.Empty;
             public Guid dataSeriesTypeId { get; set; } = Guid.Empty;
             public string name { get; set; }
