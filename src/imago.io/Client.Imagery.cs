@@ -202,5 +202,64 @@ namespace Imago.IO
                 return new Result<ImageProperties> { Code = ResultCode.failed };
             }
         }
+
+
+        public async Task<Result<string>> GetImageAttributes(Guid id, string groupName, CancellationToken ct, TimeSpan? timeout = null)
+        {
+            try
+            {
+                if (id == Guid.Empty)
+                    return new Result<string> { Code = ResultCode.failed };
+
+                var query = new NameValueCollection();
+
+                query["id"] = id.ToString();
+                query["type"] = "image";
+                query["group"] = groupName;
+
+                return await ClientGet("/attributes", query, ct, timeout, (response, body) =>
+                {
+                    var responseObject = JObject.Parse(body);
+
+                    var result =  responseObject["attributes"].ToString();
+
+                    return result;
+                });
+            }
+            catch (Exception ex)
+            {
+                this.LogTracer.TrackError(ex);
+                return new Result<string> { Code = ResultCode.failed };
+            }
+        }
+
+
+        public async Task<Result<object>> SetImageAttributes(Guid id, string groupName, object attributeData, CancellationToken ct, TimeSpan? timeout = null)
+        {
+            try
+            {
+                if (id == Guid.Empty)
+                    return new Result<object> { Code = ResultCode.failed };
+
+                var query = new NameValueCollection();
+
+                query["id"] = id.ToString();
+                query["type"] = "image";
+                query["group"] = groupName;
+                UriBuilder builder = new UriBuilder(_apiUrl);
+                builder.Path += "/attributes";
+                builder.Query = BuildQueryString(query);
+
+                return await ClientPost(builder, attributeData, timeout, ct, (response, body) =>
+                {
+                    return (object)true;
+                });
+            }
+            catch (Exception ex)
+            {
+                this.LogTracer.TrackError(ex);
+                return new Result<object> { Code = ResultCode.failed };
+            }
+        }
     }
 }
