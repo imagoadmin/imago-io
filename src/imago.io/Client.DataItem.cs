@@ -87,7 +87,7 @@ namespace Imago.IO
         {
             try
             {
-                if (parameters.dataEntityId == Guid.Empty && parameters.dataSeriesTypeId == Guid.Empty)
+                if ((parameters.dataEntityId == Guid.Empty || parameters.dataSeriesTypeId == Guid.Empty) && parameters.id == null)
                     return new Result<DataItem> { Code = ResultCode.failed };
 
                 UriBuilder builder = new UriBuilder(_apiUrl);
