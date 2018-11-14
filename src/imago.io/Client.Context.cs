@@ -10,11 +10,8 @@ using System.Net;
 using System.Web;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Web.Script.Serialization;
-using System.Data.Entity.Design.PluralizationServices;
 using System.Globalization;
 using System.Threading;
-using System.Net.Http.Formatting;
 using System.Drawing;
 using System.Diagnostics;
 using System.IO;
@@ -24,27 +21,51 @@ namespace Imago.IO
 {
     public partial class Client
     {
-      
-        public async Task<Result<UserContext>> GetUserContext()
+
+        public async Task<Result<UserContext>> GetUserContext(TimeSpan? timeout = null)
         {
             try
             {
-                string query = "/context";
+                return await ClientGet("/context", new NameValueCollection(), new CancellationToken(false), timeout, (response, body) =>
+                {
+                    JObject context = JObject.Parse(body);
 
-                HttpResponseMessage response = await _client.GetAsync(_apiUrl + query).ConfigureAwait(false);
-                _lastResponse = response;
+                    List<Project> projects = JsonConvert.DeserializeObject<List<Project>>(context["projects"].ToString(), _jsonSettings);
 
-                string body = await response.Content.ReadAsStringAsync();
-                _lastResponseBody = body;
-
-                JObject context = JObject.Parse(body);
-
-                List<Project> projects = JsonConvert.DeserializeObject<List<Project>>(context["projects"].ToString(), _jsonSettings);
-                return new Result<UserContext> { Value = new UserContext { Projects = projects }, Code = projects == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
+                    return new UserContext { Projects = projects };
+                });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
+                this.LogTracer.TrackError(ex);
                 return new Result<UserContext> { Code = ResultCode.failed };
+            }
+        }
+
+        public async Task<Result<string>> GetProjectSASUrl(Guid id, Guid? imageId = null, string mimeType = null, TimeSpan? timeout = null)
+        {
+            try
+            {
+                NameValueCollection query = new NameValueCollection();
+                query["projectid"] = id.ToString();
+                if (imageId != null)
+                {
+                    query["imageid"] = imageId.ToString();
+                    query["mimetype"] = mimeType;
+                }
+
+                return await ClientGet("/access", query, new CancellationToken(false), timeout, (response, body) =>
+                {
+                    JObject responseObject = JObject.Parse(body);
+
+                    var url = responseObject["url"].ToString();
+                    return url;
+                });
+            }
+            catch (Exception ex)
+            {
+                this.LogTracer.TrackError(ex);
+                return new Result<string> { Code = ResultCode.failed };
             }
         }
     }

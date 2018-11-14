@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace Imago.IO.Classes
 {
+    public class DataItemImagery
+    {
+        public Guid ImageryTypeId { get; set; }
+    }
     public class DataItem
     {
         public Guid Id { get; set; } = Guid.Empty;
@@ -18,6 +22,8 @@ namespace Imago.IO.Classes
 
         public double? StartDepth { get; set; }
         public double? EndDepth { get; set; }
+
+        public List<DataItemImagery> Imagery { get; set; } = new List<DataItemImagery>();
 
         public override string ToString()
         {

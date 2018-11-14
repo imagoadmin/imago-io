@@ -9,11 +9,8 @@ using System.Net.Http.Headers;
 using System.Net;
 using System.Web;
 using Newtonsoft.Json.Linq;
-using System.Web.Script.Serialization;
-using System.Data.Entity.Design.PluralizationServices;
 using System.Globalization;
 using System.Threading;
-using System.Net.Http.Formatting;
 using System.Drawing;
 using System.Diagnostics;
 using System.IO;
@@ -23,7 +20,12 @@ namespace Imago.IO
 {
     public partial class Client
     {
-     
+        public static class DataEntityQueryParametersMatchChoices
+        {
+            public const string MatchEqual = "equals";
+            public const string MatchLike = "like";
+        }
+
         public class DataEntityQueryParameters
         {
             public string name { get; set; }
@@ -31,7 +33,7 @@ namespace Imago.IO
             public Guid datasetId { get; set; }
         }
 
-        public async Task<Result<List<DataEntity>>> SearchForDataEntity(DataEntityQueryParameters parameters, CancellationToken ct)
+        public async Task<Result<List<DataEntity>>> SearchForDataEntity(DataEntityQueryParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
         {
             try
             {
@@ -41,25 +43,18 @@ namespace Imago.IO
                 if (parameters.datasetId != Guid.Empty)
                     query["datasetid"] = parameters.datasetId.ToString();
 
-                UriBuilder builder = new UriBuilder(_apiUrl);
-                builder.Path += "/dataentity";
-                builder.Query = BuildQueryString(query);
+                return await ClientGet("/dataentity", query, ct, timeout, (response, body) =>
+                {
+                    JObject responseObject = JObject.Parse(body);
 
-                HttpResponseMessage response = await _client.GetAsync(builder.ToString(),ct);
-                _lastResponse = response;
-                string body = await response.Content.ReadAsStringAsync();
-                _lastResponseBody = body;
+                    List<DataEntity> dataEntities = _jsonConverter.Deserialize<List<DataEntity>>(responseObject["dataEntities"].ToString());
 
-                if (response.StatusCode != HttpStatusCode.OK)
-                    return new Result<List<DataEntity>> { Code = ResultCode.failed };
-
-                JObject responseObject = JObject.Parse(body);
-
-                List<DataEntity> dataEntities = _jsonConverter.Deserialize<List<DataEntity>>(responseObject["dataEntities"].ToString());
-                return new Result<List<DataEntity>> { Value = dataEntities, Code = dataEntities == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
+                    return dataEntities;
+                });
             }
-            catch
+            catch (Exception ex)
             {
+                this.LogTracer.TrackError(ex);
                 return new Result<List<DataEntity>> { Code = ResultCode.failed };
             }
         }
@@ -69,7 +64,7 @@ namespace Imago.IO
             public Guid datasetId { get; set; }
             public string name { get; set; }
         }
-        public async Task<Result<DataEntity>> AddDataEntity(DataEntityUpdateParameters parameters,CancellationToken ct)
+        public async Task<Result<DataEntity>> AddDataEntity(DataEntityUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
         {
             try
             {
@@ -79,23 +74,20 @@ namespace Imago.IO
                 UriBuilder builder = new UriBuilder(_apiUrl);
                 builder.Path += "/dataentity";
 
-                string body = _jsonConverter.Serialize(parameters);
-                HttpResponseMessage response = await _client.PostAsync(builder.ToString(), new StringContent(body, Encoding.UTF8, "application/json"),ct).ConfigureAwait(false);
-                _lastResponse = response;
+                return await ClientPost(builder, parameters, timeout, ct, (response, body) =>
+                {
+                    DataEntity dataEntity = _jsonConverter.Deserialize<DataEntity>(body);
+                    return dataEntity;
+                });
 
-                body = await response.Content.ReadAsStringAsync();
-                _lastResponseBody = body;
-
-                if (response.StatusCode != HttpStatusCode.OK)
-                    return new Result<DataEntity> { Code = ResultCode.failed };
-
-                DataEntity dataEntity = _jsonConverter.Deserialize<DataEntity>(body);
-                return new Result<DataEntity> { Value = dataEntity, Code = dataEntity == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
             }
-            catch
+            catch (Exception ex)
             {
-                return new Result<DataEntity> { Code = ResultCode.failed };
+                this.LogTracer.TrackError(ex);
+                return new Result<DataEntity> { Code = ResultCode.failed, Message = ex.Message };
             }
-        }      
+        }
+
+
     }
 }

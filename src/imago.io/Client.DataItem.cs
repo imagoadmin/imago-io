@@ -9,11 +9,8 @@ using System.Net.Http.Headers;
 using System.Net;
 using System.Web;
 using Newtonsoft.Json.Linq;
-using System.Web.Script.Serialization;
-using System.Data.Entity.Design.PluralizationServices;
 using System.Globalization;
 using System.Threading;
-using System.Net.Http.Formatting;
 using System.Drawing;
 using System.Diagnostics;
 using System.IO;
@@ -35,7 +32,8 @@ namespace Imago.IO
             public double? y { get; set; }
             public double? z { get; set; }
         }
-        public async Task<Result<List<DataItem>>> SearchForDataItem(DataItemQueryParameters parameters, CancellationToken ct)
+
+        public async Task<Result<List<DataItem>>> SearchForDataItem(DataItemQueryParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
         {
             try
             {
@@ -59,31 +57,22 @@ namespace Imago.IO
                 if (parameters.z != null)
                     query["z"] = parameters.z.ToString();
 
-                UriBuilder builder = new UriBuilder(_apiUrl);
-                builder.Path += "/dataitem";
-                builder.Query = BuildQueryString(query);
-
-                HttpResponseMessage response = await _client.GetAsync(builder.ToString(),ct).ConfigureAwait(false);
-                _lastResponse = response;
-
-                string body = await response.Content.ReadAsStringAsync();
-                _lastResponseBody = body;
-
-                if (response.StatusCode != HttpStatusCode.OK)
-                    return new Result<List<DataItem>> { Code = ResultCode.failed };
-
-                JObject responseObject = JObject.Parse(body);
-
-                List<DataItem> dataItems = _jsonConverter.Deserialize<List<DataItem>>(responseObject["dataItems"].ToString());
-                return new Result<List<DataItem>> { Value = dataItems, Code = dataItems == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
+                return await ClientGet("/dataitem", query, ct, timeout, (response, body) =>
+                {
+                    JObject responseObject = JObject.Parse(body);
+                    List<DataItem> dataItems = _jsonConverter.Deserialize<List<DataItem>>(responseObject["dataItems"].ToString());
+                    return dataItems;
+                });
             }
-            catch
+            catch (Exception ex)
             {
+                this.LogTracer.TrackError(ex);
                 return new Result<List<DataItem>> { Code = ResultCode.failed };
             }
         }
         public class DataItemUpdateParameters
         {
+            public Guid? id { get; set; }
             public Guid dataEntityId { get; set; } = Guid.Empty;
             public Guid dataSeriesTypeId { get; set; } = Guid.Empty;
             public string name { get; set; }
@@ -94,27 +83,25 @@ namespace Imago.IO
             public double? z { get; set; }
         }
 
-        public async Task<Result<DataItem>> AddDataItem(DataItemUpdateParameters parameters, CancellationToken ct)
+        public async Task<Result<DataItem>> AddDataItem(DataItemUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
         {
             try
             {
-                if (parameters.dataEntityId == Guid.Empty && parameters.dataSeriesTypeId == Guid.Empty)
+                if ((parameters.dataEntityId == Guid.Empty || parameters.dataSeriesTypeId == Guid.Empty) && parameters.id == null)
                     return new Result<DataItem> { Code = ResultCode.failed };
 
                 UriBuilder builder = new UriBuilder(_apiUrl);
                 builder.Path += "/dataitem";
 
-                string body = _jsonConverter.Serialize(parameters);
-                HttpResponseMessage response = await _client.PostAsync(builder.ToString(), new StringContent(body, Encoding.UTF8, "application/json"),ct).ConfigureAwait(false);
-                _lastResponse = response;
-                body = await response.Content.ReadAsStringAsync();
-                _lastResponseBody = body;
-
-                DataItem dataItem = _jsonConverter.Deserialize<DataItem>(body);
-                return new Result<DataItem> { Value = dataItem, Code = dataItem == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
+                return await ClientPost(builder, parameters, timeout, ct, (response, body) =>
+                {
+                    DataItem dataItem = _jsonConverter.Deserialize<DataItem>(body);
+                    return dataItem;
+                });
             }
-            catch
+            catch (Exception ex)
             {
+                this.LogTracer.TrackError(ex);
                 return new Result<DataItem> { Code = ResultCode.failed };
             }
         }

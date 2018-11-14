@@ -120,7 +120,7 @@
       }
     },
     "version": "1.0.0",
-    "filename": "../imago-agent/api/routes/io/2/get-attributes.js",
+    "filename": "D:/imago/repos/imago-agent/api/routes/io/2/get-attributes.js",
     "groupTitle": "Attributes"
   },
   {
@@ -133,7 +133,7 @@
     "examples": [
       {
         "title": "Example Usage (requires the authorisation token header):",
-        "content": "curl -O  http://io.imago.live/integrate/1/dataentity?name=DH&match=startswidth",
+        "content": "curl -O  http://io.imago.live/integrate/1/dataentity?name=DH&match=startswith",
         "type": "curl"
       }
     ],
@@ -166,12 +166,13 @@
               "\"equals\"",
               "\"startswith\"",
               "\"endswith\"",
-              "\"includes\""
+              "\"includes\"",
+              "\"like\""
             ],
             "optional": true,
             "field": "match",
             "defaultValue": "equals",
-            "description": "<p>Determines how the search pattern matches the data entity name.</p>"
+            "description": "<p>Determines how the search pattern matches the data entity name. Wildcards &quot;*&quot; can be used with the &quot;like&quot; match.</p>"
           },
           {
             "group": "Parameter",
@@ -185,7 +186,7 @@
       "examples": [
         {
           "title": "Query String:",
-          "content": "?datasetid=9a08e64f-e6e9-41d8-a47c-044db8a882c4&name=DH&match=startswidth",
+          "content": "?datasetid=9a08e64f-e6e9-41d8-a47c-044db8a882c4&name=DH&match=startswith",
           "type": "json"
         }
       ]
@@ -244,7 +245,7 @@
       }
     },
     "version": "1.0.0",
-    "filename": "../imago-agent/api/routes/io/2/get-dataentity.js",
+    "filename": "D:/imago/repos/imago-agent/api/routes/io/2/get-dataentity.js",
     "groupTitle": "DataEntity"
   },
   {
@@ -347,7 +348,7 @@
       }
     },
     "version": "1.0.0",
-    "filename": "../imago-agent/api/routes/io/2/post-dataentity.js",
+    "filename": "D:/imago/repos/imago-agent/api/routes/io/2/post-dataentity.js",
     "groupTitle": "DataEntity"
   },
   {
@@ -525,13 +526,27 @@
             "optional": true,
             "field": "dataItems.z",
             "description": "<p>Elevation/Z coordinate of the data item.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "dataItems.imagery",
+            "description": "<p>List of imagery on this data item.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Guid",
+            "optional": true,
+            "field": "dataItems.imagery.imageryTypeId",
+            "description": "<p>Type of imagery available on the data item.</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "{\n    \"dataItems\" : [\n        {\n            \"id\" : \"c2019bd6-34aa-4561-ab2f-8802fa5ff3a9\",\n            \"dataEntityId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"dataSeriesTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\"\n            \"startDepth\" : 0,\n            \"endDepth\" : 10.1,\n        },\n        {\n            \"id\" : \"5a199953-52e5-437c-a2d8-aa8785beb45d\",\n            \"dataEntityId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"dataSeriesTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\",\n            \"startDepth\" : 10.1,\n            \"endDepth\" : 15.2,\n        },\n        {\n            \"id\" : \"ca8379b2-261e-4f30-8848-2eb92cfded87\",\n            \"dataEntityId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"dataSeriesTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\"\n            \"startDepth\" : 15.2,\n            \"endDepth\" : 19.43,\n        }\n    ]\n}",
+          "content": "{\n    \"dataItems\" : [\n        {\n            \"id\" : \"c2019bd6-34aa-4561-ab2f-8802fa5ff3a9\",\n            \"dataEntityId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"dataSeriesTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\"\n            \"startDepth\" : 0,\n            \"endDepth\" : 10.1,\n            \"imagery\" : [\n                { imageryTypeId: \"f0b6aec1-ce5c-4874-b107-162090623a9b\" }\n            ]\n        },\n        {\n            \"id\" : \"5a199953-52e5-437c-a2d8-aa8785beb45d\",\n            \"dataEntityId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"dataSeriesTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\",\n            \"startDepth\" : 10.1,\n            \"endDepth\" : 15.2,\n            \"imagery\" : [\n                { imageryTypeId: \"f0b6aec1-ce5c-4874-b107-162090623a9b\" }\n            ]\n        },\n        {\n            \"id\" : \"ca8379b2-261e-4f30-8848-2eb92cfded87\",\n            \"dataEntityId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"dataSeriesTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\"\n            \"startDepth\" : 15.2,\n            \"endDepth\" : 19.43,\n            \"imagery\" : [\n                { imageryTypeId: \"f0b6aec1-ce5c-4874-b107-162090623a9b\" }\n            ]\n        }\n    ]\n}",
           "type": "json"
         }
       ]
@@ -549,7 +564,7 @@
       }
     },
     "version": "1.0.0",
-    "filename": "../imago-agent/api/routes/io/2/get-dataitem.js",
+    "filename": "D:/imago/repos/imago-agent/api/routes/io/2/get-dataitem.js",
     "groupTitle": "DataItem"
   },
   {
@@ -736,7 +751,7 @@
       }
     },
     "version": "1.0.0",
-    "filename": "../imago-agent/api/routes/io/2/post-dataitem.js",
+    "filename": "D:/imago/repos/imago-agent/api/routes/io/2/post-dataitem.js",
     "groupTitle": "DataItem"
   },
   {
@@ -800,7 +815,7 @@
       },
       "examples": [
         {
-          "title": "Query String: ",
+          "title": "Query String:",
           "content": "?dataitemid=c2019bd6-34aa-4561-ab2f-8802fa5ff3a9&imagerytypeid=f0b6aec1-ce5c-4874-b107-162090623a9b&mimetype=image%2Fjpeg&width=200",
           "type": "json"
         }
@@ -825,7 +840,7 @@
       }
     },
     "version": "1.0.0",
-    "filename": "../imago-agent/api/routes/io/2/get-imagery.js",
+    "filename": "D:/imago/repos/imago-agent/api/routes/io/2/get-imagery.js",
     "groupTitle": "Imagery"
   },
   {
@@ -930,7 +945,7 @@
       }
     },
     "version": "1.0.0",
-    "filename": "../imago-agent/api/routes/io/2/post-imagery.js",
+    "filename": "D:/imago/repos/imago-agent/api/routes/io/2/post-imagery.js",
     "groupTitle": "Imagery"
   },
   {
@@ -973,7 +988,7 @@
       }
     },
     "version": "1.0.0",
-    "filename": "../imago-agent/api/routes/io/2/definition.js",
+    "filename": "D:/imago/repos/imago-agent/api/routes/io/2/definition.js",
     "groupTitle": "Session"
   },
   {
@@ -1036,7 +1051,7 @@
       }
     },
     "version": "1.0.0",
-    "filename": "../imago-agent/api/routes/io/2/definition.js",
+    "filename": "D:/imago/repos/imago-agent/api/routes/io/2/definition.js",
     "groupTitle": "Session"
   },
   {
@@ -1114,7 +1129,7 @@
       }
     },
     "version": "1.0.0",
-    "filename": "../imago-agent/api/routes/io/2/definition.js",
+    "filename": "D:/imago/repos/imago-agent/api/routes/io/2/definition.js",
     "groupTitle": "Session"
   },
   {
@@ -1267,7 +1282,7 @@
       }
     },
     "version": "1.0.0",
-    "filename": "../imago-agent/api/routes/io/2/get-context.js",
+    "filename": "D:/imago/repos/imago-agent/api/routes/io/2/get-context.js",
     "groupTitle": "UserContext"
   }
 ]

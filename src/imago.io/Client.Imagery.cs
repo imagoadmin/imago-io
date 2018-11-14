@@ -9,14 +9,10 @@ using System.Net.Http.Headers;
 using System.Net;
 using System.Web;
 using Newtonsoft.Json.Linq;
-using System.Web.Script.Serialization;
-using System.Data.Entity.Design.PluralizationServices;
 using System.Globalization;
 using System.Threading;
-using System.Net.Http.Formatting;
 using System.Drawing;
 using System.Diagnostics;
-using System.IO;
 using System.IO;
 using Imago.IO.Classes;
 
@@ -32,7 +28,7 @@ namespace Imago.IO
             public int? resizeWidth { get; set; } = null;
             public int? resizeHeight { get; set; } = null;
         }
-        public async Task<Result<string>> DownloadImageryToFile(ImageryQueryParameters parameters, string fileName, CancellationToken ct)
+        public async Task<Result<string>> DownloadImageryToFile(ImageryQueryParameters parameters, string fileName, CancellationToken ct, TimeSpan? timeout = null)
         {
             try
             {
@@ -52,28 +48,36 @@ namespace Imago.IO
                 builder.Path += "/imagery";
                 builder.Query = BuildQueryString(query);
 
-                HttpResponseMessage response = await _client.GetAsync(builder.ToString(), ct).ConfigureAwait(false);
-                _lastResponse = response;
+                using (HttpClient client = GetClient(timeout))
+                {
+                    HttpResponseMessage response = await client.GetAsync(builder.ToString(), ct).ConfigureAwait(false);
+                    _lastResponse = response;
 
-                if (response.StatusCode != HttpStatusCode.OK || response.Content.Headers.ContentDisposition == null || String.IsNullOrWhiteSpace(response.Content.Headers.ContentDisposition.FileName) || response.StatusCode != HttpStatusCode.OK)
-                    return new Result<string> { Code = ResultCode.failed };
 
-                string fsExt = Path.GetExtension(response.Content.Headers.ContentDisposition.FileName.Replace("\"",""));
-                if (String.IsNullOrWhiteSpace(fsExt))
-                    return new Result<string> { Code = ResultCode.failed };
+                    if (response.StatusCode != HttpStatusCode.OK)
+                        return new Result<string> { Code = response.GetResultCode(), Message = response.StatusCode.ToString() };
 
-                fileName += fsExt;
-                using (FileStream imageFileStream = new FileStream(fileName, FileMode.Create))
+                    if (response.Content.Headers.ContentDisposition == null || String.IsNullOrWhiteSpace(response.Content.Headers.ContentDisposition.FileName) || response.StatusCode != HttpStatusCode.OK)
+                        return new Result<string> { Code = ResultCode.failed };
+
+                    string fsExt = Path.GetExtension(response.Content.Headers.ContentDisposition.FileName.Replace("\"", ""));
+                    if (String.IsNullOrWhiteSpace(fsExt))
+                        return new Result<string> { Code = ResultCode.failed };
+
+                    fileName += fsExt;
+                    using (FileStream imageFileStream = new FileStream(fileName, FileMode.Create))
                     using (var httpStream = await response.Content.ReadAsStreamAsync())
                     {
                         httpStream.CopyTo(imageFileStream);
                         imageFileStream.Flush();
                     }
 
-                return new Result<string> { Value = fileName, Code = response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
+                    return new Result<string> { Value = fileName, Code = response.GetResultCode() };
+                }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
+                this.LogTracer.TrackError(ex);
                 return new Result<string> { Code = ResultCode.failed };
             }
             finally
@@ -87,16 +91,33 @@ namespace Imago.IO
             public string mimeType { get; set; }
             public Guid imageryTypeId { get; set; }
             public Guid dataItemId { get; set; }
+            public Stream dataStream { get; set; }
             public bool replaceHistory { get; set; } = false;
         }
-        public async Task<Result<Imagery>> AddImagery(ImageryUpdateParameters parameters, CancellationToken ct)
+
+        public async Task<Result<Imagery>> AddImagery(ImageryUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
         {
-            FileStream fs = null;
+            Stream fs = null;
             Result<Imagery> result = null;
             try
-            { 
-                if (parameters.dataItemId == Guid.Empty || parameters.imageryTypeId == Guid.Empty || String.IsNullOrWhiteSpace(parameters.imageFileName))
+            {
+                if (String.IsNullOrWhiteSpace(parameters.imageFileName))
+                    parameters.imageFileName = "unspecified.blob";
+                if (String.IsNullOrWhiteSpace(parameters.mimeType))
+                    parameters.mimeType = "image/jpeg";
+
+                this.LogTracer.TrackEvent("Client.AddImagery()", new Dictionary<string, string> {
+                    { "imageFileName", parameters.imageFileName },
+                    { "imageryTypeId", parameters.imageryTypeId.ToString() },
+                    { "mimeType", parameters.mimeType },
+                    { "replaceHistory", parameters.replaceHistory.ToString() },
+                    { "dataItemId", parameters.dataItemId.ToString() },
+                    { "size", parameters.dataStream?.Length.ToString() },
+                });
+
+                if (parameters.dataItemId == Guid.Empty || parameters.imageryTypeId == Guid.Empty)
                     return new Result<Imagery> { Code = ResultCode.failed };
+
 
                 NameValueCollection query = new NameValueCollection();
                 query["dataitemid"] = parameters.dataItemId.ToString();
@@ -109,24 +130,30 @@ namespace Imago.IO
                 builder.Path += "/imagery";
                 builder.Query = BuildQueryString(query);
 
-                fs = new FileStream(parameters.imageFileName, FileMode.Open);
+                fs = parameters.dataStream;
+                if (fs == null)
+                    fs = new FileStream(parameters.imageFileName, FileMode.Open);
 
-                string boundary = "Upload----" + DateTime.Now.ToString(CultureInfo.InvariantCulture);
-                MultipartFormDataContent content = new MultipartFormDataContent(boundary);
+                // Don't pass in a custom boundary, because passing a custom boundary 
+                // caused an exception when running on Android.
+                MultipartFormDataContent content = new MultipartFormDataContent();
                 HttpContent streamedContent = new StreamContent(fs);
                 content.Add(streamedContent, "file", parameters.imageFileName);
 
-                HttpResponseMessage response = await _client.PostAsync(builder.ToString(),content,ct).ConfigureAwait(false);
-                _lastResponse = response;
-                string body = await response.Content.ReadAsStringAsync();
-                _lastResponseBody = body;
-
-                Imagery dataItem = _jsonConverter.Deserialize<Imagery>(body);
-                result = new Result<Imagery> { Value = dataItem, Code = dataItem == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
+                using (HttpClient client = GetClient(timeout))
+                {
+                    HttpResponseMessage response = await client.PostAsync(builder.ToString(), content, ct).ConfigureAwait(false);
+                    _lastResponse = response;
+                    string body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    _lastResponseBody = body;
+                    Imagery dataItem = _jsonConverter.Deserialize<Imagery>(body);
+                    result = new Result<Imagery> { Value = dataItem, Code = dataItem == null || response.StatusCode != HttpStatusCode.OK ? response.GetResultCode() : ResultCode.ok, Message = $"HTTP error {response.StatusCode} {body}" };
+                }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                result = new Result<Imagery> { Code = ResultCode.failed };
+                this.LogTracer.TrackError(ex);
+                result = new Result<Imagery> { Code = ResultCode.failed, Message = "Exception " + ex.Message + Environment.NewLine + ex.ToString() };
             }
             finally
             {
@@ -145,7 +172,8 @@ namespace Imago.IO
             public string fileExt { get; set; }
             public Int64 fileSize { get; set; } = 0;
         }
-        public async Task<Result<ImageProperties>> GetImageProperties(Guid id, CancellationToken ct)
+
+        public async Task<Result<ImageProperties>> GetImageProperties(Guid id, CancellationToken ct, TimeSpan? timeout = null)
         {
             try
             {
@@ -158,29 +186,79 @@ namespace Imago.IO
                 query["type"] = "image";
                 query["group"] = "properties";
 
+                return await ClientGet("/attributes", query, ct, timeout, (response, body) =>
+                {
+                    JObject responseObject = JObject.Parse(body);
+                    Imagery dataItem = _jsonConverter.Deserialize<Imagery>(body);
+
+                    ImageProperties imageProperties = _jsonConverter.Deserialize<ImageProperties>(responseObject["attributes"].ToString());
+
+                    return imageProperties;
+                });
+            }
+            catch (Exception ex)
+            {
+                this.LogTracer.TrackError(ex);
+                return new Result<ImageProperties> { Code = ResultCode.failed };
+            }
+        }
+
+
+        public async Task<Result<string>> GetImageAttributes(Guid id, string groupName, CancellationToken ct, TimeSpan? timeout = null)
+        {
+            try
+            {
+                if (id == Guid.Empty)
+                    return new Result<string> { Code = ResultCode.failed };
+
+                var query = new NameValueCollection();
+
+                query["id"] = id.ToString();
+                query["type"] = "image";
+                query["group"] = groupName;
+
+                return await ClientGet("/attributes", query, ct, timeout, (response, body) =>
+                {
+                    var responseObject = JObject.Parse(body);
+
+                    var result =  responseObject["attributes"].ToString();
+
+                    return result;
+                });
+            }
+            catch (Exception ex)
+            {
+                this.LogTracer.TrackError(ex);
+                return new Result<string> { Code = ResultCode.failed };
+            }
+        }
+
+
+        public async Task<Result<object>> SetImageAttributes(Guid id, string groupName, object attributeData, CancellationToken ct, TimeSpan? timeout = null)
+        {
+            try
+            {
+                if (id == Guid.Empty)
+                    return new Result<object> { Code = ResultCode.failed };
+
+                var query = new NameValueCollection();
+
+                query["id"] = id.ToString();
+                query["type"] = "image";
+                query["group"] = groupName;
                 UriBuilder builder = new UriBuilder(_apiUrl);
                 builder.Path += "/attributes";
                 builder.Query = BuildQueryString(query);
 
-                HttpResponseMessage response = await _client.GetAsync(builder.ToString(), ct).ConfigureAwait(false);
-                _lastResponse = response;
-
-                string body = await response.Content.ReadAsStringAsync();
-                _lastResponseBody = body;
-
-                if (response.StatusCode != HttpStatusCode.OK)
-                    return new Result<ImageProperties> { Code = ResultCode.failed };
-
-                JObject responseObject = JObject.Parse(body);
-                Imagery dataItem = _jsonConverter.Deserialize<Imagery>(body);
-
-                ImageProperties imageProperties = _jsonConverter.Deserialize<ImageProperties>(responseObject["attributes"].ToString());
-
-                return new Result<ImageProperties> { Value = imageProperties, Code = responseObject == null || response.StatusCode != HttpStatusCode.OK ? ResultCode.failed : ResultCode.ok };
+                return await ClientPost(builder, attributeData, timeout, ct, (response, body) =>
+                {
+                    return (object)true;
+                });
             }
-            catch
+            catch (Exception ex)
             {
-                return new Result<ImageProperties> { Code = ResultCode.failed };
+                this.LogTracer.TrackError(ex);
+                return new Result<object> { Code = ResultCode.failed };
             }
         }
     }
