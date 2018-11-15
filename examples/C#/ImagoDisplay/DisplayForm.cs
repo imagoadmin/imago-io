@@ -15,8 +15,8 @@ using System.Windows.Forms;
 //  This example demonstrates how to:
 //
 //      1. Sign into imago,
-//      2. Query the list of projects and datasets available to the user,
-//      3. Query the list of data entities associated data items, and
+//      2. Query the list of workspaces and datasets available to the user,
+//      3. Query the list of collections associated imageries, and
 //      4. Download and display an image.
 //
 
@@ -45,7 +45,7 @@ namespace ImagoDisplay
             panelDisplay.Visible = false;
             showProgress.Visible = true;
 
-            Credentials credentials = new Credentials { UserName = txtUserName.Text, Password = txtPassword.Text };
+            Credentials credentials = new Credentials { UserName = txtUserName.Text, Password = txtPassword.Text, HostName = "http://localhost:3000" };
 
             connection = new Client();
             bool ok = await connection.SignIn(credentials);
@@ -61,119 +61,125 @@ namespace ImagoDisplay
             Result<UserContext> result = await connection.GetUserContext();
             if (result.Code != ResultCode.ok)
             {
-                MessageBox.Show("Unable to get the account's list of projects and datasets.");
+                MessageBox.Show("Unable to get the account's list of workspaces and datasets.");
                 panelDisplay.Visible = false;
                 showProgress.Visible = false;
                 return;
             }
             UserContext context = result.Value;
 
-            lstProjects.DisplayMember = "Name";
-            lstProjects.DataSource = context.Projects;
+            lstWorkspaces.DisplayMember = "Name";
+            lstWorkspaces.DataSource = context.Workspaces;
 
             panelDisplay.Visible = true;
             showProgress.Visible = false;
         }
 
         //
-        //  Update the dropdown list of datasets when the selected project changes
+        //  Update the dropdown list of datasets when the selected workspace changes
         //
 
-        private void lstProjects_SelectedValueChanged(object sender, EventArgs e)
+        private void lstWorkspaces_SelectedValueChanged(object sender, EventArgs e)
         {
             lstDatasets.DisplayMember = "Name";
-            lstDatasets.DataSource = (lstProjects.SelectedValue as Project).Datasets;
+            lstDatasets.DataSource = (lstWorkspaces.SelectedValue as Workspace).Datasets;
         }
 
         //
-        //  Update the dropdown list of data series types when the selected dataset changes.
-        //  It also downloads and updates the list of data entities in the dataset.
+        //  Update the dropdown list of imagery types when the selected dataset changes.
+        //  It also downloads and updates the list of collections in the dataset.
         //
 
         private async void lstDatasets_SelectedValueChanged(object sender, EventArgs e)
         {
-            lstDataSeriesTypes.DisplayMember = "Name";
-            lstDataSeriesTypes.DataSource = (lstDatasets.SelectedValue as Dataset).DataSeriesTypes;
+            lstImageryTypes.DisplayMember = "Name";
+            lstImageryTypes.DataSource = (lstDatasets.SelectedValue as Dataset).ImageryTypes;
 
-            lstDataEntity.DisplayMember = "Name";
+            lstCollections.DisplayMember = "Name";
 
             Dataset dataset = (Dataset)lstDatasets.SelectedValue;
             if (dataset != null)
             {
                 showProgress.Visible = true;
-                Client.DataEntityQueryParameters query = new Client.DataEntityQueryParameters { datasetId = dataset.Id };
-                Result<List<DataEntity>> result = await connection.SearchForDataEntity(query, cancelToken);
+                Client.CollectionQueryParameters query = new Client.CollectionQueryParameters { datasetId = dataset.Id };
+                Result<List<Collection>> result = await connection.SearchForCollection(query, cancelToken);
                 showProgress.Visible = false;
 
                 if (result.Code != ResultCode.ok || result.Value.Count == 0)
                 {
-                    MessageBox.Show("Unable to find any matching data entities ine the selected dataset.");
+                    MessageBox.Show("Unable to find any matching collections ine the selected dataset.");
                     return;
                 }
-                lstDataEntity.DataSource = result.Value;
+                lstCollections.DataSource = result.Value;
             }
             else
             {
-                lstDataEntity.DataSource = null;
+                lstCollections.DataSource = null;
             }
         }
 
         //
-        //  Update the dropdown list of imagery types when the selected data series type changes
+        //  Update the dropdown list of image types when the selected imagery type changes
         //
 
-        private void lstDataSeriesTypes_SelectedValueChanged(object sender, EventArgs e)
+        private async void lstDataSeriesTypes_SelectedValueChanged(object sender, EventArgs e)
         {
-            lstImageryTypes.DisplayMember = "Name";
-            lstImageryTypes.DataSource = (lstDataSeriesTypes.SelectedValue as DataSeriesType).ImageryTypes;
+            lstImageTypes.DisplayMember = "Name";
+            lstImageTypes.DataSource = (lstImageryTypes.SelectedValue as ImageryType).ImageTypes;
+            await UpdateImageries();
         }
 
         //
-        //  Download and update the list of data items associated with the selected data entity
+        //  Download and update the list of imageries associated with the selected collection
         //
 
-        private async void lstDataEntity_SelectedValueChanged(object sender, EventArgs e)
+        private async void lstCollections_SelectedValueChanged(object sender, EventArgs e)
         {
-            DataEntity dataEntity = lstDataEntity.SelectedValue as DataEntity;
-            DataSeriesType dataSeriesType = (DataSeriesType)lstDataSeriesTypes.SelectedValue;
+            await UpdateImageries();
+        }
+
+        private async System.Threading.Tasks.Task UpdateImageries()
+        {
+            Collection dataEntity = lstCollections.SelectedValue as Collection;
+            ImageryType dataSeriesType = (ImageryType)lstImageryTypes.SelectedValue;
 
             if (dataEntity != null && dataSeriesType != null)
             {
                 showProgress.Visible = true;
-                Client.DataItemQueryParameters query = new Client.DataItemQueryParameters { dataEntityId = dataEntity.Id, dataSeriesTypeId = dataSeriesType.Id };
-                Result<List<DataItem>> result = await connection.SearchForDataItem(query, cancelToken);
+                Client.ImageryQueryParameters query = new Client.ImageryQueryParameters { collectionId = dataEntity.Id, imageryTypeId = dataSeriesType.Id };
+                Result<List<Imagery>> result = await connection.SearchForImagery(query, cancelToken);
                 showProgress.Visible = false;
                 if (result.Code != ResultCode.ok || result.Value.Count == 0)
                 {
-                    MessageBox.Show("The specified data entity does not have any data items.");
+                    MessageBox.Show("The specified collection does not have any imageries.");
                     return;
                 }
-                lstDataItems.DataSource = result.Value;
+                lstImageries.DataSource = result.Value;
             }
             else
             {
-                lstDataItems.DataSource = null;
+                lstImageries.DataSource = null;
             }
         }
 
         //
-        //  Download and display the image for the selected data item and imagery type
+        //  Download and display the image for the selected imagery and image type
         //
 
         private async void butDisplay_Click(object sender, EventArgs e)
         {
-            DataItem dataItem = lstDataItems.SelectedValue as DataItem;
-            ImageryType imageryType = lstImageryTypes.SelectedValue as ImageryType;
+            Imagery dataItem = lstImageries.SelectedValue as Imagery;
+            ImageType imageryType = lstImageTypes.SelectedValue as ImageType;
             if (dataItem == null || imageryType == null)
             {
-                MessageBox.Show("A data item and imagery type must be selected first.");
+                MessageBox.Show("A imagery and image type must be selected first.");
                 return;
             }
 
             showProgress.Visible = true;
-            Client.ImageryQueryParameters query = new Client.ImageryQueryParameters { dataItemId = dataItem.Id, imageryTypeId = imageryType.Id };
+            Client.ImageQueryParameters query = new Client.ImageQueryParameters { imageryId = dataItem.Id, imageTypeId = imageryType.Id };
             string tempFileName = Path.GetTempFileName();
-            Result<string> result = await connection.DownloadImageryToFile(query, tempFileName, cancelToken);
+            Result<string> result = await connection.DownloadImageToFile(query, tempFileName, cancelToken);
             showProgress.Visible = false;
 
             if (result.Code != ResultCode.ok)
@@ -183,6 +189,5 @@ namespace ImagoDisplay
             }
             picDisplay.ImageLocation = result.Value;
         }
-
     }
 }

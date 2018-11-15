@@ -196,6 +196,26 @@ namespace Imago.IO
             }
         }
 
+        private async Task<Result<T>> ClientPut<T, TPostBody>(UriBuilder builder, TPostBody parameters, TimeSpan? timeout, CancellationToken ct, Func<HttpResponseMessage, string, T> processResponse) where T : class
+        {
+            string body = _jsonConverter.Serialize(parameters);
+
+            using (HttpClient client = GetClient(timeout))
+            {
+                HttpResponseMessage response = await client.PutAsync(builder.ToString(), new StringContent(body, Encoding.UTF8, "application/json"), ct).ConfigureAwait(false);
+                _lastResponse = response;
+
+                body = await response.Content.ReadAsStringAsync();
+                _lastResponseBody = body;
+
+                if (response.StatusCode != HttpStatusCode.OK)
+                    return new Result<T> { Code = response.GetResultCode(), Message = response.StatusCode.ToString() };
+
+                var result = processResponse(response, body);
+                return new Result<T> { Value = result, Code = result != null ? ResultCode.ok : ResultCode.failed };
+            }
+        }
+
         public async Task<bool> IsSessionValid(TimeSpan? timeout = null)
         {
             try

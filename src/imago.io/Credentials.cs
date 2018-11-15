@@ -10,11 +10,11 @@ namespace Imago.IO
     public class Credentials
     {
         public static string DefaultHostName { get; set; }
-        public static string DefaultApiVersion1 { get; protected set; } = "/integrate/1";
+        public static string DefaultApiVersion2 { get; protected set; } = "/integrate/2";
         public Credentials()
         {
             HostName = "https://io.imago.live";
-            ApiVersion = Credentials.DefaultApiVersion1;
+            ApiVersion = Credentials.DefaultApiVersion2;
         }
         public string ProxyUri { get; set; } = null;
         public string HostName { get; set; }

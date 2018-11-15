@@ -30,9 +30,9 @@ namespace Imago.IO
                 {
                     JObject context = JObject.Parse(body);
 
-                    List<Project> projects = JsonConvert.DeserializeObject<List<Project>>(context["projects"].ToString(), _jsonSettings);
+                    List<Workspace> workspaces = JsonConvert.DeserializeObject<List<Workspace>>(context["workspaces"].ToString(), _jsonSettings);
 
-                    return new UserContext { Projects = projects };
+                    return new UserContext { Workspaces = workspaces };
                 });
             }
             catch (Exception ex)
@@ -42,12 +42,12 @@ namespace Imago.IO
             }
         }
 
-        public async Task<Result<string>> GetProjectSASUrl(Guid id, Guid? imageId = null, string mimeType = null, TimeSpan? timeout = null)
+        public async Task<Result<string>> GetWorkspaceSASUrl(Guid id, Guid? imageId = null, string mimeType = null, TimeSpan? timeout = null)
         {
             try
             {
                 NameValueCollection query = new NameValueCollection();
-                query["projectid"] = id.ToString();
+                query["workspaceid"] = id.ToString();
                 if (imageId != null)
                 {
                     query["imageid"] = imageId.ToString();

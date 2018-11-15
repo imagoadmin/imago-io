@@ -34,19 +34,19 @@
             this.label2 = new System.Windows.Forms.Label();
             this.txtPassword = new System.Windows.Forms.TextBox();
             this.panelDisplay = new System.Windows.Forms.Panel();
-            this.lstDataEntity = new System.Windows.Forms.ComboBox();
+            this.lstCollections = new System.Windows.Forms.ComboBox();
             this.butDisplay = new System.Windows.Forms.Button();
             this.picDisplay = new System.Windows.Forms.PictureBox();
-            this.lstDataItems = new System.Windows.Forms.ComboBox();
+            this.lstImageries = new System.Windows.Forms.ComboBox();
             this.label8 = new System.Windows.Forms.Label();
-            this.lstImageryTypes = new System.Windows.Forms.ComboBox();
+            this.lstImageTypes = new System.Windows.Forms.ComboBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.lstDataSeriesTypes = new System.Windows.Forms.ComboBox();
+            this.lstImageryTypes = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.lstDatasets = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
-            this.lstProjects = new System.Windows.Forms.ComboBox();
+            this.lstWorkspaces = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.butConnect = new System.Windows.Forms.Button();
             this.showProgress = new System.Windows.Forms.ProgressBar();
@@ -97,19 +97,19 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelDisplay.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panelDisplay.Controls.Add(this.lstDataEntity);
+            this.panelDisplay.Controls.Add(this.lstCollections);
             this.panelDisplay.Controls.Add(this.butDisplay);
             this.panelDisplay.Controls.Add(this.picDisplay);
-            this.panelDisplay.Controls.Add(this.lstDataItems);
+            this.panelDisplay.Controls.Add(this.lstImageries);
             this.panelDisplay.Controls.Add(this.label8);
-            this.panelDisplay.Controls.Add(this.lstImageryTypes);
+            this.panelDisplay.Controls.Add(this.lstImageTypes);
             this.panelDisplay.Controls.Add(this.label7);
-            this.panelDisplay.Controls.Add(this.lstDataSeriesTypes);
+            this.panelDisplay.Controls.Add(this.lstImageryTypes);
             this.panelDisplay.Controls.Add(this.label6);
             this.panelDisplay.Controls.Add(this.label5);
             this.panelDisplay.Controls.Add(this.lstDatasets);
             this.panelDisplay.Controls.Add(this.label4);
-            this.panelDisplay.Controls.Add(this.lstProjects);
+            this.panelDisplay.Controls.Add(this.lstWorkspaces);
             this.panelDisplay.Controls.Add(this.label3);
             this.panelDisplay.Location = new System.Drawing.Point(16, 80);
             this.panelDisplay.Name = "panelDisplay";
@@ -118,13 +118,13 @@
             // 
             // lstDataEntity
             // 
-            this.lstDataEntity.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.lstDataEntity.FormattingEnabled = true;
-            this.lstDataEntity.Location = new System.Drawing.Point(114, 149);
-            this.lstDataEntity.Name = "lstDataEntity";
-            this.lstDataEntity.Size = new System.Drawing.Size(153, 21);
-            this.lstDataEntity.TabIndex = 8;
-            this.lstDataEntity.SelectedValueChanged += new System.EventHandler(this.lstDataEntity_SelectedValueChanged);
+            this.lstCollections.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.lstCollections.FormattingEnabled = true;
+            this.lstCollections.Location = new System.Drawing.Point(114, 149);
+            this.lstCollections.Name = "lstDataEntity";
+            this.lstCollections.Size = new System.Drawing.Size(153, 21);
+            this.lstCollections.TabIndex = 8;
+            this.lstCollections.SelectedValueChanged += new System.EventHandler(this.lstCollections_SelectedValueChanged);
             // 
             // butDisplay
             // 
@@ -150,12 +150,12 @@
             // 
             // lstDataItems
             // 
-            this.lstDataItems.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.lstDataItems.FormattingEnabled = true;
-            this.lstDataItems.Location = new System.Drawing.Point(114, 176);
-            this.lstDataItems.Name = "lstDataItems";
-            this.lstDataItems.Size = new System.Drawing.Size(153, 21);
-            this.lstDataItems.TabIndex = 9;
+            this.lstImageries.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.lstImageries.FormattingEnabled = true;
+            this.lstImageries.Location = new System.Drawing.Point(114, 176);
+            this.lstImageries.Name = "lstImageries";
+            this.lstImageries.Size = new System.Drawing.Size(153, 21);
+            this.lstImageries.TabIndex = 9;
             // 
             // label8
             // 
@@ -164,16 +164,16 @@
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(58, 13);
             this.label8.TabIndex = 12;
-            this.label8.Text = "Data Items";
+            this.label8.Text = "Imagery";
             // 
             // lstImageryTypes
             // 
-            this.lstImageryTypes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.lstImageryTypes.FormattingEnabled = true;
-            this.lstImageryTypes.Location = new System.Drawing.Point(114, 94);
-            this.lstImageryTypes.Name = "lstImageryTypes";
-            this.lstImageryTypes.Size = new System.Drawing.Size(153, 21);
-            this.lstImageryTypes.TabIndex = 7;
+            this.lstImageTypes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.lstImageTypes.FormattingEnabled = true;
+            this.lstImageTypes.Location = new System.Drawing.Point(114, 94);
+            this.lstImageTypes.Name = "lstImageTypes";
+            this.lstImageTypes.Size = new System.Drawing.Size(153, 21);
+            this.lstImageTypes.TabIndex = 7;
             // 
             // label7
             // 
@@ -182,17 +182,17 @@
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(71, 13);
             this.label7.TabIndex = 9;
-            this.label7.Text = "Imagery Type";
+            this.label7.Text = "Image Type";
             // 
             // lstDataSeriesTypes
             // 
-            this.lstDataSeriesTypes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.lstDataSeriesTypes.FormattingEnabled = true;
-            this.lstDataSeriesTypes.Location = new System.Drawing.Point(114, 67);
-            this.lstDataSeriesTypes.Name = "lstDataSeriesTypes";
-            this.lstDataSeriesTypes.Size = new System.Drawing.Size(153, 21);
-            this.lstDataSeriesTypes.TabIndex = 6;
-            this.lstDataSeriesTypes.SelectedValueChanged += new System.EventHandler(this.lstDataSeriesTypes_SelectedValueChanged);
+            this.lstImageryTypes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.lstImageryTypes.FormattingEnabled = true;
+            this.lstImageryTypes.Location = new System.Drawing.Point(114, 67);
+            this.lstImageryTypes.Name = "lstImageryTypes";
+            this.lstImageryTypes.Size = new System.Drawing.Size(153, 21);
+            this.lstImageryTypes.TabIndex = 6;
+            this.lstImageryTypes.SelectedValueChanged += new System.EventHandler(this.lstDataSeriesTypes_SelectedValueChanged);
             // 
             // label6
             // 
@@ -201,7 +201,7 @@
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(89, 13);
             this.label6.TabIndex = 7;
-            this.label6.Text = "Data Series Type";
+            this.label6.Text = "Imagery Type";
             // 
             // label5
             // 
@@ -210,7 +210,7 @@
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(59, 13);
             this.label5.TabIndex = 5;
-            this.label5.Text = "Data Entity";
+            this.label5.Text = "Collection";
             // 
             // lstDatasets
             // 
@@ -233,13 +233,13 @@
             // 
             // lstProjects
             // 
-            this.lstProjects.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.lstProjects.FormattingEnabled = true;
-            this.lstProjects.Location = new System.Drawing.Point(114, 13);
-            this.lstProjects.Name = "lstProjects";
-            this.lstProjects.Size = new System.Drawing.Size(153, 21);
-            this.lstProjects.TabIndex = 4;
-            this.lstProjects.SelectedValueChanged += new System.EventHandler(this.lstProjects_SelectedValueChanged);
+            this.lstWorkspaces.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.lstWorkspaces.FormattingEnabled = true;
+            this.lstWorkspaces.Location = new System.Drawing.Point(114, 13);
+            this.lstWorkspaces.Name = "lstWorkspaces";
+            this.lstWorkspaces.Size = new System.Drawing.Size(153, 21);
+            this.lstWorkspaces.TabIndex = 4;
+            this.lstWorkspaces.SelectedValueChanged += new System.EventHandler(this.lstWorkspaces_SelectedValueChanged);
             // 
             // label3
             // 
@@ -248,7 +248,7 @@
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(40, 13);
             this.label3.TabIndex = 1;
-            this.label3.Text = "Project";
+            this.label3.Text = "Workspace";
             // 
             // butConnect
             // 
@@ -314,21 +314,21 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox txtPassword;
         private System.Windows.Forms.Panel panelDisplay;
-        private System.Windows.Forms.ComboBox lstDataItems;
+        private System.Windows.Forms.ComboBox lstImageries;
         private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.ComboBox lstImageryTypes;
+        private System.Windows.Forms.ComboBox lstImageTypes;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.ComboBox lstDataSeriesTypes;
+        private System.Windows.Forms.ComboBox lstImageryTypes;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.ComboBox lstDatasets;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.ComboBox lstProjects;
+        private System.Windows.Forms.ComboBox lstWorkspaces;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button butDisplay;
         private System.Windows.Forms.PictureBox picDisplay;
         private System.Windows.Forms.Button butConnect;
-        private System.Windows.Forms.ComboBox lstDataEntity;
+        private System.Windows.Forms.ComboBox lstCollections;
         private System.Windows.Forms.ProgressBar showProgress;
         private System.Windows.Forms.PictureBox pictureBox1;
     }

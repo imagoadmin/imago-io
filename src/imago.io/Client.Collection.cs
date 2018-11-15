@@ -20,20 +20,20 @@ namespace Imago.IO
 {
     public partial class Client
     {
-        public static class DataEntityQueryParametersMatchChoices
+        public static class CollectionQueryParametersMatchChoices
         {
             public const string MatchEqual = "equals";
             public const string MatchLike = "like";
         }
 
-        public class DataEntityQueryParameters
+        public class CollectionQueryParameters
         {
             public string name { get; set; }
             public string match { get; set; }
             public Guid datasetId { get; set; }
         }
 
-        public async Task<Result<List<DataEntity>>> SearchForDataEntity(DataEntityQueryParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
+        public async Task<Result<List<Collection>>> SearchForCollection(CollectionQueryParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
         {
             try
             {
@@ -43,48 +43,48 @@ namespace Imago.IO
                 if (parameters.datasetId != Guid.Empty)
                     query["datasetid"] = parameters.datasetId.ToString();
 
-                return await ClientGet("/dataentity", query, ct, timeout, (response, body) =>
+                return await ClientGet("/collection", query, ct, timeout, (response, body) =>
                 {
                     JObject responseObject = JObject.Parse(body);
 
-                    List<DataEntity> dataEntities = _jsonConverter.Deserialize<List<DataEntity>>(responseObject["dataEntities"].ToString());
+                    List<Collection> collections = _jsonConverter.Deserialize<List<Collection>>(responseObject["collections"].ToString());
 
-                    return dataEntities;
+                    return collections;
                 });
             }
             catch (Exception ex)
             {
                 this.LogTracer.TrackError(ex);
-                return new Result<List<DataEntity>> { Code = ResultCode.failed };
+                return new Result<List<Collection>> { Code = ResultCode.failed };
             }
         }
 
-        public class DataEntityUpdateParameters
+        public class CollectionUpdateParameters
         {
             public Guid datasetId { get; set; }
             public string name { get; set; }
         }
-        public async Task<Result<DataEntity>> AddDataEntity(DataEntityUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
+        public async Task<Result<Collection>> AddCollection(CollectionUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
         {
             try
             {
                 if (parameters.datasetId == Guid.Empty)
-                    return new Result<DataEntity> { Code = ResultCode.failed };
+                    return new Result<Collection> { Code = ResultCode.failed };
 
                 UriBuilder builder = new UriBuilder(_apiUrl);
-                builder.Path += "/dataentity";
+                builder.Path += "/collection";
 
                 return await ClientPost(builder, parameters, timeout, ct, (response, body) =>
                 {
-                    DataEntity dataEntity = _jsonConverter.Deserialize<DataEntity>(body);
-                    return dataEntity;
+                    Collection collection = _jsonConverter.Deserialize<Collection>(body);
+                    return collection;
                 });
 
             }
             catch (Exception ex)
             {
                 this.LogTracer.TrackError(ex);
-                return new Result<DataEntity> { Code = ResultCode.failed, Message = ex.Message };
+                return new Result<Collection> { Code = ResultCode.failed, Message = ex.Message };
             }
         }
 

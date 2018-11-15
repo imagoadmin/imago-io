@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace Imago.IO.Classes
 {
-    public class Dataset
+    public class Workspace
     {
         public Guid Id { get; set; } = Guid.Empty;
         public string Name { get; set; }
-        public List<ImageryType> ImageryTypes { get; set; } = new List<ImageryType>();
+        public Boolean Readonly { get; set; }
+        public List<Dataset> Datasets { get; set; } = new List<Dataset>();
     }
 }
