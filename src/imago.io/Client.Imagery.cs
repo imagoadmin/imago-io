@@ -72,8 +72,6 @@ namespace Imago.IO
         public class ImageryUpdateParameters
         {
             public Guid? id { get; set; }
-            public Guid collectionId { get; set; } = Guid.Empty;
-            public Guid imageryTypeId { get; set; } = Guid.Empty;
             public string name { get; set; }
             public double? startDepth { get; set; }
             public double? endDepth { get; set; }
@@ -86,11 +84,12 @@ namespace Imago.IO
         {
             try
             {
-                if ((parameters.collectionId == Guid.Empty || parameters.imageryTypeId == Guid.Empty) && parameters.id == null)
+                if (parameters.id == null || parameters.id == Guid.Empty)
                     return new Result<Imagery> { Code = ResultCode.failed };
 
                 UriBuilder builder = new UriBuilder(_apiUrl);
-                builder.Path += "/imagery";
+                builder.Path += "/imagery/" + parameters.id.ToString();
+                parameters.id = null;
 
                 return await ClientPut(builder, parameters, timeout, ct, (response, body) =>
                 {
