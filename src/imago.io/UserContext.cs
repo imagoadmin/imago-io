@@ -15,6 +15,6 @@ namespace Imago.IO
     /// </summary>
     public class UserContext
     {
-        public List<Project> Projects { get; set; } = new List<Project>();
+        public List<Workspace> Workspaces { get; set; } = new List<Workspace>();
     }
 }

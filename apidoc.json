@@ -1,6 +1,6 @@
 {
   "name": "Imago IO for Developers",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Imago's integration and embedding API.",
   "title": "Imago IO",
   "url" : "https://io.imago.live",
@@ -10,9 +10,9 @@
     "GetSession",
     "DeleteSession",
     "UserContext",
-    "DataEntity",
-    "DataItem",
-    "Imagery"
+    "Collection",
+    "Imagery",
+    "Attributes"
   ],
   "header": {
       "title" : "Imago IO",

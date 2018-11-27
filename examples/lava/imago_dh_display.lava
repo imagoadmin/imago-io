@@ -7,6 +7,7 @@
 # Modifications:
 #
 # 21/11/2017 - Renamed the file and check if imago.defaults exists before trying to read from it.
+# 27/11/2018 - This example uses the deprecated V1 api.
 #
 
 use Lava;
