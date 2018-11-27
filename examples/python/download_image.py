@@ -2,7 +2,7 @@
 # Download Image from Imago
 #
 # Imago Inc
-# September, 2017
+# November, 2018
 #
 
 import requests as req
@@ -10,8 +10,7 @@ from PIL import Image
 import io 
 
 
-#apiEndpoint = 'https://io.imago.live/integrate/1'
-apiEndpoint = 'http://localhost:3000/integrate/1'
+apiEndpoint = 'https://io.imago.live/integrate/2'
 
 def firstOrNone(l):
     if l is None or len(l) != 1:
@@ -43,30 +42,30 @@ if res.status_code != 200:
     print('Unable to get the list of projects and datasets for this demo.')
     exit()
 
-projects = res.json()["projects"]
+workspaces = res.json()["workspaces"]
 
-print("The available projects and datasets are:\n")
-for project in projects:
-    print(project["name"])
-    for dataset in project["datasets"]:
+print("The available workspaces and datasets are:\n")
+for workspace in workspaces:
+    print(workspace["name"])
+    for dataset in workspace["datasets"]:
         print("\t", dataset["name"])
 
 #
-# Find the Imago Demo project
+# Find the Imago Demo workspace
 #
 
-project = firstOrNone([p for p in projects if p["name"] == "Imago Demo"])
-if project is None:
-    print('Unable to find the project Imago Demo.')
+workspace = firstOrNone([p for p in workspaces if p["name"] == "Imago Demo"])
+if workspace is None:
+    print('Unable to find the workspace Imago Demo.')
     exit()
 
-print("Found project: ", project["name"])
+print("Found workspace: ", workspace["name"])
 
 # 
 # Find the Drilling Hard Rock dataset
 #
 
-dataset = firstOrNone([d for d in project["datasets"] if d["name"] == "Drilling Hard Rock"])
+dataset = firstOrNone([d for d in workspace["datasets"] if d["name"] == "Drilling Hard Rock"])
 if dataset is None:
     print('Unable to find the dataset Drilling Hard Rock.')
     exit()
@@ -74,65 +73,65 @@ if dataset is None:
 print("Found dataset: ", dataset["name"])
  
 #
-# Find a data entity called AA222 in Drilling Hard Rock
+# Find a collection called AA222 in Drilling Hard Rock
 #
 
-res = req.get(apiEndpoint + "/dataentity", params={ "name" : "AA222", "datasetid" : dataset["id"] }, headers=apiHeaders)
+res = req.get(apiEndpoint + "/collection", params={ "name" : "AA222", "datasetid" : dataset["id"] }, headers=apiHeaders)
 if res.status_code != 200:
-    print('Unable to find the data entity called AA222.')
+    print('Unable to find the collection called AA222.')
     exit()
 
-dataEntity = firstOrNone(res.json()["dataEntities"])
-if dataEntity is None:
-    print('Unable to find the data entity called AA222.')
+collection = firstOrNone(res.json()["collections"])
+if collection is None:
+    print('Unable to find the collection called AA222.')
     exit()
     
-print("Found data entity: ", dataEntity["name"])
+print("Found collection: ", collection["name"])
 
 #
 # Find Core Boxes data series type
 #
 
-dataSeriesType = firstOrNone([d for d in dataset["dataSeriesTypes"] if d["name"] == "Core Boxes"])
-if dataSeriesType is None:
+imageryType = firstOrNone([d for d in dataset["imageryTypes"] if d["name"] == "Core Boxes"])
+if imageryType is None:
     print('Unable to find the data series type Core Boxes in the Drilling Hard Rock dataset.')
     exit()
 
-print("Found dataSeriesType: ", dataSeriesType["name"])
+print("Found imagery type: ", imageryType["name"])
 
 #
-# Find data item for the interval 0-4.6 in the data series Core Boxes for data entity AA222
+# Find imagery for the interval 0-4.6 in the data series Core Boxes for data entity AA222
 #
 
-res = req.get(apiEndpoint + "/dataitem", params={ "dataentityid" : dataEntity["id"], "dataseriestypeid" : dataSeriesType["id"], "startdepth" : "0.0", "enddepth" : "4.6" }, headers=apiHeaders)
+res = req.get(apiEndpoint + "/imagery", params={ "collectionid" : collection["id"], "imagerytypeid" : imageryType["id"], "startdepth" : "0.0", "enddepth" : "4.6" }, headers=apiHeaders)
 if res.status_code != 200:
     print('Unable to find the data item for interval 0-4.6.')
     exit()
 
-dataItem = firstOrNone(res.json()["dataItems"])
-if dataItem is None:
-    print('Unable to find the data item for interval 0-4.6.')
+imagery = firstOrNone(res.json()["imageries"])
+if imagery is None:
+    print('Unable to find the imagery for interval 0-4.6.')
     exit()
     
-print("Found data item: ", dataItem["startDepth"], dataItem["endDepth"])
+print("Found imagery: ", imagery["startDepth"], imagery["endDepth"])
 
 #
-# Find the Dry imagery type in the data item at 0-4.6
+# Find the Dry image type in the imagery at 0-4.6
 #
 
-imageryType = firstOrNone([d for d in dataSeriesType["imageryTypes"] if d["name"] == "Dry"])
-if imageryType is None:
-    print('Unable to find the imagery type Dry.')
+imageType = firstOrNone([d for d in imageryType["imageTypes"] if d["name"] == "Dry"])
+if imageType is None:
+    print('Unable to find the image type Dry.')
     exit()
 
-print("Found imagery type ", imageryType["name"])
+print("Found image type ", imageType["name"])
 
 #
 # Download an image of the core tray
 #
 
 print("Downloading image ...")
-res = req.get(apiEndpoint + "/imagery", params={ "dataitemid" : dataItem["id"], "imagerytypeid" : imageryType["id"] }, headers=apiHeaders)
+res = req.get(apiEndpoint + "/image", params={ "imageryid" : imagery["id"], "imagetypeid" : imageType["id"] }, headers=apiHeaders)
 if res.status_code != 200:
     print('Unable to find the download the core tray image.')
     exit()
