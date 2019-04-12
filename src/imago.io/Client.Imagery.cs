@@ -59,6 +59,8 @@ namespace Imago.IO
 
                 return await ClientGet("/imagery", query, ct, timeout, (response, body) =>
                 {
+                    this.LogHttpResponse(response);
+
                     JObject responseObject = JObject.Parse(body);
                     return _jsonConverter.Deserialize<List<Imagery>>(responseObject["imageries"].ToString());
                 });
@@ -93,6 +95,7 @@ namespace Imago.IO
 
                 return await ClientPut(builder, parameters, timeout, ct, (response, body) =>
                 {
+                    this.LogHttpResponse(response);
                     return _jsonConverter.Deserialize<Imagery>(body);
                 });
             }

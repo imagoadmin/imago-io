@@ -35,7 +35,16 @@ namespace Imago.IO
         private HttpResponseMessage _lastResponse;
         private string _lastResponseBody;
 
-        public IEventLogger LogTracer => IO.EventLogger.Default;
+        public IEventLogger LogTracer { get; private set; } = IO.EventLogger.Default;
+
+        public Client()
+        {
+            this.LogTracer = IO.EventLogger.Default;
+        }
+        public Client(IEventLogger logger)
+        {
+            this.LogTracer = (logger == null ? IO.EventLogger.Default : logger);
+        }
 
         public string UserName
         {
@@ -102,6 +111,7 @@ namespace Imago.IO
                 var signindata = new { username = credentials.UserName, password = credentials.Password, product = product };
                 string body = _jsonConverter.Serialize(signindata, _jsonSettings);
                 HttpResponseMessage response = await client.PutAsync(signInURI, new StringContent(body, Encoding.UTF8, "application/json")).ConfigureAwait(false);
+                this.LogHttpResponse(response);
 
                 _lastResponse = response;
 
@@ -162,6 +172,8 @@ namespace Imago.IO
             using (HttpClient client = GetClient(timeout))
             {
                 HttpResponseMessage response = await client.GetAsync(builder.ToString(), ct);
+                this.LogHttpResponse(response);
+
                 _lastResponse = response;
                 string body = await response.Content.ReadAsStringAsync();
                 _lastResponseBody = body;
@@ -183,6 +195,8 @@ namespace Imago.IO
             using (HttpClient client = GetClient(timeout))
             {
                 HttpResponseMessage response = await client.PostAsync(builder.ToString(), new StringContent(body, Encoding.UTF8, "application/json"), ct).ConfigureAwait(false);
+                this.LogHttpResponse(response);
+
                 _lastResponse = response;
 
                 body = await response.Content.ReadAsStringAsync();
@@ -203,6 +217,7 @@ namespace Imago.IO
             using (HttpClient client = GetClient(timeout))
             {
                 HttpResponseMessage response = await client.PutAsync(builder.ToString(), new StringContent(body, Encoding.UTF8, "application/json"), ct).ConfigureAwait(false);
+                this.LogHttpResponse(response);
                 _lastResponse = response;
 
                 body = await response.Content.ReadAsStringAsync();
@@ -226,7 +241,10 @@ namespace Imago.IO
                         return false;
 
                     HttpResponseMessage result = await client.GetAsync(_apiUrl + "/session").ConfigureAwait(false);
+                    this.LogHttpResponse(result);
                     _lastResponse = result;
+
+                    this.LogHttpResponse(result);
 
                     _lastResponseBody = null;
                     if (result.StatusCode != HttpStatusCode.OK)
@@ -252,6 +270,7 @@ namespace Imago.IO
                         return false;
 
                     HttpResponseMessage result = await client.DeleteAsync(_apiUrl + "/signout").ConfigureAwait(false);
+                    this.LogHttpResponse(result);
                     _lastResponse = result;
                     _apiToken = null;
 
@@ -268,6 +287,16 @@ namespace Imago.IO
             finally
             {
             }
+        }
+
+        public void LogHttpResponse(HttpResponseMessage response)
+        {
+            string request = response.RequestMessage.Method.ToString() + ":" + response.RequestMessage.RequestUri.ToString();
+            this.LogTracer.TrackEvent(request, new Dictionary<string, string>()
+            {
+                { "Status Code", response.StatusCode.ToString() },
+                { "Message", response.ToString() },
+            });
         }
 
         private string BuildQueryString(NameValueCollection nvc)

@@ -45,6 +45,8 @@ namespace Imago.IO
 
                 return await ClientGet("/collection", query, ct, timeout, (response, body) =>
                 {
+                    this.LogHttpResponse(response);
+
                     JObject responseObject = JObject.Parse(body);
 
                     List<Collection> collections = _jsonConverter.Deserialize<List<Collection>>(responseObject["collections"].ToString());
@@ -76,6 +78,8 @@ namespace Imago.IO
 
                 return await ClientPost(builder, parameters, timeout, ct, (response, body) =>
                 {
+                    this.LogHttpResponse(response);
+
                     Collection collection = _jsonConverter.Deserialize<Collection>(body);
                     return collection;
                 });

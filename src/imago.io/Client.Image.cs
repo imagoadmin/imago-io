@@ -51,6 +51,7 @@ namespace Imago.IO
                 using (HttpClient client = GetClient(timeout))
                 {
                     HttpResponseMessage response = await client.GetAsync(builder.ToString(), ct).ConfigureAwait(false);
+                    this.LogHttpResponse(response);
                     _lastResponse = response;
 
 
@@ -163,6 +164,7 @@ namespace Imago.IO
                 using (HttpClient client = GetClient(timeout))
                 {
                     HttpResponseMessage response = await client.PostAsync(builder.ToString(), content, ct).ConfigureAwait(false);
+                    this.LogHttpResponse(response);
                     _lastResponse = response;
                     string body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     _lastResponseBody = body;
