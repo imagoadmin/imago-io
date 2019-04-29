@@ -6,7 +6,7 @@
   "url" : "https://io.imago.live",
   "order": [
     "Session",
-    "PutSession",
+    "PostSession",
     "GetSession",
     "DeleteSession",
     "UserContext",

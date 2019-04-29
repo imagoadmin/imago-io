@@ -1111,6 +1111,91 @@
     "groupTitle": "Session"
   },
   {
+    "type": "post",
+    "url": "/integrate/2/session",
+    "title": "Sign into Imago",
+    "name": "PostSession",
+    "group": "Session",
+    "description": "<p>Signs into Imago using a username and password and creates an active session.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "username",
+            "description": "<p>User's account name.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "password",
+            "description": "<p>User's password.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request Body:",
+          "content": "{\n    \"username\" : \"my_user_name\",\n    \"password\" : \"my_password\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Guid",
+            "optional": false,
+            "field": "uid",
+            "description": "<p>User's identifier.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Guid",
+            "optional": false,
+            "field": "apiToken",
+            "description": "<p>Imago authorisation token.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n    \"uid\" : \"23c6727c-a5a6-484b-ac33-9812b9878f0a\",\n    \"apiToken\" : \"b4ecb7d7-b8bb-460f-9506-134df358f471\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "401": [
+          {
+            "group": "401",
+            "optional": false,
+            "field": "NotAuthorised",
+            "description": "<p>Not authorised to sign in with the supplied credentials.</p>"
+          }
+        ],
+        "404": [
+          {
+            "group": "404",
+            "optional": false,
+            "field": "ErrorDuringRequest",
+            "description": "<p>Internal error occurred during the request.</p>"
+          }
+        ]
+      }
+    },
+    "version": "2.0.0",
+    "filename": "../imago-agent/api/routes/io/2/definition.js",
+    "groupTitle": "Session"
+  },
+  {
     "type": "get",
     "url": "/integrate/2/context",
     "title": "Get the user's context",
