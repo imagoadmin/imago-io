@@ -9,7 +9,7 @@ define({ "api": [
     "examples": [
       {
         "title": "Example Usage (requires the authorisation token header):",
-        "content": "curl -O  http://io.imago.live/integrate/2/attributes?id=e1865861-0d53-4d49-a554-af79dae9aa81&type=image",
+        "content": "curl -O  https://io.imago.live/integrate/2/attributes?id=e1865861-0d53-4d49-a554-af79dae9aa81&type=image",
         "type": "curl"
       }
     ],
@@ -133,7 +133,7 @@ define({ "api": [
     "examples": [
       {
         "title": "Example Usage (requires the authorisation token header):",
-        "content": "curl -H \"Content-Type: application/json\" -X POST -d '{\"name\":\"DH001\",\"place\":\"lower mountain top\"}'   http://io.imago.live/integrate/2/attributes?id=e1865861-0d53-4d49-a554-af79dae9aa81&group=custom",
+        "content": "curl -H \"Content-Type: application/json\" -X POST -d '{\"name\":\"DH001\",\"place\":\"lower mountain top\"}'   https://io.imago.live/integrate/2/attributes?id=e1865861-0d53-4d49-a554-af79dae9aa81&group=custom",
         "type": "curl"
       }
     ],
@@ -209,7 +209,7 @@ define({ "api": [
     "examples": [
       {
         "title": "Example Usage (requires the authorisation token header):",
-        "content": "curl -O  http://io.imago.live/integrate/2/collection?name=DH&match=startswith",
+        "content": "curl -O  https://io.imago.live/integrate/2/collection?name=DH&match=startswith",
         "type": "curl"
       }
     ],
@@ -330,11 +330,11 @@ define({ "api": [
     "title": "Create a new collection",
     "name": "PostCollection",
     "group": "Collection",
-    "description": "<p>Adds a new collection to a dataset.</p> <p>If a collection already exists in the dataset then no action is taken.</p>",
+    "description": "<p>Adds a new collection to a dataset.</p> <p>If the new collection already exists in the dataset then no action is taken.</p>",
     "examples": [
       {
         "title": "Example Usage (requires the authorisation token header):",
-        "content": "curl -H \"Content-Type: application/json\" -X POST -d '{\"name\":\"DH001\",\"datasetId\":\"9a08e64f-e6e9-41d8-a47c-044db8a882c4\"}' http://io.imago.live/integrate/2/collection",
+        "content": "curl -H \"Content-Type: application/json\" -X POST -d '{\"name\":\"DH001\",\"datasetId\":\"9a08e64f-e6e9-41d8-a47c-044db8a882c4\"}' https://io.imago.live/integrate/2/collection",
         "type": "curl"
       }
     ],
@@ -437,7 +437,7 @@ define({ "api": [
     "examples": [
       {
         "title": "Example Usage (requires the authorisation token header):",
-        "content": "curl -O  http://io.imago.live/integrate/2/image?imageryid=c2019bd6-34aa-4561-ab2f-8802fa5ff3a9&imagetypeid=f0b6aec1-ce5c-4874-b107-162090623a9b&mimetype=image%2Fjpeg&width=200",
+        "content": "curl -O  https://io.imago.live/integrate/2/image?imageryid=c2019bd6-34aa-4561-ab2f-8802fa5ff3a9&imagetypeid=f0b6aec1-ce5c-4874-b107-162090623a9b&mimetype=image%2Fjpeg&width=200",
         "type": "curl"
       }
     ],
@@ -526,7 +526,7 @@ define({ "api": [
     "examples": [
       {
         "title": "Example Usage (requires the authorisation token header):",
-        "content": "curl -O  http://io.imago.live/integrate/2/imagery?collectionid=d856d001-22bf-4339-8382-9e29532e539b&imagerytypeid=78742fab-4c55-4b57-830d-5ab6b6c1fb09",
+        "content": "curl -O  https://io.imago.live/integrate/2/imagery?collectionid=d856d001-22bf-4339-8382-9e29532e539b&imagerytypeid=78742fab-4c55-4b57-830d-5ab6b6c1fb09",
         "type": "curl"
       }
     ],
@@ -600,6 +600,18 @@ define({ "api": [
             "optional": true,
             "field": "z",
             "description": "<p>Search for imagery with this elevation/Z coordinate.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "allowedValues": [
+              "\"equals\"",
+              "\"includes\""
+            ],
+            "optional": true,
+            "field": "match",
+            "defaultValue": "equals",
+            "description": "<p>Determines how the search pattern matches the start/end depths.</p>"
           },
           {
             "group": "Parameter",
@@ -711,7 +723,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "{\n    \"dataItems\" : [\n        {\n            \"id\" : \"c2019bd6-34aa-4561-ab2f-8802fa5ff3a9\",\n            \"collectionId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"imageryTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\"\n            \"startDepth\" : 0,\n            \"endDepth\" : 10.1,\n            \"images\" : [\n                { imageTypeId: \"f0b6aec1-ce5c-4874-b107-162090623a9b\" }\n            ]\n        },\n        {\n            \"id\" : \"5a199953-52e5-437c-a2d8-aa8785beb45d\",\n            \"collectionId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"imageryTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\",\n            \"startDepth\" : 10.1,\n            \"endDepth\" : 15.2,\n            \"images\" : [\n                { imageTypeId: \"f0b6aec1-ce5c-4874-b107-162090623a9b\" }\n            ]\n        },\n        {\n            \"id\" : \"ca8379b2-261e-4f30-8848-2eb92cfded87\",\n            \"collectionId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"imageryTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\"\n            \"startDepth\" : 15.2,\n            \"endDepth\" : 19.43,\n            \"images\" : [\n                { imageTypeId: \"f0b6aec1-ce5c-4874-b107-162090623a9b\" }\n            ]\n        }\n    ]\n}",
+          "content": "{\n    \"imageries\" : [\n        {\n            \"id\" : \"c2019bd6-34aa-4561-ab2f-8802fa5ff3a9\",\n            \"collectionId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"imageryTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\"\n            \"startDepth\" : 0,\n            \"endDepth\" : 10.1,\n            \"images\" : [\n                { imageTypeId: \"f0b6aec1-ce5c-4874-b107-162090623a9b\" }\n            ]\n        },\n        {\n            \"id\" : \"5a199953-52e5-437c-a2d8-aa8785beb45d\",\n            \"collectionId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"imageryTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\",\n            \"startDepth\" : 10.1,\n            \"endDepth\" : 15.2,\n            \"images\" : [\n                { imageTypeId: \"f0b6aec1-ce5c-4874-b107-162090623a9b\" }\n            ]\n        },\n        {\n            \"id\" : \"ca8379b2-261e-4f30-8848-2eb92cfded87\",\n            \"collectionId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"imageryTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\"\n            \"startDepth\" : 15.2,\n            \"endDepth\" : 19.43,\n            \"images\" : [\n                { imageTypeId: \"f0b6aec1-ce5c-4874-b107-162090623a9b\" }\n            ]\n        }\n    ]\n}",
           "type": "json"
         }
       ]
@@ -742,7 +754,7 @@ define({ "api": [
     "examples": [
       {
         "title": "Example Usage (requires the authorisation token header):",
-        "content": "    curl -i -F filedata=@sample.jpeg -X POST http://io.imago.live/integrate/2/image?imageryid=c2019bd6-34aa-4561-ab2f-8802fa5ff3a9&imagetypeid=f0b6aec1-ce5c-4874-b107-162090623a9b&mimetype=image%2Fjpeg\nor\n    curl -i -F filedata=@sample.jpeg -X POST http://io.imago.live/integrate/2/image?startdepth=10&enddepth=20&imagerytypeid=78742fab-4c55-4b57-830d-5ab6b6c1fb09&imagetypeid=f0b6aec1-ce5c-4874-b107-162090623a9b&mimetype=image%2Fjpeg",
+        "content": "    curl -i -F filedata=@sample.jpeg -X POST https://io.imago.live/integrate/2/image?imageryid=c2019bd6-34aa-4561-ab2f-8802fa5ff3a9&imagetypeid=f0b6aec1-ce5c-4874-b107-162090623a9b&mimetype=image%2Fjpeg\nor\n    curl -i -F filedata=@sample.jpeg -X POST https://io.imago.live/integrate/2/image?startdepth=10&enddepth=20&imagerytypeid=78742fab-4c55-4b57-830d-5ab6b6c1fb09&imagetypeid=f0b6aec1-ce5c-4874-b107-162090623a9b&mimetype=image%2Fjpeg",
         "type": "curl"
       }
     ],
@@ -766,7 +778,7 @@ define({ "api": [
             "type": "Guid",
             "optional": true,
             "field": "imageryid",
-            "description": "<p>Upload direcly against this imager using an ID.</p>"
+            "description": "<p>Upload direcly against this imagery using an ID. Specify the imagery ID or specify the following criteria:</p>"
           },
           {
             "group": "Parameter",
@@ -852,11 +864,25 @@ define({ "api": [
             "group": "Success 200",
             "type": "Guid",
             "optional": false,
-            "field": "id",
-            "description": "<p>New image's identifier.</p>"
+            "field": "imageryId",
+            "description": "<p>New imagery's identifier (related to start/end depth, x/y/z etc..).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Guid",
+            "optional": false,
+            "field": "imageId",
+            "description": "<p>New image's identifier (related to image attached to imagery)</p>"
           }
         ]
-      }
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n    \"imageId\": \"4dba5ebd-264f-4135-8420-1293f61c4e59\",\n    \"imageryId\": \"c2019bd6-34aa-4561-ab2f-8802fa5ff3a9\"\n}",
+          "type": "json"
+        }
+      ]
     },
     "error": {
       "fields": {
@@ -884,7 +910,7 @@ define({ "api": [
     "examples": [
       {
         "title": "Example Usage (requires the authorisation token header):",
-        "content": "curl -H \"Content-Type: application/json\" -X PUT -d '{\"name\":\"Sample 01926AB\"}' http://io.imago.live/integrate/2/imagery/ca8379b2-261e-4f30-8848-2eb92cfded87",
+        "content": "curl -H \"Content-Type: application/json\" -X PUT -d '{\"name\":\"Sample 01926AB\"}' https ://io.imago.live/integrate/2/imagery/ca8379b2-261e-4f30-8848-2eb92cfded87",
         "type": "curl"
       }
     ],
@@ -1085,91 +1111,6 @@ define({ "api": [
     "groupTitle": "Session"
   },
   {
-    "type": "put",
-    "url": "/integrate/2/session",
-    "title": "Sign into Imago",
-    "name": "PutSession",
-    "group": "Session",
-    "description": "<p>Signs into Imago using a username and password and creates an active session.</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "username",
-            "description": "<p>User's account name.</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "password",
-            "description": "<p>User's password.</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Request Body:",
-          "content": "{\n    \"username\" : \"my_user_name\",\n    \"password\" : \"my_password\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "Guid",
-            "optional": false,
-            "field": "uid",
-            "description": "<p>User's identifier.</p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "Guid",
-            "optional": false,
-            "field": "apiToken",
-            "description": "<p>Imago authorisation token.</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "{\n    \"uid\" : \"23c6727c-a5a6-484b-ac33-9812b9878f0a\",\n    \"apiToken\" : \"b4ecb7d7-b8bb-460f-9506-134df358f471\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "error": {
-      "fields": {
-        "401": [
-          {
-            "group": "401",
-            "optional": false,
-            "field": "NotAuthorised",
-            "description": "<p>Not authorised to sign in with the supplied credentials.</p>"
-          }
-        ],
-        "404": [
-          {
-            "group": "404",
-            "optional": false,
-            "field": "ErrorDuringRequest",
-            "description": "<p>Internal error occurred during the request.</p>"
-          }
-        ]
-      }
-    },
-    "version": "2.0.0",
-    "filename": "../imago-agent/api/routes/io/2/definition.js",
-    "groupTitle": "Session"
-  },
-  {
     "type": "get",
     "url": "/integrate/2/context",
     "title": "Get the user's context",
@@ -1179,7 +1120,7 @@ define({ "api": [
     "examples": [
       {
         "title": "Example Usage (requires the authorisation token header):",
-        "content": "curl -O  http://io.imago.live/integrate/2/context",
+        "content": "curl -O  https://io.imago.live/integrate/2/context",
         "type": "curl"
       }
     ],

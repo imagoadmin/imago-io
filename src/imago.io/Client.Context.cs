@@ -28,6 +28,7 @@ namespace Imago.IO
             {
                 return await ClientGet("/context", new NameValueCollection(), new CancellationToken(false), timeout, (response, body) =>
                 {
+                    this.LogHttpResponse(response);
                     JObject context = JObject.Parse(body);
 
                     List<Workspace> workspaces = JsonConvert.DeserializeObject<List<Workspace>>(context["workspaces"].ToString(), _jsonSettings);
@@ -56,6 +57,7 @@ namespace Imago.IO
 
                 return await ClientGet("/access", query, new CancellationToken(false), timeout, (response, body) =>
                 {
+                    this.LogHttpResponse(response);
                     JObject responseObject = JObject.Parse(body);
 
                     var url = responseObject["url"].ToString();
