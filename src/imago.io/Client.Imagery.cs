@@ -31,6 +31,7 @@ namespace Imago.IO
             public double? x { get; set; }
             public double? y { get; set; }
             public double? z { get; set; }
+            public int? updatedSinceDays { get; set; }
         }
 
         public async Task<Result<List<Imagery>>> SearchForImagery(ImageryQueryParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
@@ -56,9 +57,13 @@ namespace Imago.IO
                     query["y"] = parameters.y.ToString();
                 if (parameters.z != null)
                     query["z"] = parameters.z.ToString();
+                if (parameters.updatedSinceDays != null && parameters.updatedSinceDays > 0)
+                    query["updatedsince"] = parameters.updatedSinceDays.ToString();
 
                 return await ClientGet("/imagery", query, ct, timeout, (response, body) =>
                 {
+                    this.LogHttpResponse(response);
+
                     JObject responseObject = JObject.Parse(body);
                     return _jsonConverter.Deserialize<List<Imagery>>(responseObject["imageries"].ToString());
                 });
@@ -93,6 +98,7 @@ namespace Imago.IO
 
                 return await ClientPut(builder, parameters, timeout, ct, (response, body) =>
                 {
+                    this.LogHttpResponse(response);
                     return _jsonConverter.Deserialize<Imagery>(body);
                 });
             }

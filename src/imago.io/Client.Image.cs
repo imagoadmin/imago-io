@@ -51,6 +51,7 @@ namespace Imago.IO
                 using (HttpClient client = GetClient(timeout))
                 {
                     HttpResponseMessage response = await client.GetAsync(builder.ToString(), ct).ConfigureAwait(false);
+                    this.LogHttpResponse(response);
                     _lastResponse = response;
 
 
@@ -133,13 +134,14 @@ namespace Imago.IO
                     return new Result<ImageUpdateResult> { Code = ResultCode.failed };
 
                 NameValueCollection query = new NameValueCollection();
-                query["imageryid"] = parameters.imageryId.ToString();
+
+                if (parameters.imageryId.HasValue) query["imageryid"] = parameters.imageryId.ToString();
                 query["collectionid"] = parameters.collectionId?.ToString();
                 query["imagerytypeid"] = parameters.imageryTypeId?.ToString();
                 query["imagetypeid"] = parameters.imageTypeId.ToString();
                 query["mimetype"] = parameters.mimeType;
 
-                query["name"] = parameters.name.ToString();
+                query["name"] = parameters.name?.ToString();
                 query["startdepth"] = parameters.startDepth?.ToString();
                 query["enddepth"] = parameters.endDepth?.ToString();
                 query["x"] = parameters.x?.ToString();
@@ -163,6 +165,7 @@ namespace Imago.IO
                 using (HttpClient client = GetClient(timeout))
                 {
                     HttpResponseMessage response = await client.PostAsync(builder.ToString(), content, ct).ConfigureAwait(false);
+                    this.LogHttpResponse(response);
                     _lastResponse = response;
                     string body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     _lastResponseBody = body;
