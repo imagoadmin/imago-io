@@ -24,7 +24,7 @@ namespace Imago.IO
         public class ImageryQueryParameters
         {
             public Guid collectionId { get; set; }
-            public Guid imageryTypeId { get; set; }
+            public Guid? imageryTypeId { get; set; }
             public string name { get; set; }
             public double? startDepth { get; set; }
             public double? endDepth { get; set; }
@@ -44,7 +44,8 @@ namespace Imago.IO
                 NameValueCollection query = new NameValueCollection();
 
                 query["collectionid"] = parameters.collectionId.ToString();
-                query["imagerytypeid"] = parameters.imageryTypeId.ToString();
+                if  (parameters.imageryTypeId != null)
+                    query["imagerytypeid"] = parameters.imageryTypeId.ToString();
                 if (!String.IsNullOrWhiteSpace(parameters.name))
                     query["name"] = parameters.name;
                 if (parameters.startDepth != null)

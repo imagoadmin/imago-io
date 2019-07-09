@@ -15,7 +15,7 @@ namespace Imago.IO.Classes
             public string uploadedBy { get; set; }
             public int? width { get; set; }
             public int? height { get; set; }
-            public int? fileSize { get; set; }
+            public Int64? fileSize { get; set; }
         }
 
         public Guid Id { get; set; } = Guid.Empty;
