@@ -9,7 +9,7 @@
     "examples": [
       {
         "title": "Example Usage (requires the authorisation token header):",
-        "content": "curl -O  https://io.imago.live/integrate/2/attributes?id=e1865861-0d53-4d49-a554-af79dae9aa81&type=image",
+        "content": "curl -O  https://io.imago.live/integrate/2/attributes?id=c2019bd6-34aa-4561-ab2f-8802fa5ff3a9&type=imagery&group=custom",
         "type": "curl"
       }
     ],
@@ -33,36 +33,38 @@
             "type": "Guid",
             "optional": false,
             "field": "id",
-            "description": "<p>Data identifier.</p>"
+            "description": "<p>If the group is &quot;custom&quot; then it must be the ID of the required imagery. If group is &quot;properties&quot; then it must be the ID for required image.</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
             "allowedValues": [
+              "\"imagery\"",
               "\"image\""
             ],
             "optional": true,
             "field": "type",
             "defaultValue": "image",
-            "description": "<p>Type of data to search for.</p>"
+            "description": "<p>Describes where the attributes should be stored. Only imagery or image attributes are supported.</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
             "allowedValues": [
-              "\"properties\""
+              "\"properties\"",
+              "\"custom\""
             ],
             "optional": true,
             "field": "group",
             "defaultValue": "properties",
-            "description": "<p>Specifies which group of attributes to return for the data.</p>"
+            "description": "<p>Specifies which group of attributes to return.</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Query String:",
-          "content": "?id=e1865861-0d53-4d49-a554-af79dae9aa81&type=image",
+          "content": "?id=c2019bd6-34aa-4561-ab2f-8802fa5ff3a9&group=custom&type=imagery",
           "type": "json"
         }
       ]
@@ -96,7 +98,7 @@
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "{\n    \"id\" : \"108501d0-4d6c-475c-8ad2-96bb983b1fc5\",\n    \"group\" : \"properties\",\n    \"attributes\" : {\n        \"mimeType\" : \"image/jpeg\",\n        \"fileName\" : \"DH001_coretray_wet.jpeg\",\n        \"fileExt\" : \".jpeg\",\n        \"fileSize\" : \"16253742783\"\n    }\n}",
+          "content": "{\n    \"id\" : \"c2019bd6-34aa-4561-ab2f-8802fa5ff3a9\",\n    \"type\" : \"imagery\",\n    \"group\" : \"custom\",\n    \"attributes\" : {\n        \"name\" : \"andesite\",\n        \"colour\" : \"gray\"\n    }\n}",
           "type": "json"
         }
       ]
@@ -133,7 +135,7 @@
     "examples": [
       {
         "title": "Example Usage (requires the authorisation token header):",
-        "content": "curl -H \"Content-Type: application/json\" -X POST -d '{\"name\":\"DH001\",\"place\":\"lower mountain top\"}'   https://io.imago.live/integrate/2/attributes?id=e1865861-0d53-4d49-a554-af79dae9aa81&group=custom",
+        "content": "curl -H \"Content-Type: application/json\" -X POST -d '{\"name\":\"DH001\",\"place\":\"lower mountain top\"}'   https://io.imago.live/integrate/2/attributes?id=e1865861-0d53-4d49-a554-af79dae9aa81&group=custom&type=custom",
         "type": "curl"
       }
     ],
@@ -157,7 +159,18 @@
             "type": "Guid",
             "optional": false,
             "field": "id",
-            "description": "<p>Data identifier.</p>"
+            "description": "<p>Data identifier. Only an Imagery ID is permitted at this time.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "allowedValues": [
+              "\"imagery\""
+            ],
+            "optional": true,
+            "field": "type",
+            "defaultValue": "imagery",
+            "description": "<p>Describes where the attributes should be stored. Only imagery attributes are supported.</p>"
           },
           {
             "group": "Parameter",
@@ -165,14 +178,55 @@
             "optional": true,
             "field": "group",
             "defaultValue": "custom",
-            "description": "<p>Specifies which group of attributes to assign for the data.</p>"
+            "description": "<p>Specifies which group of attributes to assign. Only custom imagery attributes are permitted currently.</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Query String:",
-          "content": "?id=e1865861-0d53-4d49-a554-af79dae9aa81&type=image&group=custom",
+          "content": "?id=c2019bd6-34aa-4561-ab2f-8802fa5ff3a9&group=custom&type=imagery",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Guid",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Data identifier.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "type",
+            "description": "<p>Type of data</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "group",
+            "description": "<p>Name of group of attributes.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "attributes",
+            "description": "<p>Attributes associated with the specified group. The fields depend on the attributes group and its definition.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n    \"id\" : \"c2019bd6-34aa-4561-ab2f-8802fa5ff3a9\",\n    \"type\" : \"imagery\",\n    \"group\" : \"custom\",\n    \"attributes\" : {\n        \"name\" : \"andesite\",\n        \"colour\" : \"gray\"\n    }\n}",
           "type": "json"
         }
       ]
@@ -297,13 +351,20 @@
             "optional": false,
             "field": "collections.datasetId",
             "description": "<p>Identifier of dataset that the collection belongs to.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Guid",
+            "optional": false,
+            "field": "collections.createdOn",
+            "description": "<p>Date/time when the collection was created.</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "{\n    \"collections\" : [\n        {\n            \"id\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"name\" : \"DH001\",\n            \"datasetId\" : \"9a08e64f-e6e9-41d8-a47c-044db8a882c4\"\n        },\n        {\n            \"id\" : \"eecd8f6c-127f-42ba-9ddc-a56a97c61719\",\n            \"name\" : \"DH003\",\n            \"datasetId\" : \"9a08e64f-e6e9-41d8-a47c-044db8a882c4\"\n        }\n    ]\n}",
+          "content": "{\n    \"collections\" : [\n        {\n            \"id\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"name\" : \"DH001\",\n            \"datasetId\" : \"9a08e64f-e6e9-41d8-a47c-044db8a882c4\"\n            \"createdOn\": \"2019-07-01T23:15:02.753Z\"\n        },\n        {\n            \"id\" : \"eecd8f6c-127f-42ba-9ddc-a56a97c61719\",\n            \"name\" : \"DH003\",\n            \"datasetId\" : \"9a08e64f-e6e9-41d8-a47c-044db8a882c4\",\n            \"createdOn\": \"2019-07-04T01:26:17.753Z\"\n        }\n    ]\n}",
           "type": "json"
         }
       ]
@@ -400,13 +461,20 @@
             "optional": false,
             "field": "datasetId",
             "description": "<p>Identifier of dataset that the collection belongs to.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Guid",
+            "optional": false,
+            "field": "collections.createdOn",
+            "description": "<p>Date/time when the collection was created. *</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "{\n    \"id\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n    \"name\" : \"DH001\",\n    \"datasetId\" : \"9a08e64f-e6e9-41d8-a47c-044db8a882c4\"\n}",
+          "content": "{\n    \"id\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n    \"name\" : \"DH001\",\n    \"datasetId\" : \"9a08e64f-e6e9-41d8-a47c-044db8a882c4\",\n    \"createdOn\": \"2019-07-01T23:15:02.753Z\"\n}",
           "type": "json"
         }
       ]
@@ -620,6 +688,13 @@
             "field": "tol",
             "defaultValue": "0.0",
             "description": "<p>Tolerance used when matching numbers.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": true,
+            "field": "updatedsince",
+            "description": "<p>Only return imagery that has been updated in the last number of specified days.</p>"
           }
         ]
       },
@@ -706,6 +781,13 @@
           },
           {
             "group": "Success 200",
+            "type": "Number",
+            "optional": true,
+            "field": "imageries.attributes",
+            "description": "<p>Custom attributes associated with this imagery.</p>"
+          },
+          {
+            "group": "Success 200",
             "type": "Object[]",
             "optional": false,
             "field": "imageries.images",
@@ -717,13 +799,55 @@
             "optional": true,
             "field": "imageries.images.imageTypeId",
             "description": "<p>Image type available on the imagery.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Guid",
+            "optional": true,
+            "field": "imageries.images.uploadedOn",
+            "description": "<p>Date/time that the image was uploaded.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Guid",
+            "optional": true,
+            "field": "imageries.images.uploadedBy",
+            "description": "<p>User account that uploaded the image.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Guid",
+            "optional": true,
+            "field": "imageries.images.mimeType",
+            "description": "<p>Image's mime type.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Guid",
+            "optional": true,
+            "field": "imageries.images.width",
+            "description": "<p>Image's width in pixels.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Guid",
+            "optional": true,
+            "field": "imageries.images.height",
+            "description": "<p>Image's height in pixels.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Guid",
+            "optional": true,
+            "field": "imageries.images.fileSize",
+            "description": "<p>Size of image file.</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "{\n    \"imageries\" : [\n        {\n            \"id\" : \"c2019bd6-34aa-4561-ab2f-8802fa5ff3a9\",\n            \"collectionId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"imageryTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\"\n            \"startDepth\" : 0,\n            \"endDepth\" : 10.1,\n            \"images\" : [\n                { imageTypeId: \"f0b6aec1-ce5c-4874-b107-162090623a9b\" }\n            ]\n        },\n        {\n            \"id\" : \"5a199953-52e5-437c-a2d8-aa8785beb45d\",\n            \"collectionId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"imageryTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\",\n            \"startDepth\" : 10.1,\n            \"endDepth\" : 15.2,\n            \"images\" : [\n                { imageTypeId: \"f0b6aec1-ce5c-4874-b107-162090623a9b\" }\n            ]\n        },\n        {\n            \"id\" : \"ca8379b2-261e-4f30-8848-2eb92cfded87\",\n            \"collectionId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"imageryTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\"\n            \"startDepth\" : 15.2,\n            \"endDepth\" : 19.43,\n            \"images\" : [\n                { imageTypeId: \"f0b6aec1-ce5c-4874-b107-162090623a9b\" }\n            ]\n        }\n    ]\n}",
+          "content": "{\n    \"imageries\" : [\n        {\n            \"id\" : \"c2019bd6-34aa-4561-ab2f-8802fa5ff3a9\",\n            \"collectionId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"imageryTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\"\n            \"startDepth\" : 0,\n            \"endDepth\" : 10.1,\n            \"attributes\": {\n                \"colour1\" : \"#99A\"\n            },\n            \"images\" : [\n                { \n                    \"imageTypeId\": \"f0b6aec1-ce5c-4874-b107-162090623a9b\",\n                    \"uploadedOn\": \"2019-07-01T23:15:02.753Z\",\n                    \"uploadedBy\": \"jacob\",\n                    \"mimeType\": \"image/jpeg\",\n                    \"width\": 2048,\n                    \"height\": 1920,\n                    \"fileSize\": 127381728\n                }\n            ]\n        },\n        {\n            \"id\" : \"5a199953-52e5-437c-a2d8-aa8785beb45d\",\n            \"collectionId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"imageryTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\",\n            \"startDepth\" : 10.1,\n            \"endDepth\" : 15.2,\n            \"attributes\": {\n                \"colour1\" : \"#253\"\n            },\n            \"images\" : [\n                { \n                    \"imageTypeId\": \"f0b6aec1-ce5c-4874-b107-162090623a9b\",\n                    \"uploadedOn\": \"2019-07-01T23:15:02.753Z\",\n                    \"uploadedBy\": \"jacob\",\n                    \"mimeType\": \"image/jpeg\",\n                    \"width\": 3192,\n                    \"height\": 1920,\n                    \"fileSize\": 20384959\n                }\n            ]\n        },\n        {\n            \"id\" : \"ca8379b2-261e-4f30-8848-2eb92cfded87\",\n            \"collectionId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"imageryTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\"\n            \"startDepth\" : 15.2,\n            \"endDepth\" : 19.43,\n            \"attributes\": {\n                \"colour1\" : \"#EEE\"\n            },\n            \"images\" : [\n                { \n                    \"imageTypeId\": \"f0b6aec1-ce5c-4874-b107-162090623a9b\",\n                    \"uploadedOn\": \"2019-07-01T23:15:02.753Z\",\n                    \"uploadedBy\": \"jacob\",\n                    \"mimeType\": \"image/jpeg\",\n                    \"width\": 2048,\n                    \"height\": 1920,\n                    \"fileSize\": 159281728\n                }\n            ]\n        }\n    ]\n}",
           "type": "json"
         }
       ]
@@ -1082,6 +1206,91 @@
         {
           "title": "Success-Response:",
           "content": "{\n    \"uid\" : \"23c6727c-a5a6-484b-ac33-9812b9878f0a\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "401": [
+          {
+            "group": "401",
+            "optional": false,
+            "field": "NotAuthorised",
+            "description": "<p>Not authorised to sign in with the supplied credentials.</p>"
+          }
+        ],
+        "404": [
+          {
+            "group": "404",
+            "optional": false,
+            "field": "ErrorDuringRequest",
+            "description": "<p>Internal error occurred during the request.</p>"
+          }
+        ]
+      }
+    },
+    "version": "2.0.0",
+    "filename": "../imago-agent/api/routes/io/2/definition.js",
+    "groupTitle": "Session"
+  },
+  {
+    "type": "post",
+    "url": "/integrate/2/session",
+    "title": "Sign into Imago",
+    "name": "PostSession",
+    "group": "Session",
+    "description": "<p>Signs into Imago using a username and password and creates an active session.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "username",
+            "description": "<p>User's account name.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "password",
+            "description": "<p>User's password.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request Body:",
+          "content": "{\n    \"username\" : \"my_user_name\",\n    \"password\" : \"my_password\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Guid",
+            "optional": false,
+            "field": "uid",
+            "description": "<p>User's identifier.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Guid",
+            "optional": false,
+            "field": "apiToken",
+            "description": "<p>Imago authorisation token.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n    \"uid\" : \"23c6727c-a5a6-484b-ac33-9812b9878f0a\",\n    \"apiToken\" : \"b4ecb7d7-b8bb-460f-9506-134df358f471\"\n}",
           "type": "json"
         }
       ]
