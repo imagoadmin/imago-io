@@ -23,7 +23,7 @@ namespace Imago.IO
      
         public class ImageryQueryParameters
         {
-            public Guid workspaceId { get; set; }
+            public Guid? workspaceId { get; set; }
             public Guid? collectionId { get; set; }
             public Guid? imageryTypeId { get; set; }
             public string name { get; set; }
