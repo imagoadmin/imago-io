@@ -33,6 +33,8 @@ namespace Imago.IO
             public double? y { get; set; }
             public double? z { get; set; }
             public int? updatedSinceDays { get; set; }
+            public int? queryOffset { get; set; }
+            public int? queryLimit { get; set; }
         }
 
         public async Task<Result<List<Imagery>>> SearchForImagery(ImageryQueryParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
@@ -62,6 +64,10 @@ namespace Imago.IO
                     query["y"] = parameters.y.ToString();
                 if (parameters.z != null)
                     query["z"] = parameters.z.ToString();
+                if (parameters.queryOffset != null)
+                    query["offset"] = parameters.queryOffset.ToString();
+                if (parameters.queryLimit != null)
+                    query["limit"] = parameters.queryLimit.ToString();
                 if (parameters.updatedSinceDays != null && parameters.updatedSinceDays > 0)
                     query["updatedsince"] = parameters.updatedSinceDays.ToString();
 
