@@ -338,7 +338,7 @@ namespace Imago.IO
                     if (client == null)
                         return false;
 
-                    HttpResponseMessage result = await client.DeleteAsync(_apiUrl + "/signout").ConfigureAwait(false);
+                    HttpResponseMessage result = await client.DeleteAsync(_apiUrl + "/session").ConfigureAwait(false);
                     this.LogHttpResponse(result);
                     _lastResponse = result;
                     _apiToken = null;
