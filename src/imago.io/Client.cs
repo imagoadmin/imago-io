@@ -19,7 +19,7 @@ using Imago.IO.Classes;
 
 namespace Imago.IO
 {
-    public partial class Client
+    public partial class Client : IClient
     {
         public enum Matching { equals, includes, startWith, endWith };
 
