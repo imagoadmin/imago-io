@@ -15,7 +15,7 @@ namespace Imago.IO
         int MaxRetryAttempts { get; set; }
         HttpClient Direct { get; }
         Task<bool> SignIn(Credentials credentials, TimeSpan? timeout = null);
-
+        string APIUrl { get; }
 
         Task<Result<List<Imagery>>> SearchForImagery(ImageryQueryParameters parameters, CancellationToken ct, TimeSpan? timeout = null);
         Task<Result<Imagery>> UpdateImagery(ImageryUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null);
