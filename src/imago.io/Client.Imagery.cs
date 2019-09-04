@@ -23,8 +23,9 @@ namespace Imago.IO
      
         public class ImageryQueryParameters
         {
-            public Guid collectionId { get; set; }
-            public Guid imageryTypeId { get; set; }
+            public Guid? workspaceId { get; set; }
+            public Guid? collectionId { get; set; }
+            public Guid? imageryTypeId { get; set; }
             public string name { get; set; }
             public double? startDepth { get; set; }
             public double? endDepth { get; set; }
@@ -32,6 +33,8 @@ namespace Imago.IO
             public double? y { get; set; }
             public double? z { get; set; }
             public int? updatedSinceDays { get; set; }
+            public int? queryOffset { get; set; }
+            public int? queryLimit { get; set; }
         }
 
         public async Task<Result<List<Imagery>>> SearchForImagery(ImageryQueryParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
@@ -43,8 +46,12 @@ namespace Imago.IO
 
                 NameValueCollection query = new NameValueCollection();
 
-                query["collectionid"] = parameters.collectionId.ToString();
-                query["imagerytypeid"] = parameters.imageryTypeId.ToString();
+                if (parameters.workspaceId != null)
+                    query["workspaceid"] = parameters.workspaceId.ToString();
+                if (parameters.collectionId != null)
+                    query["collectionid"] = parameters.collectionId.ToString();
+                if  (parameters.imageryTypeId != null)
+                    query["imagerytypeid"] = parameters.imageryTypeId.ToString();
                 if (!String.IsNullOrWhiteSpace(parameters.name))
                     query["name"] = parameters.name;
                 if (parameters.startDepth != null)
@@ -57,6 +64,10 @@ namespace Imago.IO
                     query["y"] = parameters.y.ToString();
                 if (parameters.z != null)
                     query["z"] = parameters.z.ToString();
+                if (parameters.queryOffset != null)
+                    query["offset"] = parameters.queryOffset.ToString();
+                if (parameters.queryLimit != null)
+                    query["limit"] = parameters.queryLimit.ToString();
                 if (parameters.updatedSinceDays != null && parameters.updatedSinceDays > 0)
                     query["updatedsince"] = parameters.updatedSinceDays.ToString();
 
