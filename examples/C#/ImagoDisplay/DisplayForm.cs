@@ -45,7 +45,7 @@ namespace ImagoDisplay
             panelDisplay.Visible = false;
             showProgress.Visible = true;
 
-            Credentials credentials = new Credentials { UserName = txtUserName.Text, Password = txtPassword.Text, HostName = "http://localhost:3000" };
+            Credentials credentials = new Credentials { UserName = txtUserName.Text, Password = txtPassword.Text };
 
             connection = new Client();
             bool ok = await connection.SignIn(credentials);
