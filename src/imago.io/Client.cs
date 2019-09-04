@@ -164,7 +164,7 @@ namespace Imago.IO
             return client;
         }
 
-        private Task<Result<T>> ClientGet<T>(string relativePath, NameValueCollection query, CancellationToken ct, TimeSpan? timeout, Func<HttpResponseMessage, string, T> processResponse) where T : class
+        public Task<Result<T>> ClientGet<T>(string relativePath, NameValueCollection query, CancellationToken ct, TimeSpan? timeout, Func<HttpResponseMessage, string, T> processResponse) where T : class
         {
             UriBuilder builder = new UriBuilder(_apiUrl);
             builder.Path += relativePath;
