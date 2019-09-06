@@ -11,6 +11,7 @@ namespace Imago.IO
     public interface IEventLogger
     {
         void TrackError(Exception ex, IDictionary<string, string> properties = null);
+        void TrackError(string err, IDictionary<string, string> properties = null);
         void TrackEvent(string name, IDictionary<string, string> properties = null);
     }
 }
