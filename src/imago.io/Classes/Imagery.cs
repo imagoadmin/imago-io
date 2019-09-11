@@ -30,6 +30,7 @@ namespace Imago.IO.Classes
         public double? EndDepth { get; set; }
 
         public List<Image> Images { get; set; } = new List<Image>();
+        public Dictionary<string, string> Attributes { get; set; } = new Dictionary<string, string>();
 
         public override string ToString()
         {
