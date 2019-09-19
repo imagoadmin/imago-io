@@ -119,5 +119,54 @@ namespace Imago.IO
                 return new Result<Imagery> { Code = ResultCode.failed };
             }
         }
+        public class AttributeUpdateParameters : ImageryQueryParameters
+        {
+            public Dictionary<string, string> attributes { get; set; }
+        }
+        public class BulkAttributeUpdateParameters
+        {
+            public int? id { get; set; }
+            public string type { get; set; }
+            public string group { get; set; }
+            public List<AttributeUpdateParameters> imageries{ get; set; }
+        }
+        public async Task<Result<object>> UpdateBulkImageryAttributes(BulkAttributeUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
+        {
+            try
+            {
+                if (parameters.imageries.Count == 0)
+                    return new Result<object> { Code = ResultCode.ok };
+
+                var query = new NameValueCollection();
+
+                query["id"] = parameters.id.ToString();
+                query["type"] = parameters.type;
+                query["group"] = parameters.group;
+                UriBuilder builder = new UriBuilder(_apiUrl);
+                builder.Path += "/attributes";
+                builder.Query = BuildQueryString(query);
+
+                // Constructing Json body structure
+                /*List<object> entries = new List<object>();
+                foreach(ImageryUpdateParameters param in parameters)
+                {
+                    entries.Add(new { imageryId = param.id,
+                                    attributes = param.attributes
+                    });
+                }
+                var sendbody = new { imageries = entries };*/
+
+                return await ClientPost(builder, parameters, timeout, ct, (response, body) =>
+                {
+                    this.LogHttpResponse(response);
+                    return (object)true;
+                });
+            }
+            catch (Exception ex)
+            {
+                this.LogTracer.TrackError(ex);
+                return new Result<object> { Code = ResultCode.failed };
+            }
+        }
     }
 }
