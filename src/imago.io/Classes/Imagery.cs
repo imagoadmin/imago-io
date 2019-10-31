@@ -11,6 +11,7 @@ namespace Imago.IO.Classes
         public class Image
         {
             public Guid ImageTypeId { get; set; }
+            public string url { get; set; }
             public DateTime? uploadedOn { get; set; }
             public string uploadedBy { get; set; }
             public int? width { get; set; }

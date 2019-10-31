@@ -74,7 +74,6 @@ namespace Imago.IO
                 return await ClientGet("/imagery", query, ct, timeout, (response, body) =>
                 {
                     this.LogHttpResponse(response);
-
                     JObject responseObject = JObject.Parse(body);
                     return _jsonConverter.Deserialize<List<Imagery>>(responseObject["imageries"].ToString());
                 });
