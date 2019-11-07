@@ -201,6 +201,10 @@ namespace Imago.IO
                         }
                     }
                 }
+                catch(OperationCanceledException)
+                {
+                    return new Result<T> { Value = null, Code = ResultCode.failed };
+                }
                 catch (Exception ex)
                 {
                 }
