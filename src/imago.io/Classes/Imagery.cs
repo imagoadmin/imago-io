@@ -1,4 +1,4 @@
-﻿using System;
+﻿ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,6 +30,7 @@ namespace Imago.IO.Classes
         public double? EndDepth { get; set; }
 
         public List<Image> Images { get; set; } = new List<Image>();
+        public List<Feature> Features { get; set; } = new List<Feature>();
 
         public override string ToString()
         {
