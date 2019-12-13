@@ -15,6 +15,7 @@ namespace Imago.IO.Classes
             public int Pen { get; set; }
         }
         public Guid Id { get; set; } = Guid.Empty;
+        public Guid FeatureTypeId { get; set; } = Guid.Empty;
         public Guid ImageTypeId { get; set; } = Guid.Empty;
         public List<Point> Points { get; set; } = new List<Point>();
     }
