@@ -145,16 +145,6 @@ namespace Imago.IO
                 builder.Path += "/attributes";
                 builder.Query = BuildQueryString(query);
 
-                // Constructing Json body structure
-                /*List<object> entries = new List<object>();
-                foreach(ImageryUpdateParameters param in parameters)
-                {
-                    entries.Add(new { imageryId = param.id,
-                                    attributes = param.attributes
-                    });
-                }
-                var sendbody = new { imageries = entries };*/
-
                 return await ClientPost(builder, parameters, timeout, ct, (response, body) =>
                 {
                     this.LogHttpResponse(response);
