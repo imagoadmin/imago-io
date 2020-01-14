@@ -19,7 +19,7 @@ using Imago.IO.Classes;
 
 namespace Imago.IO
 {
-    public partial class Client
+    public partial class Client : IClient
     {
         public enum Matching { equals, includes, startWith, endWith };
 
@@ -200,6 +200,10 @@ namespace Imago.IO
                             return new Result<T> { Value = result, Code = result != null ? ResultCode.ok : ResultCode.failed };
                         }
                     }
+                }
+                catch(OperationCanceledException)
+                {
+                    return new Result<T> { Value = null, Code = ResultCode.failed };
                 }
                 catch (Exception ex)
                 {

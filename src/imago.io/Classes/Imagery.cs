@@ -11,6 +11,7 @@ namespace Imago.IO.Classes
         public class Image
         {
             public Guid ImageTypeId { get; set; }
+            public string url { get; set; }
             public DateTime? uploadedOn { get; set; }
             public string uploadedBy { get; set; }
             public int? width { get; set; }
@@ -31,6 +32,7 @@ namespace Imago.IO.Classes
 
         public List<Image> Images { get; set; } = new List<Image>();
         public List<Feature> Features { get; set; } = new List<Feature>();
+        public Dictionary<string, string> Attributes { get; set; } = new Dictionary<string, string>();
 
         public override string ToString()
         {
