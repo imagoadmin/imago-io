@@ -24,6 +24,7 @@ Parameter|Description|Required|
  ds | Imagery type name|optional|
  im | Image type name|optional|
  dp | Display at this depth|optional|
+ ig | Display at image with this name|optional|
 
 If the workspace or dataset parameters are provided then they will restrict the search for the collection. Without these parameters, the light table will search across all workspaces/datasets until it finds a collection that matches. If no imagery type or image type is specified then it will display the first imagery/image type listed in the collection's dataset.
 
