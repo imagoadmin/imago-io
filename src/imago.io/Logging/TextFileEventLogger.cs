@@ -17,6 +17,10 @@ namespace Imago.IO
         {
             writer.WriteLine("exception|" + DateTime.Now.ToString() + "|" + ex.Message + "|" + PropertiesAsString(properties));
         }
+        public void TrackError(string err, IDictionary<string, string> properties = null)
+        {
+            writer.WriteLine("error|" + DateTime.Now.ToString() + "|" + err + "|" + PropertiesAsString(properties));
+        }
 
         public void TrackEvent(string name, IDictionary<string, string> properties = null)
         {

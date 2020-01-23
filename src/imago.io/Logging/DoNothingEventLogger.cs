@@ -9,6 +9,10 @@ namespace Imago.IO
         {
         }
 
+        public void TrackError(string err, IDictionary<string, string> properties = null)
+        {
+        }
+
         public void TrackEvent(string name, IDictionary<string, string> properties = null)
         {
         }
