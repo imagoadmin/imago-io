@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
@@ -26,7 +26,6 @@ namespace Imago.IO
             public Guid imageryId { get; set; } = Guid.Empty;
             public Guid imageTypeId { get; set; } = Guid.Empty;
             public string url { get; set; } = null;
-            public bool overwriteExisting { get; set; } = false;
             public int? resizeWidth { get; set; } = null;
             public int? resizeHeight { get; set; } = null;
         }
