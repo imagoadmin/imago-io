@@ -128,14 +128,14 @@
   {
     "type": "post",
     "url": "/integrate/2/attributes",
-    "title": "Assigns attributes to an image",
+    "title": "Assigns attributes to an imagery",
     "name": "PostAttributes",
     "group": "Attributes",
-    "description": "<p>Assigns a group of attributes to associated an image within Imago.</p>",
+    "description": "<p>Assigns a group of attributes to associated an imagery within Imago. The assignment can be performed on a single imagery (i.e. using query parameters) or a bulk update of multiple imageries.</p>",
     "examples": [
       {
-        "title": "Example Usage (requires the authorisation token header):",
-        "content": "curl -H \"Content-Type: application/json\" -X POST -d '{\"name\":\"DH001\",\"place\":\"lower mountain top\"}'   https://io.imago.live/integrate/2/attributes?id=e1865861-0d53-4d49-a554-af79dae9aa81&group=custom&type=custom",
+        "title": "Example Usage of a single assignment (requires the authorisation token header):",
+        "content": "curl -H \"Content-Type: application/json\" -X POST -d '{\"name\":\"DH001\",\"place\":\"lower mountain top\"}'   https://io.imago.live/integrate/2/attributes?id=e1865861-0d53-4d49-a554-af79dae9aa81&group=custom&type=imagery",
         "type": "curl"
       }
     ],
@@ -159,7 +159,7 @@
             "type": "Guid",
             "optional": false,
             "field": "id",
-            "description": "<p>Data identifier. Only an Imagery ID is permitted at this time.</p>"
+            "description": "<p>Data identifier. Only an Imagery ID is permitted at this time (SINGLE ASSIGNMENT ONLY)</p>"
           },
           {
             "group": "Parameter",
@@ -170,7 +170,7 @@
             "optional": true,
             "field": "type",
             "defaultValue": "imagery",
-            "description": "<p>Describes where the attributes should be stored. Only imagery attributes are supported.</p>"
+            "description": "<p>Describes where the attributes should be stored. Only imagery attributes are supported. (SINGLE ASSIGNMENT ONLY)</p>"
           },
           {
             "group": "Parameter",
@@ -178,14 +178,91 @@
             "optional": true,
             "field": "group",
             "defaultValue": "custom",
-            "description": "<p>Specifies which group of attributes to assign. Only custom imagery attributes are permitted currently.</p>"
+            "description": "<p>Specifies which group of attributes to assign. Only custom imagery attributes are permitted currently. (SINGLE ASSIGNMENT ONLY)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object[]",
+            "optional": true,
+            "field": "imageries",
+            "description": "<p>List of imagery with updated attributes when performing a bulk update. (BULK UPDATE ONLY)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "imageries.imageryId",
+            "description": "<p>Search for this imagery by ID. (BULK UPDATE ONLY)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "imageries.collectionId",
+            "description": "<p>Search for this collection. (BULK UPDATE ONLY)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "imageries.imageryTypeId",
+            "description": "<p>Search for imagery of this type. (BULK UPDATE ONLY)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "imageries.name",
+            "description": "<p>Search for imagery by name. (BULK UPDATE ONLY)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": true,
+            "field": "imageries.startDepth",
+            "description": "<p>Search for imagery by start depth. (BULK UPDATE ONLY)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": true,
+            "field": "imageries.endDepth",
+            "description": "<p>Search for imagery by end depth. (BULK UPDATE ONLY)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": true,
+            "field": "imageries.x",
+            "description": "<p>Search for imagery by longtitude/X. (BULK UPDATE ONLY)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": true,
+            "field": "imageries.y",
+            "description": "<p>Search for imagery by latitude/Y. (BULK UPDATE ONLY)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": true,
+            "field": "imageries.z",
+            "description": "<p>Search for imagery by elevation/Z. (BULK UPDATE ONLY)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": true,
+            "field": "imageries.attributes",
+            "description": "<p>New attributes. (BULK UPDATE ONLY)</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Query String:",
-          "content": "?id=c2019bd6-34aa-4561-ab2f-8802fa5ff3a9&group=custom&type=imagery",
+          "content": "\nIf query parameters were supplied for a single update then: \n\n?id=c2019bd6-34aa-4561-ab2f-8802fa5ff3a9&group=custom&type=imagery\n\nOr if there are no query parameters and a bulk update is requested then send a JSON body of:\n\n{  \n    \"imageries\": [\n        {\n            \"collectionId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"imageryTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\",\n            \"startDepth\" : 0,\n            \"endDepth\" : 10,\n            \"attributes\" : {\n                \"name\" : \"andesite\",\n                \"colour\" : \"gray\"\n            }\n        },\n        {\n            \"collectionId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"imageryTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\",\n            \"startDepth\" : 20,\n            \"endDepth\" : 30,\n            \"attributes\" : {\n                \"name\" : \"brecha\",\n                \"colour\" : \"red\"\n            }\n        },\n        {\n            \"imageryId\" : \"c2019bd6-34aa-4561-ab2f-8802fa5ff3a9\",\n            \"attributes\" : {\n                \"name\" : \"brecha\",\n                \"colour\" : \"red\"\n            }\n        }\n    ]\n}",
           "type": "json"
         }
       ]
@@ -220,13 +297,90 @@
             "optional": false,
             "field": "attributes",
             "description": "<p>Attributes associated with the specified group. The fields depend on the attributes group and its definition.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": true,
+            "field": "imageries",
+            "description": "<p>List of imagery with updated attributes.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": true,
+            "field": "imageries.imageryId",
+            "description": "<p>ID of updated imagery.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": true,
+            "field": "imageries.collectionId",
+            "description": "<p>Collection ID of updated imagery.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": true,
+            "field": "imageries.imageryTypeId",
+            "description": "<p>Imagery type of updated imagery.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": true,
+            "field": "imageries.name",
+            "description": "<p>Imagery name of updated imagery.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": true,
+            "field": "imageries.startDepth",
+            "description": "<p>Start depth of updated imagery.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": true,
+            "field": "imageries.endDepth",
+            "description": "<p>End depth of updated imagery.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": true,
+            "field": "imageries.x",
+            "description": "<p>Longtitude/X of updated imagery.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": true,
+            "field": "imageries.y",
+            "description": "<p>Latitude/Y of updated imagery.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": true,
+            "field": "imageries.z",
+            "description": "<p>Elevation/Z of updated imagery.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": true,
+            "field": "imageries.attributes",
+            "description": "<p>Updated attributes of imagery.</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "{\n    \"id\" : \"c2019bd6-34aa-4561-ab2f-8802fa5ff3a9\",\n    \"type\" : \"imagery\",\n    \"group\" : \"custom\",\n    \"attributes\" : {\n        \"name\" : \"andesite\",\n        \"colour\" : \"gray\"\n    }\n}",
+          "content": "\nIf query parameters were supplied then: \n\n{\n    \"id\" : \"c2019bd6-34aa-4561-ab2f-8802fa5ff3a9\",\n    \"type\" : \"imagery\",\n    \"group\" : \"custom\",\n    \"attributes\" : {\n        \"name\" : \"andesite\",\n        \"colour\" : \"gray\"\n    }\n}\n\nIf no query parameters were supplied and a bulk update was requested then: \n\n{  \n    \"imageries\": [\n        {\n            \"imageryId\" : \"ecc59019-0e28-4720-a48a-48f600ed865a\",\n            \"collectionId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"imageryTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\",\n            \"startDepth\" : 0,\n            \"endDepth\" : 10,\n            \"attributes\" : {\n                \"name\" : \"andesite\",\n                \"colour\" : \"gray\"\n            }\n        },\n        {\n            \"imageryId\" : \"00ab137d-6772-4566-854e-fe95a696d78d\",\n            \"collectionId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"imageryTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\",\n            \"startDepth\" : 20,\n            \"endDepth\" : 30,\n            \"attributes\" : {\n                \"name\" : \"brecha\",\n                \"colour\" : \"red\"\n            }\n        },\n        {\n            \"imageryId\" : \"c2019bd6-34aa-4561-ab2f-8802fa5ff3a9\",\n            \"collectionId\" : \"d856d001-22bf-4339-8382-9e29532e539b\",\n            \"imageryTypeId\" : \"78742fab-4c55-4b57-830d-5ab6b6c1fb09\",\n            \"startDepth\" : 30,\n            \"endDepth\" : 40,\n            \"attributes\" : {\n                \"name\" : \"brecha\",\n                \"colour\" : \"lighttred\"\n            }\n        }\n    ]\n}",
           "type": "json"
         }
       ]
@@ -616,16 +770,23 @@
           {
             "group": "Parameter",
             "type": "Guid",
-            "optional": false,
+            "optional": true,
             "field": "collectionid",
-            "description": "<p>Only search within this collection.</p>"
+            "description": "<p>Restrict searching to this collection. Either collectionid or workspaceid must always be defined.</p>"
           },
           {
             "group": "Parameter",
             "type": "Guid",
-            "optional": false,
+            "optional": true,
+            "field": "workspaceid",
+            "description": "<p>Restrict searching to this workspace.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Guid",
+            "optional": true,
             "field": "imagerytypeid",
-            "description": "<p>Only search for imagery with this imagery type.</p>"
+            "description": "<p>Only search for imagery with this imagery type. If not provided then all imagery types are returned.</p>"
           },
           {
             "group": "Parameter",
@@ -781,7 +942,7 @@
           },
           {
             "group": "Success 200",
-            "type": "Number",
+            "type": "Object",
             "optional": true,
             "field": "imageries.attributes",
             "description": "<p>Custom attributes associated with this imagery.</p>"
@@ -878,7 +1039,7 @@
     "examples": [
       {
         "title": "Example Usage (requires the authorisation token header):",
-        "content": "    curl -i -F filedata=@sample.jpeg -X POST https://io.imago.live/integrate/2/image?imageryid=c2019bd6-34aa-4561-ab2f-8802fa5ff3a9&imagetypeid=f0b6aec1-ce5c-4874-b107-162090623a9b&mimetype=image%2Fjpeg\nor\n    curl -i -F filedata=@sample.jpeg -X POST https://io.imago.live/integrate/2/image?startdepth=10&enddepth=20&imagerytypeid=78742fab-4c55-4b57-830d-5ab6b6c1fb09&imagetypeid=f0b6aec1-ce5c-4874-b107-162090623a9b&mimetype=image%2Fjpeg",
+        "content": "    curl -i -F filedata=@sample.jpeg -X POST https://io.imago.live/integrate/2/image?imageryid=c2019bd6-34aa-4561-ab2f-8802fa5ff3a9&imagetypeid=f0b6aec1-ce5c-4874-b107-162090623a9b&mimetype=image%2Fjpeg\nor\n    curl -i -F filedata=@sample.jpeg -X POST https://io.imago.live/integrate/2/image?collectionid=d856d001-22bf-4339-8382-9e29532e539b&startdepth=10&enddepth=20&imagerytypeid=78742fab-4c55-4b57-830d-5ab6b6c1fb09&imagetypeid=f0b6aec1-ce5c-4874-b107-162090623a9b&mimetype=image%2Fjpeg",
         "type": "curl"
       }
     ],
@@ -902,7 +1063,14 @@
             "type": "Guid",
             "optional": true,
             "field": "imageryid",
-            "description": "<p>Upload direcly against this imagery using an ID. Specify the imagery ID or specify the following criteria:</p>"
+            "description": "<p>Upload directly against this imagery using an ID. Specify the imagery ID or specify the following criteria:</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "collectionid",
+            "description": "<p>Search for this collection.</p>"
           },
           {
             "group": "Parameter",
@@ -1437,7 +1605,7 @@
             "type": "Object[]",
             "optional": false,
             "field": "workspaces.datasets.imageryTypes.imagetypes",
-            "description": "<p>List of imag types in the imagery type.</p>"
+            "description": "<p>List of image types in the imagery type.</p>"
           },
           {
             "group": "Success 200",
@@ -1452,13 +1620,47 @@
             "optional": false,
             "field": "workspaces.datasets.imageryTypes.imageTypes.name",
             "description": "<p>Name of the image type.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "workspaces.datasets.imageryTypes.attributeTypes",
+            "description": "<p>List of attribute types in the imagery type.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Guid",
+            "optional": false,
+            "field": "workspaces.datasets.imageryTypes.attributeTypes.id",
+            "description": "<p>Attribute type identifier.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "workspaces.datasets.imageryTypes.attributeTypes.name",
+            "description": "<p>Name of the attribute type.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "allowedValues": [
+              "\"string\"",
+              "\"number\"",
+              "\"note\"",
+              "\"date\""
+            ],
+            "optional": false,
+            "field": "workspaces.datasets.imageryTypes.attributeTypes.dataType",
+            "description": "<p>Data type for the value stored in the attribute type.</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "{\n    \"workspaces\": [\n        {\n            \"id\": \"e0a14890-4ff9-4048-bf5d-76018b950317\",\n            \"name\": \"Demo\",\n            \"readonly\" : false,\n            \"datasets\": [\n                {\n                    \"id\": \"9a08e64f-e6e9-41d8-a47c-044db8a882c4\",\n                    \"name\": \"Base Metals Brownfields Drilling\",\n                    \"imageryTypes\": [\n                        {\n                            \"id\": \"b3627180-ca97-4e5d-a0c6-49fbc0c16f6e\",\n                            \"name\": \"Core Trays\",\n                            \"geometryType\": \"trace\",\n                            \"contentType\": \"coretray\",\n                            \"imageTypes\": [\n                                {\n                                    \"id\": \"744b14c5-f754-4dee-b644-bbfde533c798\",\n                                    \"name\": \"Dry\"\n                                },\n                                {\n                                    \"id\": \"d0969932-d6bd-4e0d-8c54-9acc13cf5144\",\n                                    \"name\": \"Wet\"\n                                }\n                            ]\n                        },\n                        {\n                            \"id\": \"aed9256f-a18a-4eb4-a17a-9e5958dddf2f\",\n                            \"name\": \"Downhole\",\n                            \"geometryType\": \"trace\",\n                            \"contentType\": \"none\",\n                            \"imageTypes\": [\n                                {\n                                    \"id\": \"7bf27c47-7c0d-498e-a3fb-887531632b7b\",\n                                    \"name\": \"Dry\"\n                                },\n                                {\n                                    \"id\": \"02bcc28c-b483-422f-8d32-dac72285c3ea\",\n                                    \"name\": \"Wet\"\n                                }\n                            ]\n                        }\n                    ]\n                },\n                {\n                    \"id\": \"992efe3e-340c-4082-a83f-ddff9225c180\",\n                    \"name\": \"Coal Mine Infill Drilling\",\n                    \"imageryTypes\": [\n                        {\n                            \"id\": \"b3627180-ca97-4e5d-a0c6-49fbc0c16f6e\",\n                            \"name\": \"Core Trays\",\n                            \"geometryType\": \"trace\",\n                            \"contentType\": \"coretray\",\n                            \"imageTypes\": [\n                                {\n                                    \"id\": \"744b14c5-f754-4dee-b644-bbfde533c798\",\n                                    \"name\": \"Dry\"\n                                },\n                                {\n                                    \"id\": \"d0969932-d6bd-4e0d-8c54-9acc13cf5144\",\n                                    \"name\": \"Wet\"\n                                }\n                            ]\n                        },\n                        {\n                            \"id\": \"aed9256f-a18a-4eb4-a17a-9e5958dddf2f\",\n                            \"name\": \"Downhole\",\n                            \"geometryType\": \"trace\",\n                            \"contentType\": \"none\",\n                            \"imageTypes\": [\n                                {\n                                    \"id\": \"7bf27c47-7c0d-498e-a3fb-887531632b7b\",\n                                    \"name\": \"Dry\"\n                                },\n                                {\n                                    \"id\": \"02bcc28c-b483-422f-8d32-dac72285c3ea\",\n                                    \"name\": \"Wet\"\n                                }\n                            ]\n                        }\n                    ]\n                }\n            ]\n        }\n    ]\n}",
+          "content": "{\n    \"workspaces\": [\n        {\n            \"id\": \"e0a14890-4ff9-4048-bf5d-76018b950317\",\n            \"name\": \"Demo\",\n            \"readonly\" : false,\n            \"datasets\": [\n                {\n                    \"id\": \"9a08e64f-e6e9-41d8-a47c-044db8a882c4\",\n                    \"name\": \"Base Metals Brownfields Drilling\",\n                    \"imageryTypes\": [\n                        {\n                            \"id\": \"b3627180-ca97-4e5d-a0c6-49fbc0c16f6e\",\n                            \"name\": \"Core Trays\",\n                            \"geometryType\": \"trace\",\n                            \"contentType\": \"coretray\",\n                            \"imageTypes\": [\n                                {\n                                    \"id\": \"744b14c5-f754-4dee-b644-bbfde533c798\",\n                                    \"name\": \"Dry\"\n                                },\n                                {\n                                    \"id\": \"d0969932-d6bd-4e0d-8c54-9acc13cf5144\",\n                                    \"name\": \"Wet\"\n                                }\n                            ],\n                            \"attributeTypes\": [\n                                {\n                                    \"dataType\": \"note\",\n                                    \"id\": \"3396deb2-9b6b-40d8-9445-b982cf136c2c\",\n                                    \"name\": \"fieldnotes\"\n                                },\n                                {\n                                    \"dataType\": \"string\",\n                                    \"id\": \"42011c75-48d6-479e-866b-05cc6e8ae924\",\n                                    \"name\": \"classification\"\n                                },\n                                {\n                                    \"dataType\": \"number\",\n                                    \"id\": \"d35d47ec-6169-45d2-95b7-a9c7c7125682\",\n                                    \"name\": \"scale\"\n                                },\n                                {\n                                    \"dataType\": \"date\",\n                                    \"id\": \"e5c13c0f-84a3-4d13-a4ec-30028189de48\",\n                                    \"name\": \"Observed On\"\n                                }\n                            ]\n                        },\n                        {\n                            \"id\": \"aed9256f-a18a-4eb4-a17a-9e5958dddf2f\",\n                            \"name\": \"Downhole\",\n                            \"geometryType\": \"trace\",\n                            \"contentType\": \"none\",\n                            \"imageTypes\": [\n                                {\n                                    \"id\": \"7bf27c47-7c0d-498e-a3fb-887531632b7b\",\n                                    \"name\": \"Dry\"\n                                },\n                                {\n                                    \"id\": \"02bcc28c-b483-422f-8d32-dac72285c3ea\",\n                                    \"name\": \"Wet\"\n                                }\n                            ]\n                        }\n                    ]\n                },\n                {\n                    \"id\": \"992efe3e-340c-4082-a83f-ddff9225c180\",\n                    \"name\": \"Coal Mine Infill Drilling\",\n                    \"imageryTypes\": [\n                        {\n                            \"id\": \"b3627180-ca97-4e5d-a0c6-49fbc0c16f6e\",\n                            \"name\": \"Core Trays\",\n                            \"geometryType\": \"trace\",\n                            \"contentType\": \"coretray\",\n                            \"imageTypes\": [\n                                {\n                                    \"id\": \"744b14c5-f754-4dee-b644-bbfde533c798\",\n                                    \"name\": \"Dry\"\n                                },\n                                {\n                                    \"id\": \"d0969932-d6bd-4e0d-8c54-9acc13cf5144\",\n                                    \"name\": \"Wet\"\n                                }\n                            ]\n                        },\n                        {\n                            \"id\": \"aed9256f-a18a-4eb4-a17a-9e5958dddf2f\",\n                            \"name\": \"Downhole\",\n                            \"geometryType\": \"trace\",\n                            \"contentType\": \"none\",\n                            \"imageTypes\": [\n                                {\n                                    \"id\": \"7bf27c47-7c0d-498e-a3fb-887531632b7b\",\n                                    \"name\": \"Dry\"\n                                },\n                                {\n                                    \"id\": \"02bcc28c-b483-422f-8d32-dac72285c3ea\",\n                                    \"name\": \"Wet\"\n                                }\n                            ]\n                        }\n                    ]\n                }\n            ]\n        }\n    ]\n}",
           "type": "json"
         }
       ]
