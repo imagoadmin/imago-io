@@ -18,6 +18,7 @@ namespace Imago.IO
         string APIUrl { get; }
 
         Task<Result<List<Imagery>>> SearchForImagery(ImageryQueryParameters parameters, CancellationToken ct, TimeSpan? timeout = null);
+        Task<Result<object>> SetImageAttributes(Guid id, string groupName, object attributeData, CancellationToken ct, TimeSpan? timeout = null);
         Task<Result<Imagery>> UpdateImagery(ImageryUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null);
         Task<Result<ImageUpdateResult>> UploadImage(ImageUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null);
         Task<Result<object>> UpdateBulkImageryAttributes(BulkAttributeUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null);
