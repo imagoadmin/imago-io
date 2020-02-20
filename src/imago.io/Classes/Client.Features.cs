@@ -33,9 +33,13 @@ namespace Imago.IO
 			}
 		}
 
-		public async Task<Result<ImageUpdateResult>> UploadFeatures(FeatureUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
+		public class FeatureUpdateResult
 		{
-			Result<ImageUpdateResult> result = null;
+			public bool Success { get; set; }
+		}
+		public async Task<Result<FeatureUpdateResult>> UploadFeatures(FeatureUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
+		{
+			Result<FeatureUpdateResult> result = null;
 			try
 			{
 				this.LogTracer.TrackEvent("Client.UploadFeatures()", new Dictionary<string, string> {
@@ -46,18 +50,19 @@ namespace Imago.IO
 				});
 
 				if (parameters.features.Any(x => x.imageryId == Guid.Empty) || parameters.features.Any(x => x.featureTypeId == Guid.Empty) || parameters.features.Any(x => x.imageTypeId == Guid.Empty))
-					return new Result<ImageUpdateResult> { Code = ResultCode.failed };
+					return new Result<FeatureUpdateResult> { Code = ResultCode.failed };
 				UriBuilder builder = new UriBuilder(_apiUrl);
 				builder.Path += "/feature";
-				result = await ClientPost(builder, parameters, timeout, ct, (response, body) =>
+				return await ClientPost(builder, parameters, timeout, ct, (response, body) =>
 				{
-					return (ImageUpdateResult)null;
+					this.LogHttpResponse(response);
+					return new FeatureUpdateResult() { Success = true };
 				});
 			}
 			catch (Exception ex)
 			{
 				this.LogTracer.TrackError(ex);
-				result = new Result<ImageUpdateResult> { Code = ResultCode.failed, Message = "Exception " + ex.Message + Environment.NewLine + ex.ToString() };
+				result = new Result<FeatureUpdateResult> { Code = ResultCode.failed, Message = "Exception " + ex.Message + Environment.NewLine + ex.ToString() };
 			}
 			return result;
 		}
