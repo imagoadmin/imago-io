@@ -14,15 +14,15 @@ namespace Imago.IO
 	{
 		public class FeatureUpdateParameters
 		{
-			public List<Feature> features { get; set; }
+			public Feature[] features { get; set; }
 
 			public class Feature
 			{
-				public Guid? id { get; set; } = Guid.Empty;
+				public Guid? id { get; set; } = null;
 				public Guid imageryId { get; set; } = Guid.Empty;
 				public Guid featureTypeId { get; set; } = Guid.Empty;
 				public Guid imageTypeId { get; set; } = Guid.Empty;
-				public List<Point> points { get; set; } = new List<Point>();
+				public Point[] points { get; set; } = null;
 
 				public class Point
 				{
@@ -39,7 +39,7 @@ namespace Imago.IO
 			try
 			{
 				this.LogTracer.TrackEvent("Client.UploadFeatures()", new Dictionary<string, string> {
-					{ "features", parameters.features.Count.ToString() },
+					{ "features", parameters.features.Length.ToString() },
 					{ "imageryId", string.Join(",",parameters.features.Select(x=>x.imageryId)) },
 					{ "featureTypeId", string.Join(",",parameters.features.Select(x=>x.featureTypeId)) },
 					{ "imageTypeId", string.Join(",",parameters.features.Select(x=>x.imageTypeId)) },
@@ -49,7 +49,7 @@ namespace Imago.IO
 					return new Result<ImageUpdateResult> { Code = ResultCode.failed };
 				UriBuilder builder = new UriBuilder(_apiUrl);
 				builder.Path += "/feature";
-				return await ClientPost(builder, parameters, timeout, ct, (response, body) => 
+				result = await ClientPost(builder, parameters, timeout, ct, (response, body) =>
 				{
 					return (ImageUpdateResult)null;
 				});
