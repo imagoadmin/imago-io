@@ -37,6 +37,8 @@ namespace Imago.IO
 
         public IEventLogger LogTracer { get; private set; } = IO.EventLogger.Default;
 
+        public ResultCode? LastSignInResultCode { get; private set; } = null;
+
         public Client()
         {
             this.LogTracer = IO.EventLogger.Default;
@@ -94,6 +96,7 @@ namespace Imago.IO
         {
             try
             {
+                LastSignInResultCode = null;
                 _credentials = credentials;
 
                 _apiUrl = credentials.HostName + credentials.ApiVersion;
@@ -121,6 +124,8 @@ namespace Imago.IO
 
                 _lastResponse = response;
 
+                LastSignInResultCode = _lastResponse.GetResultCode();
+
                 Task<string> reading = response.Content.ReadAsStringAsync();
                 reading.Wait();
                 body = reading.Result;
@@ -138,6 +143,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
+                LastSignInResultCode = ResultCode.failed;
                 this.LogTracer.TrackError(ex);
                 return false;
             }
@@ -346,6 +352,7 @@ namespace Imago.IO
                     this.LogHttpResponse(result);
                     _lastResponse = result;
                     _apiToken = null;
+                    LastSignInResultCode = null;
 
                     _lastResponseBody = null;
 
