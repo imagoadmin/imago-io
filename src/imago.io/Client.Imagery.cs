@@ -112,7 +112,7 @@ namespace Imago.IO
                 public int pen { get; set; }
             }
 
-            public Guid? id { get; set; }
+           
             public string name { get; set; }
             public double? startDepth { get; set; }
             public double? endDepth { get; set; }
@@ -123,20 +123,19 @@ namespace Imago.IO
             public Image[] images { get; set; } = null;
         }
 
-        public async Task<Result<Imagery>> UpdateImagery(ImageryUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
+        public async Task<Result<Imagery>> UpdateImagery(Guid? imageryId, ImageryUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
         {
             try
             {
-                if (parameters.id == null || parameters.id == Guid.Empty)
+                if (imageryId == null || imageryId == Guid.Empty)
                     return new Result<Imagery> { Code = ResultCode.failed };
 
                 UriBuilder builder = new UriBuilder(_apiUrl);
-                builder.Path += "/imagery/" + parameters.id.ToString();
-                parameters.id = null;
+                builder.Path += "/imagery/" + imageryId.ToString();
+                
 
                 if (parameters.images.Any(i => i.imageTypeId == Guid.Empty || i.features.featureTypes.Any(x => x.id == Guid.Empty)))
                     return new Result<Imagery> { Code = ResultCode.failed };
-
 
                 return await ClientPut(builder, parameters, timeout, ct, (response, body) =>
                 {
