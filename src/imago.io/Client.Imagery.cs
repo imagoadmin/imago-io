@@ -50,7 +50,7 @@ namespace Imago.IO
                     query["workspaceid"] = parameters.workspaceId.ToString();
                 if (parameters.collectionId != null)
                     query["collectionid"] = parameters.collectionId.ToString();
-                if  (parameters.imageryTypeId != null)
+                if (parameters.imageryTypeId != null)
                     query["imagerytypeid"] = parameters.imageryTypeId.ToString();
                 if (!String.IsNullOrWhiteSpace(parameters.name))
                     query["name"] = parameters.name;
@@ -86,6 +86,27 @@ namespace Imago.IO
         }
         public class ImageryUpdateParameters
         {
+            public class Image
+            {
+                public class Feature
+                {
+                    public class Point
+                    {
+                        public double x { get; set; }
+                        public double y { get; set; }
+                        public int pen { get; set; }
+                    }
+
+                    public Guid featureTypeId { get; set; } = Guid.Empty;
+                    public Point[] points { get; set; } = null;
+                  
+                }
+
+                public Guid imageTypeId { get; set; } = Guid.Empty;
+                public Feature[] features { get; set; } = null;
+
+            }
+
             public Guid? id { get; set; }
             public string name { get; set; }
             public double? startDepth { get; set; }
@@ -93,6 +114,8 @@ namespace Imago.IO
             public double? x { get; set; }
             public double? y { get; set; }
             public double? z { get; set; }
+
+            public Image[] images { get; set; } = null;
         }
 
         public async Task<Result<Imagery>> UpdateImagery(ImageryUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
@@ -105,6 +128,10 @@ namespace Imago.IO
                 UriBuilder builder = new UriBuilder(_apiUrl);
                 builder.Path += "/imagery/" + parameters.id.ToString();
                 parameters.id = null;
+
+                if (parameters.images.Any(i => i.imageTypeId == Guid.Empty || i.features.Any(x => x.featureTypeId == Guid.Empty)))
+                    return new Result<Imagery> { Code = ResultCode.failed };
+
 
                 return await ClientPut(builder, parameters, timeout, ct, (response, body) =>
                 {
@@ -127,7 +154,7 @@ namespace Imago.IO
             public int? id { get; set; }
             public string type { get; set; }
             public string group { get; set; }
-            public List<AttributeUpdateParameters> imageries{ get; set; }
+            public List<AttributeUpdateParameters> imageries { get; set; }
         }
         public async Task<Result<object>> UpdateBulkImageryAttributes(BulkAttributeUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
         {
