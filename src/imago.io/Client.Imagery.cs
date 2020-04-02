@@ -88,23 +88,28 @@ namespace Imago.IO
         {
             public class Image
             {
-                public class Feature
-                {
-                    public class Point
-                    {
-                        public double x { get; set; }
-                        public double y { get; set; }
-                        public int pen { get; set; }
-                    }
-
-                    public Guid featureTypeId { get; set; } = Guid.Empty;
-                    public Point[] points { get; set; } = null;
-                  
-                }
-
                 public Guid imageTypeId { get; set; } = Guid.Empty;
+                public Features features { get; set; } = null;
+            }
+            public class Features
+            {
+                public FeatureType[] featureTypes { get; set; } = null;
+            }
+            public class FeatureType
+            {                
+                public Guid id { get; set; } = Guid.Empty;
                 public Feature[] features { get; set; } = null;
+            }
+            public class Feature
+            {
+                public Point[] points { get; set; } = null;
+            }
 
+            public class Point
+            {
+                public double x { get; set; }
+                public double y { get; set; }
+                public int pen { get; set; }
             }
 
             public Guid? id { get; set; }
@@ -129,7 +134,7 @@ namespace Imago.IO
                 builder.Path += "/imagery/" + parameters.id.ToString();
                 parameters.id = null;
 
-                if (parameters.images.Any(i => i.imageTypeId == Guid.Empty || i.features.Any(x => x.featureTypeId == Guid.Empty)))
+                if (parameters.images.Any(i => i.imageTypeId == Guid.Empty || i.features.featureTypes.Any(x => x.id == Guid.Empty)))
                     return new Result<Imagery> { Code = ResultCode.failed };
 
 
