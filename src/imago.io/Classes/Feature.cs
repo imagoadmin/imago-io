@@ -18,7 +18,6 @@ namespace Imago.IO.Classes
         public Guid ImageryId { get; set; } = Guid.Empty;
         public Guid FeatureTypeId { get; set; } = Guid.Empty;
         public Guid ImageTypeId { get; set; } = Guid.Empty;
-        public Guid? CloudId { get; set; } = null;
         public List<Point> Points { get; set; } = new List<Point>();
     }
 }
