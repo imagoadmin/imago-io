@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
@@ -63,6 +63,7 @@ namespace Imago.IO
 
         public class CollectionUpdateParameters
         {
+            public Guid? id { get; set; }
             public Guid datasetId { get; set; }
             public string name { get; set; }
         }
