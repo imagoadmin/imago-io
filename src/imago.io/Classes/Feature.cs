@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Imago.IO.Classes
 {
-    public class Feature
+    public class Feature: Interfaces.IFeature
     {
-        public class Point
+        public class Point : Interfaces.IPoint
         {
             public double X { get; set; }
             public double Y { get; set; }
@@ -18,6 +18,6 @@ namespace Imago.IO.Classes
         public Guid ImageryId { get; set; } = Guid.Empty;
         public Guid FeatureTypeId { get; set; } = Guid.Empty;
         public Guid ImageTypeId { get; set; } = Guid.Empty;
-        public List<Point> Points { get; set; } = new List<Point>();
+        public List<Interfaces.IPoint> Points { get; set; } = new List<Interfaces.IPoint>();
     }
 }
