@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Imago.IO.Converters
 {
-    public class ImagesConverter : JsonConverter
+    public class PointsConverter : JsonConverter
     {
         public override bool CanWrite => false;
         public override bool CanRead => base.CanRead;
@@ -20,9 +20,9 @@ namespace Imago.IO.Converters
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             var array = JArray.Load(reader);
-            var results = array.ToObject<IEnumerable<Classes.Imagery.Image>>();
-            //var results = serializer.Deserialize<IEnumerable<Classes.Imagery.Image>>(reader);
-            return new List<Interfaces.IImage>(results);
+            var results = array.ToObject<IEnumerable<Classes.Feature.Point>>();
+            //var results = serializer.Deserialize<IEnumerable<Classes.Feature.Point>>(reader);
+            return new List<Interfaces.IPoint>(results);
         }
 
         public override bool CanConvert(Type objectType)

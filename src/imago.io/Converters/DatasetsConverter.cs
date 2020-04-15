@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +19,9 @@ namespace Imago.IO.Converters
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            var results = serializer.Deserialize<IEnumerable<Classes.Dataset>>(reader);
+            var array = JArray.Load(reader);
+            var results = array.ToObject<IEnumerable<Classes.Dataset>>();
+            //var results = serializer.Deserialize<IEnumerable<Classes.Dataset>>(reader);
             return new List<Interfaces.IDataset>(results);
         }
 
