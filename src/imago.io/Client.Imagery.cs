@@ -86,18 +86,22 @@ namespace Imago.IO
         }
         public class ImageryUpdateParameters
         {
-            public class Image
+            public class FeatureDefinition
             {
-                public Guid imageTypeId { get; set; } = Guid.Empty;
-                public Features features { get; set; } = null;
-            }
-            public class Features
-            {
+                public string name { get; set; } = "linearization";
                 public FeatureType[] featureTypes { get; set; } = null;
             }
             public class FeatureType
-            {                
-                public Guid id { get; set; } = Guid.Empty;
+            {
+                public string name { get; set; } = null;
+                public Image[] images { get; set; } = null;
+
+            }
+
+
+            public class Image
+            {
+                public string name { get; set; }
                 public Feature[] features { get; set; } = null;
             }
             public class Feature
@@ -120,7 +124,7 @@ namespace Imago.IO
             public double? y { get; set; }
             public double? z { get; set; }
 
-            public Image[] images { get; set; } = null;
+            public FeatureDefinition[] featureDefinitions { get; set; } = null;
         }
 
         public async Task<Result<Imagery>> UpdateImagery(Guid? imageryId, ImageryUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
@@ -132,9 +136,8 @@ namespace Imago.IO
 
                 UriBuilder builder = new UriBuilder(_apiUrl);
                 builder.Path += "/imagery/" + imageryId.ToString();
-                
 
-                if (parameters.images.Any(i => i.imageTypeId == Guid.Empty || i.features.featureTypes.Any(x => x.id == Guid.Empty)))
+                if (parameters.featureDefinitions.Any(fd => string.IsNullOrWhiteSpace(fd.name) || fd.featureTypes.Any(ft => string.IsNullOrWhiteSpace(ft.name) || ft.images.Any(i=> string.IsNullOrWhiteSpace(i.name)))))
                     return new Result<Imagery> { Code = ResultCode.failed };
 
                 return await ClientPut(builder, parameters, timeout, ct, (response, body) =>
