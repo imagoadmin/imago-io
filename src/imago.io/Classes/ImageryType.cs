@@ -19,6 +19,6 @@ namespace Imago.IO.Classes
         public GeometryTypes GeometryType { get; set; }
         [JsonConverter(typeof(StringEnumConverter))] public ContentTypes ContentType { get; set; }
         public List<ImageType> ImageTypes { get; set; } = new List<ImageType>();
-        public List<AttributeType> AttributeTypes { get; set; } = new List<AttributeType>();
+        public List<AttributeDefinition> AttributeDefinitions { get; set; } = new List<AttributeDefinition>();
     }
 }

@@ -137,6 +137,7 @@ namespace Imago.IO
         }
         public class AttributeUpdateParameters : ImageryQueryParameters
         {
+            //public Guid imageryId { get; set; }
             public Dictionary<string, string> attributes { get; set; }
         }
         public class BulkAttributeUpdateParameters
