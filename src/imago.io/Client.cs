@@ -351,8 +351,7 @@ namespace Imago.IO
                     HttpResponseMessage result = await client.DeleteAsync(_apiUrl + "/session").ConfigureAwait(false);
                     this.LogHttpResponse(result);
                     _lastResponse = result;
-                    _apiToken = null;
-                    LastSignInResultCode = null;
+                    
 
                     _lastResponseBody = null;
 
@@ -366,6 +365,9 @@ namespace Imago.IO
             }
             finally
             {
+                _apiToken = null;
+                LastSignInResultCode = null;
+                _uid = null;
             }
         }
 
