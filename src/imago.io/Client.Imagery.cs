@@ -98,6 +98,17 @@ namespace Imago.IO
 
             }
 
+            public class AttributeDefinition
+            {
+                public string name { get; set; } = "Core Tray Box Numbers";
+                public AttributeType[] attributeTypes { get; set; } = null;
+            }
+            public class AttributeType
+            {
+                public string name { get; set; } = null;
+                public Attribute values { get; set; } = null;
+
+            }
 
             public class Image
             {
@@ -107,6 +118,10 @@ namespace Imago.IO
             public class Feature
             {
                 public Point[] points { get; set; } = null;
+            }
+            public class Attribute
+            {
+                public string value { get; set; } = null;
             }
 
             public class Point
@@ -125,6 +140,7 @@ namespace Imago.IO
             public double? z { get; set; }
 
             public FeatureDefinition[] featureDefinitions { get; set; } = null;
+            public AttributeDefinition[] attributeDefinitions { get; set; } = null;
         }
 
         public async Task<Result<Imagery>> UpdateImagery(Guid? imageryId, ImageryUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
@@ -138,6 +154,8 @@ namespace Imago.IO
                 builder.Path += "/imagery/" + imageryId.ToString();
 
                 if (parameters.featureDefinitions.Any(fd => string.IsNullOrWhiteSpace(fd.name) || fd.featureTypes.Any(ft => string.IsNullOrWhiteSpace(ft.name) || ft.images.Any(i=> string.IsNullOrWhiteSpace(i.name)))))
+                    return new Result<Imagery> { Code = ResultCode.failed };
+                if (parameters.attributeDefinitions.Any(ad => string.IsNullOrWhiteSpace(ad.name) || ad.attributeTypes.Any(at => string.IsNullOrWhiteSpace(at.name) || string.IsNullOrWhiteSpace(at.values.value))))
                     return new Result<Imagery> { Code = ResultCode.failed };
 
                 return await ClientPut(builder, parameters, timeout, ct, (response, body) =>
