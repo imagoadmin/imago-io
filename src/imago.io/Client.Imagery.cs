@@ -106,7 +106,7 @@ namespace Imago.IO
             public class AttributeType
             {
                 public string name { get; set; } = null;
-                public Attribute values { get; set; } = null;
+                public string value { get; set; } = null;
 
             }
 
@@ -118,10 +118,6 @@ namespace Imago.IO
             public class Feature
             {
                 public Point[] points { get; set; } = null;
-            }
-            public class Attribute
-            {
-                public string value { get; set; } = null;
             }
 
             public class Point
@@ -155,7 +151,7 @@ namespace Imago.IO
 
                 if (parameters.featureDefinitions.Any(fd => string.IsNullOrWhiteSpace(fd.name) || fd.featureTypes.Any(ft => string.IsNullOrWhiteSpace(ft.name) || ft.images.Any(i=> string.IsNullOrWhiteSpace(i.name)))))
                     return new Result<Imagery> { Code = ResultCode.failed };
-                if (parameters.attributeDefinitions.Any(ad => string.IsNullOrWhiteSpace(ad.name) || ad.attributeTypes.Any(at => string.IsNullOrWhiteSpace(at.name) || string.IsNullOrWhiteSpace(at.values.value))))
+                if (parameters.attributeDefinitions.Any(ad => string.IsNullOrWhiteSpace(ad.name) || ad.attributeTypes.Any(at => string.IsNullOrWhiteSpace(at.name) || string.IsNullOrWhiteSpace(at.value))))
                     return new Result<Imagery> { Code = ResultCode.failed };
 
                 return await ClientPut(builder, parameters, timeout, ct, (response, body) =>
