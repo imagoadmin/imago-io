@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Imago.IO.Classes
 {
-    public class ImageType
+    public class ImageType: Interfaces.IImageType
     {
         public Guid Id { get; set; } = Guid.Empty;
         public string Name { get; set; }

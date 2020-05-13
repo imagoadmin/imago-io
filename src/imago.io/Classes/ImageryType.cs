@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Imago.IO.Classes
 {
-    public class ImageryType
+    public class ImageryType: Interfaces.IImageryType
     {
         public enum GeometryTypes { none, point, trace };
         public enum ContentTypes { image, video, coretray, downhole };
@@ -17,7 +17,8 @@ namespace Imago.IO.Classes
         public string Name { get; set; }
         [JsonConverter(typeof(StringEnumConverter))]
         public GeometryTypes GeometryType { get; set; }
-        [JsonConverter(typeof(StringEnumConverter))] public ContentTypes ContentType { get; set; }
-        public List<ImageType> ImageTypes { get; set; } = new List<ImageType>();
+        [JsonConverter(typeof(StringEnumConverter))] 
+        public ContentTypes ContentType { get; set; }
+        public List<Interfaces.IImageType> ImageTypes { get; set; } = new List<Interfaces.IImageType>();
     }
 }

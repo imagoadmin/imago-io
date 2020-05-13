@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Imago.IO.Classes
 {
-    public class Imagery
+    public class Imagery : Interfaces.IImagery
     {
-        public class Image
+        public class Image : Interfaces.IImage
         {
             public Guid ImageTypeId { get; set; }
             public string url { get; set; }
@@ -30,7 +30,8 @@ namespace Imago.IO.Classes
         public double? StartDepth { get; set; }
         public double? EndDepth { get; set; }
 
-        public List<Image> Images { get; set; } = new List<Image>();
+        public List<Interfaces.IImage> Images { get; set; } = new List<Interfaces.IImage>();
+        public List<Interfaces.IFeature> Features { get; set; } = new List<Interfaces.IFeature>();
         public Dictionary<string, string> Attributes { get; set; } = new Dictionary<string, string>();
 
         public override string ToString()
