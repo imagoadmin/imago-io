@@ -101,13 +101,7 @@ namespace Imago.IO
             public class AttributeDefinition
             {
                 public string name { get; set; } = "Core Tray Box Numbers";
-                public AttributeType[] attributeTypes { get; set; } = null;
-            }
-            public class AttributeType
-            {
-                public string name { get; set; } = null;
-                public string value { get; set; } = null;
-
+                public Dictionary<string, object> attributeValues { get; set; } = new Dictionary<string, object>();
             }
 
             public class Image
@@ -150,8 +144,6 @@ namespace Imago.IO
                 builder.Path += "/imagery/" + imageryId.ToString();
 
                 if (parameters.featureDefinitions.Any(fd => string.IsNullOrWhiteSpace(fd.name) || fd.featureTypes.Any(ft => string.IsNullOrWhiteSpace(ft.name) || ft.images.Any(i=> string.IsNullOrWhiteSpace(i.name)))))
-                    return new Result<Imagery> { Code = ResultCode.failed };
-                if (parameters.attributeDefinitions.Any(ad => string.IsNullOrWhiteSpace(ad.name) || ad.attributeTypes.Any(at => string.IsNullOrWhiteSpace(at.name) || string.IsNullOrWhiteSpace(at.value))))
                     return new Result<Imagery> { Code = ResultCode.failed };
 
                 return await ClientPut(builder, parameters, timeout, ct, (response, body) =>
