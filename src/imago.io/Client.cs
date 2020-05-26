@@ -62,6 +62,14 @@ namespace Imago.IO
                 return uid;
             }
         }
+        public Guid ApiToken
+        {
+            get
+            {
+                Guid.TryParse(_apiToken, out var token);
+                return token;
+            }
+        }
 
         public HttpClient Direct
         {
