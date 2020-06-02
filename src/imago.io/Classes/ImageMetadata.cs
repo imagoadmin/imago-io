@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Imago.IO.Classes
 {
-    public class ImageMetadata
+    public class ImageMetadata: Interfaces.IImageMetadata
     {
         public DateTimeOffset? DateTaken { get; set; }
         public double? Latitude { get; set; }

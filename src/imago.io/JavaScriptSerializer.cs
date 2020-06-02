@@ -16,9 +16,12 @@ namespace Imago.IO
             }
         }
 
-        internal T Deserialize<T>(string json)
+        internal T Deserialize<T>(string json, JsonConverter converter = null)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(json);
+            if (converter != null)
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(json, converter);
+            else
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(json);
         }
     }
 }

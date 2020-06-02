@@ -31,6 +31,8 @@ namespace Imago.IO
             public string name { get; set; }
             public string match { get; set; }
             public Guid datasetId { get; set; }
+            public string workspacename { get; set; }
+            public string datasetname { get; set; }
         }
 
         public async Task<Result<List<Collection>>> SearchForCollection(CollectionQueryParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
@@ -38,8 +40,13 @@ namespace Imago.IO
             try
             {
                 NameValueCollection query = new NameValueCollection();
+                if (!string.IsNullOrWhiteSpace(parameters.workspacename))
+                    query["workspacename"] = parameters.workspacename;
+                if (!string.IsNullOrWhiteSpace(parameters.datasetname))
+                    query["datasetname"] = parameters.datasetname;
                 query["name"] = parameters.name;
                 query["match"] = parameters.match;
+
                 if (parameters.datasetId != Guid.Empty)
                     query["datasetid"] = parameters.datasetId.ToString();
 

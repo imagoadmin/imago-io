@@ -37,6 +37,8 @@ namespace Imago.IO
 
         public IEventLogger LogTracer { get; private set; } = IO.EventLogger.Default;
 
+        public ResultCode? LastSignInResultCode { get; private set; } = null;
+
         public Client()
         {
             this.LogTracer = IO.EventLogger.Default;
@@ -94,6 +96,7 @@ namespace Imago.IO
         {
             try
             {
+                LastSignInResultCode = null;
                 _credentials = credentials;
 
                 _apiUrl = credentials.HostName + credentials.ApiVersion;
@@ -121,6 +124,8 @@ namespace Imago.IO
 
                 _lastResponse = response;
 
+                LastSignInResultCode = _lastResponse.GetResultCode();
+
                 Task<string> reading = response.Content.ReadAsStringAsync();
                 reading.Wait();
                 body = reading.Result;
@@ -138,6 +143,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
+                LastSignInResultCode = ResultCode.failed;
                 this.LogTracer.TrackError(ex);
                 return false;
             }
@@ -228,14 +234,14 @@ namespace Imago.IO
                 {
                     using (HttpClient client = GetClient(timeout))
                     {
-                        string body = _jsonConverter.Serialize(parameters);
-                        HttpResponseMessage response = await client.PostAsync(builder.ToString(), new StringContent(body, Encoding.UTF8, "application/json"), ct).ConfigureAwait(false);
+                        string requestbody = _jsonConverter.Serialize(parameters);
+                        HttpResponseMessage response = await client.PostAsync(builder.ToString(), new StringContent(requestbody, Encoding.UTF8, "application/json"), ct).ConfigureAwait(false);
                         this.LogHttpResponse(response);
 
                         _lastResponse = response;
 
-                        body = await response.Content.ReadAsStringAsync();
-                        _lastResponseBody = body;
+                        string responsebody = await response.Content.ReadAsStringAsync();
+                        _lastResponseBody = responsebody;
 
                         ResultCode code = response.GetResultCode();
                         if (code == ResultCode.unauthorized)
@@ -243,7 +249,7 @@ namespace Imago.IO
 
                         if (code != ResultCode.failed)
                         {
-                            var result = processResponse(response, body);
+                            var result = processResponse(response, responsebody);
 
                             return new Result<T> { Value = result, Code = result != null ? ResultCode.ok : ResultCode.failed };
                         }
@@ -345,7 +351,7 @@ namespace Imago.IO
                     HttpResponseMessage result = await client.DeleteAsync(_apiUrl + "/session").ConfigureAwait(false);
                     this.LogHttpResponse(result);
                     _lastResponse = result;
-                    _apiToken = null;
+                    
 
                     _lastResponseBody = null;
 
@@ -359,6 +365,9 @@ namespace Imago.IO
             }
             finally
             {
+                _apiToken = null;
+                LastSignInResultCode = null;
+                _uid = null;
             }
         }
 

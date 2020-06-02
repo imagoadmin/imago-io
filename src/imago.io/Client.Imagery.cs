@@ -50,7 +50,7 @@ namespace Imago.IO
                     query["workspaceid"] = parameters.workspaceId.ToString();
                 if (parameters.collectionId != null)
                     query["collectionid"] = parameters.collectionId.ToString();
-                if  (parameters.imageryTypeId != null)
+                if (parameters.imageryTypeId != null)
                     query["imagerytypeid"] = parameters.imageryTypeId.ToString();
                 if (!String.IsNullOrWhiteSpace(parameters.name))
                     query["name"] = parameters.name;
@@ -86,25 +86,65 @@ namespace Imago.IO
         }
         public class ImageryUpdateParameters
         {
-            public Guid? id { get; set; }
+            public class FeatureDefinition
+            {
+                public string name { get; set; } = "linearization";
+                public FeatureType[] featureTypes { get; set; } = null;
+            }
+            public class FeatureType
+            {
+                public string name { get; set; } = null;
+                public Image[] images { get; set; } = null;
+
+            }
+
+            public class AttributeDefinition
+            {
+                public string name { get; set; } = "Core Tray Box Numbers";
+                public Dictionary<string, object> attributeValues { get; set; } = new Dictionary<string, object>();
+            }
+
+            public class Image
+            {
+                public string name { get; set; }
+                public Feature[] features { get; set; } = null;
+            }
+            public class Feature
+            {
+                public Point[] points { get; set; } = null;
+            }
+
+            public class Point
+            {
+                public double x { get; set; }
+                public double y { get; set; }
+                public int pen { get; set; }
+            }
+
+           
             public string name { get; set; }
             public double? startDepth { get; set; }
             public double? endDepth { get; set; }
             public double? x { get; set; }
             public double? y { get; set; }
             public double? z { get; set; }
+
+            public FeatureDefinition[] featureDefinitions { get; set; } = null;
+            public AttributeDefinition[] attributeDefinitions { get; set; } = null;
         }
 
-        public async Task<Result<Imagery>> UpdateImagery(ImageryUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
+        public async Task<Result<Imagery>> UpdateImagery(Guid? imageryId, ImageryUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
         {
             try
             {
-                if (parameters.id == null || parameters.id == Guid.Empty)
+                if (imageryId == null || imageryId == Guid.Empty)
                     return new Result<Imagery> { Code = ResultCode.failed };
 
                 UriBuilder builder = new UriBuilder(_apiUrl);
-                builder.Path += "/imagery/" + parameters.id.ToString();
-                parameters.id = null;
+                builder.Path += "/imagery/" + imageryId.ToString();
+
+                if (parameters.featureDefinitions.Any(fd => string.IsNullOrWhiteSpace(fd.name) || fd.featureTypes.Any(ft => string.IsNullOrWhiteSpace(ft.name) || ft.images.Any(i=> string.IsNullOrWhiteSpace(i.name)))))
+                    return new Result<Imagery> { Code = ResultCode.failed };
 
                 return await ClientPut(builder, parameters, timeout, ct, (response, body) =>
                 {
@@ -127,7 +167,7 @@ namespace Imago.IO
             public int? id { get; set; }
             public string type { get; set; }
             public string group { get; set; }
-            public List<AttributeUpdateParameters> imageries{ get; set; }
+            public List<AttributeUpdateParameters> imageries { get; set; }
         }
         public async Task<Result<object>> UpdateBulkImageryAttributes(BulkAttributeUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
         {
