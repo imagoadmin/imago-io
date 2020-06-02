@@ -70,7 +70,6 @@ namespace Imago.IO
 
         public class CollectionUpdateParameters
         {
-            public Guid? id { get; set; }
             public Guid datasetId { get; set; }
             public string name { get; set; }
         }
@@ -97,31 +96,6 @@ namespace Imago.IO
             {
                 this.LogTracer.TrackError(ex);
                 return new Result<Collection> { Code = ResultCode.failed, Message = ex.Message };
-            }
-        }
-        public async Task<Result<List<Collection>>> AddCollectionBulk(List<CollectionUpdateParameters> parameters, CancellationToken ct, TimeSpan? timeout = null)
-        {
-            try
-            {
-                if (parameters.Count == 0)
-                    return new Result<List<Collection>> { Code = ResultCode.ok, Value=new List<Collection>() };
-
-                UriBuilder builder = new UriBuilder(_apiUrl);
-                builder.Path += "/collection";
-
-                return await ClientPost(builder, parameters, timeout, ct, (response, body) =>
-                {
-                    this.LogHttpResponse(response);
-
-                    List<Collection> collection = _jsonConverter.Deserialize<List<Collection>>(body);
-                    return collection;
-                });
-
-            }
-            catch (Exception ex)
-            {
-                this.LogTracer.TrackError(ex);
-                return new Result<List<Collection>> { Code = ResultCode.failed, Message = ex.Message };
             }
         }
 

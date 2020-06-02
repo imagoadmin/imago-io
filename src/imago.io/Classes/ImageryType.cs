@@ -20,6 +20,6 @@ namespace Imago.IO.Classes
         [JsonConverter(typeof(StringEnumConverter))] 
         public ContentTypes ContentType { get; set; }
         public List<Interfaces.IImageType> ImageTypes { get; set; } = new List<Interfaces.IImageType>();
-        public List<AttributeDefinition> AttributeDefinitions { get; set; } = new List<AttributeDefinition>();
+        public List<AttributeType> AttributeTypes { get; set; } = new List<AttributeType>();
     }
 }
