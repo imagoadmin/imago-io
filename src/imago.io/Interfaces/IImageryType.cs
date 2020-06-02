@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Imago.IO.Classes;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
@@ -16,5 +17,6 @@ namespace Imago.IO.Interfaces
         Classes.ImageryType.ContentTypes ContentType { get; set; }
         [Newtonsoft.Json.JsonConverter(typeof(Converters.ImageTypesConverter))]
         List<IImageType> ImageTypes { get; set; }
+        List<AttributeDefinition> AttributeDefinitions { get; set; }
     }
 }
