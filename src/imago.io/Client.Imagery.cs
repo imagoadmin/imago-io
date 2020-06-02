@@ -20,22 +20,13 @@ namespace Imago.IO
 {
     public partial class Client
     {
-        public static class ImageryQueryParametersMatchChoices
-        {
-            public const string MatchEqual = "equals";
-            public const string MatchLike = "like";
-        }
-
+     
         public class ImageryQueryParameters
         {
             public Guid? workspaceId { get; set; }
             public Guid? collectionId { get; set; }
-            public Guid? datasetId { get; set; }
             public Guid? imageryTypeId { get; set; }
-            public string collectionName { get; set; }
-            public string datasetName { get; set; }
             public string name { get; set; }
-            public string match { get; set; }
             public double? startDepth { get; set; }
             public double? endDepth { get; set; }
             public double? x { get; set; }
@@ -59,18 +50,10 @@ namespace Imago.IO
                     query["workspaceid"] = parameters.workspaceId.ToString();
                 if (parameters.collectionId != null)
                     query["collectionid"] = parameters.collectionId.ToString();
-                if (parameters.datasetId != null)
-                    query["datasetid"] = parameters.datasetId.ToString();
                 if  (parameters.imageryTypeId != null)
                     query["imagerytypeid"] = parameters.imageryTypeId.ToString();
-                if (!String.IsNullOrWhiteSpace(parameters.collectionName))
-                    query["collectionname"] = parameters.collectionName;
-                if (!String.IsNullOrWhiteSpace(parameters.datasetName))
-                    query["datasetname"] = parameters.datasetName;
                 if (!String.IsNullOrWhiteSpace(parameters.name))
                     query["name"] = parameters.name;
-                if (!String.IsNullOrWhiteSpace(parameters.match))
-                    query["match"] = parameters.match;
                 if (parameters.startDepth != null)
                     query["startdepth"] = parameters.startDepth.ToString();
                 if (parameters.endDepth != null)
@@ -137,7 +120,6 @@ namespace Imago.IO
         }
         public class AttributeUpdateParameters : ImageryQueryParameters
         {
-            //public Guid imageryId { get; set; }
             public Dictionary<string, string> attributes { get; set; }
         }
         public class BulkAttributeUpdateParameters
