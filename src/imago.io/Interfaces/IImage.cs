@@ -13,5 +13,6 @@ namespace Imago.IO.Interfaces
         int? width { get; set; }
         int? height { get; set; }
         Int64? fileSize { get; set; }
+        string MimeType { get; set; }
     }
 }
