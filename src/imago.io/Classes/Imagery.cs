@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Imago.IO.Interfaces;
 
 namespace Imago.IO.Classes
 {
@@ -33,7 +34,7 @@ namespace Imago.IO.Classes
 
         public List<Interfaces.IImage> Images { get; set; } = new List<Interfaces.IImage>();
         public List<Interfaces.IFeature> Features { get; set; } = new List<Interfaces.IFeature>();
-        public Dictionary<string, string> Attributes { get; set; } = new Dictionary<string, string>();
+        public List<Interfaces.IAttribute> AttributeDefinitions { get; set; } = new List<IAttribute>();
 
         public override string ToString()
         {

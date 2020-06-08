@@ -21,6 +21,6 @@ namespace Imago.IO.Interfaces
         List<Interfaces.IImage> Images { get; set; }
         [Newtonsoft.Json.JsonConverter(typeof(Converters.FeaturesConverter))]
         List<Interfaces.IFeature> Features { get; set; }
-        Dictionary<string, string> Attributes { get; set; }
+        List<Interfaces.IAttribute> AttributeDefinitions { get; set; }
     }
 }

@@ -4,10 +4,9 @@ using System.Text;
 
 namespace Imago.IO.Interfaces
 {
-    public interface IAttribute
+    public interface IAttributeDefinition
     {
         string name { get; set; }
-        IDictionary<string, object> attributes {get;set;}
-
+        IDictionary<string,object> attributes { get; set; }
     }
 }

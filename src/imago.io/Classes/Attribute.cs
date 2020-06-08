@@ -7,11 +7,7 @@ namespace Imago.IO.Classes
 {
     public class Attribute : IAttribute
     {
-        public Guid Id { get; set; }
-        public Guid ImageryId { get; set; }
-        public Guid AttributeTypeId { get; set; }
-        public string AttributeTypeName { get; set; }
-        public Guid? ImageTypeId { get; set; } = null;
-        public string Value { get; set; }
+        public string name { get; set; }
+        public IDictionary<string, object> attributes { get; set; }
     }
 }
