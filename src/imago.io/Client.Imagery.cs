@@ -147,7 +147,7 @@ namespace Imago.IO
             public double? z { get; set; }
 
             public FeatureDefinition[] featureDefinitions { get; set; } = null;
-            public AttributeDefinition[] attributeDefinitions { get; set; } = null;
+            public List<AttributeDefinition> attributeDefinitions { get; set; } = null;
         }
         public async Task<Result<Imagery>> UpdateImagery(ImageryUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
         {
