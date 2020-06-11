@@ -25,6 +25,7 @@ namespace Imago.IO
         {
             public Guid imageryId { get; set; } = Guid.Empty;
             public Guid imageTypeId { get; set; } = Guid.Empty;
+            public string imageTypeName { get; set; }
             public string url { get; set; } = null;
             public int? resizeWidth { get; set; } = null;
             public int? resizeHeight { get; set; } = null;
@@ -43,6 +44,8 @@ namespace Imago.IO
 
                 query["imageryid"] = parameters.imageryId.ToString();
                 query["imagetypeid"] = parameters.imageTypeId.ToString();
+                if (!string.IsNullOrWhiteSpace(parameters.imageTypeName))
+                    query["imagetypename"] = parameters.imageTypeName;
                 if (parameters.resizeHeight != null)
                     query["height"] = parameters.resizeHeight.Value.ToString();
                 if (parameters.resizeWidth != null)

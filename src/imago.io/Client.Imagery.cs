@@ -34,6 +34,8 @@ namespace Imago.IO
             public Guid? imageryTypeId { get; set; }
             public string collectionName { get; set; }
             public string datasetName { get; set; }
+            public string workspaceName { get; set; }
+            public string imageryTypeName { get; set; }
             public string name { get; set; }
             public string match { get; set; }
             public double? startDepth { get; set; }
@@ -67,6 +69,10 @@ namespace Imago.IO
                     query["collectionname"] = parameters.collectionName;
                 if (!String.IsNullOrWhiteSpace(parameters.datasetName))
                     query["datasetname"] = parameters.datasetName;
+                if (!string.IsNullOrWhiteSpace(parameters.workspaceName))
+                    query["workspacename"] = parameters.workspaceName;
+                if (!string.IsNullOrWhiteSpace(parameters.imageryTypeName))
+                    query["imagerytypename"] = parameters.imageryTypeName;
                 if (!String.IsNullOrWhiteSpace(parameters.name))
                     query["name"] = parameters.name;
                 if (!String.IsNullOrWhiteSpace(parameters.match))
