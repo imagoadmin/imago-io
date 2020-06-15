@@ -12,6 +12,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Globalization;
 using System.Threading;
+using System.Reflection;
 using System.Drawing;
 using System.Diagnostics;
 using System.IO;
@@ -124,8 +125,22 @@ namespace Imago.IO
                 client.Timeout = timeout ?? new TimeSpan(0, 0, 30);
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
+                string productCode = product??credentials.Product;
+                string productVersion = credentials.Version;
+                if (String.IsNullOrWhiteSpace(productVersion))
+                {
+                    try
+                    {
+                        Version version = Assembly.GetEntryAssembly().GetName().Version;
+                        productVersion = version.Major + "." + version.Minor + "." + version.Build + "." + version.MinorRevision;
+                    }
+                    catch (System.Exception)
+                    {
+                    }
+                }
+
                 Uri signInURI = new Uri(_apiUrl + "/session");
-                var signindata = new { username = credentials.UserName, password = credentials.Password, product = product };
+                var signindata = new { username = credentials.UserName, password = credentials.Password, product = productCode, version = productVersion };
                 string body = _jsonConverter.Serialize(signindata, _jsonSettings);
                 HttpResponseMessage response = await client.PutAsync(signInURI, new StringContent(body, Encoding.UTF8, "application/json")).ConfigureAwait(false);
                 this.LogHttpResponse(response);
