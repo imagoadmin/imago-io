@@ -159,7 +159,7 @@ namespace Imago.IO
                 UriBuilder builder = new UriBuilder(_apiUrl);
                 builder.Path += "/imagery/" + parameters.id.ToString();
 
-                if (parameters.featureDefinitions.Any(fd => string.IsNullOrWhiteSpace(fd.name) || fd.featureTypes.Any(ft => string.IsNullOrWhiteSpace(ft.name) || ft.images.Any(i=> string.IsNullOrWhiteSpace(i.name)))))
+                if (parameters.featureDefinitions != null && parameters.featureDefinitions.Any(fd => string.IsNullOrWhiteSpace(fd.name) || fd.featureTypes.Any(ft => string.IsNullOrWhiteSpace(ft.name) || ft.images.Any(i=> string.IsNullOrWhiteSpace(i.name)))))
                     return new Result<Imagery> { Code = ResultCode.failed };
 
                 return await ClientPut(builder, parameters, timeout, ct, (response, body) =>
