@@ -12,6 +12,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Globalization;
 using System.Threading;
+using System.Reflection;
 using System.Drawing;
 using System.Diagnostics;
 using System.IO;
@@ -19,7 +20,7 @@ using Imago.IO.Classes;
 
 namespace Imago.IO
 {
-    public partial class Client
+    public partial class Client : IClient
     {
         public enum Matching { equals, includes, startWith, endWith };
 
@@ -35,7 +36,18 @@ namespace Imago.IO
         private HttpResponseMessage _lastResponse;
         private string _lastResponseBody;
 
-        public IEventLogger LogTracer => IO.EventLogger.Default;
+        public IEventLogger LogTracer { get; private set; } = IO.EventLogger.Default;
+
+        public ResultCode? LastSignInResultCode { get; private set; } = null;
+
+        public Client()
+        {
+            this.LogTracer = IO.EventLogger.Default;
+        }
+        public Client(IEventLogger logger)
+        {
+            this.LogTracer = (logger == null ? IO.EventLogger.Default : logger);
+        }
 
         public string UserName
         {
@@ -51,6 +63,14 @@ namespace Imago.IO
             {
                 Guid.TryParse(_uid, out var uid);
                 return uid;
+            }
+        }
+        public Guid ApiToken
+        {
+            get
+            {
+                Guid.TryParse(_apiToken, out var token);
+                return token;
             }
         }
 
@@ -70,6 +90,12 @@ namespace Imago.IO
             }
         }
 
+        public int MaxRetryAttempts { get; set; } = 0;
+        private int _retryDelayInSeconds = 2;
+        public int RetryDelayInSeconds { get { return _retryDelayInSeconds > 0 ? _retryDelayInSeconds : 4; } set { _retryDelayInSeconds = value; } }
+        private int _retryDelayFactor { get; set; } = 5;
+        public int RetryDelayFactor { get { return _retryDelayFactor > 0 ? _retryDelayFactor : 4; } set { _retryDelayFactor = value; } }
+
         public Task<bool> SignIn(Credentials credentials, TimeSpan? timeout = null)
         {
             return SignIn(credentials, null, timeout);
@@ -79,6 +105,7 @@ namespace Imago.IO
         {
             try
             {
+                LastSignInResultCode = null;
                 _credentials = credentials;
 
                 _apiUrl = credentials.HostName + credentials.ApiVersion;
@@ -95,15 +122,32 @@ namespace Imago.IO
                 responseHandler.CookieContainer = new CookieContainer();
 
                 HttpClient client = new HttpClient(responseHandler);
-                client.Timeout = timeout ?? new TimeSpan(0, 10, 0);
+                client.Timeout = timeout ?? new TimeSpan(0, 0, 30);
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
+                string productCode = product??credentials.Product;
+                string productVersion = credentials.Version;
+                if (String.IsNullOrWhiteSpace(productVersion))
+                {
+                    try
+                    {
+                        Version version = Assembly.GetEntryAssembly().GetName().Version;
+                        productVersion = version.Major + "." + version.Minor + "." + version.Build + "." + version.MinorRevision;
+                    }
+                    catch (System.Exception)
+                    {
+                    }
+                }
+
                 Uri signInURI = new Uri(_apiUrl + "/session");
-                var signindata = new { username = credentials.UserName, password = credentials.Password, product = product };
+                var signindata = new { username = credentials.UserName, password = credentials.Password, product = productCode, version = productVersion };
                 string body = _jsonConverter.Serialize(signindata, _jsonSettings);
                 HttpResponseMessage response = await client.PutAsync(signInURI, new StringContent(body, Encoding.UTF8, "application/json")).ConfigureAwait(false);
+                this.LogHttpResponse(response);
 
                 _lastResponse = response;
+
+                LastSignInResultCode = _lastResponse.GetResultCode();
 
                 Task<string> reading = response.Content.ReadAsStringAsync();
                 reading.Wait();
@@ -122,6 +166,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
+                LastSignInResultCode = ResultCode.failed;
                 this.LogTracer.TrackError(ex);
                 return false;
             }
@@ -148,7 +193,7 @@ namespace Imago.IO
             return client;
         }
 
-        private Task<Result<T>> ClientGet<T>(string relativePath, NameValueCollection query, CancellationToken ct, TimeSpan? timeout, Func<HttpResponseMessage, string, T> processResponse) where T : class
+        public Task<Result<T>> ClientGet<T>(string relativePath, NameValueCollection query, CancellationToken ct, TimeSpan? timeout, Func<HttpResponseMessage, string, T> processResponse) where T : class
         {
             UriBuilder builder = new UriBuilder(_apiUrl);
             builder.Path += relativePath;
@@ -159,61 +204,133 @@ namespace Imago.IO
 
         private async Task<Result<T>> ClientGet<T>(UriBuilder builder, CancellationToken ct, TimeSpan? timeout, Func<HttpResponseMessage, string, T> processResponse) where T : class
         {
-            using (HttpClient client = GetClient(timeout))
+            int retryCount = 0, retryDelay = this.RetryDelayInSeconds;
+            do
             {
-                HttpResponseMessage response = await client.GetAsync(builder.ToString(), ct);
-                _lastResponse = response;
-                string body = await response.Content.ReadAsStringAsync();
-                _lastResponseBody = body;
+                try
+                {
+                    using (HttpClient client = GetClient(timeout))
+                    {
+                        HttpResponseMessage response = await client.GetAsync(builder.ToString(), ct);
+                        this.LogHttpResponse(response);
 
-                if (response.StatusCode != HttpStatusCode.OK)
-                    return new Result<T> { Code = response.GetResultCode() };
+                        _lastResponse = response;
+                        string body = await response.Content.ReadAsStringAsync();
+                        _lastResponseBody = body;
 
-                var result = processResponse(response, body);
+                        ResultCode code = response.GetResultCode();
+                        if (code == ResultCode.unauthorized)
+                            return new Result<T> { Value = null, Code = ResultCode.unauthorized };
 
-                return new Result<T> { Value = result, Code = result != null ? ResultCode.ok : ResultCode.failed };
+                        if (code != ResultCode.failed)
+                        {
+                            var result = processResponse(response, body);
+
+                            return new Result<T> { Value = result, Code = result != null ? ResultCode.ok : ResultCode.failed };
+                        }
+                    }
+                }
+                catch(OperationCanceledException)
+                {
+                    return new Result<T> { Value = null, Code = ResultCode.failed };
+                }
+                catch (Exception ex)
+                {
+                }
+                Thread.Sleep(TimeSpan.FromSeconds(retryCount < MaxRetryAttempts ? retryDelay : 0));
+                retryDelay *= this.RetryDelayFactor;
+                retryCount++;
             }
+            while (retryCount <= MaxRetryAttempts);
+
+            return new Result<T> { Value = null, Code = ResultCode.failed };
         }
 
 
         private async Task<Result<T>> ClientPost<T, TPostBody>(UriBuilder builder, TPostBody parameters, TimeSpan? timeout, CancellationToken ct, Func<HttpResponseMessage, string, T> processResponse) where T : class
         {
-            string body = _jsonConverter.Serialize(parameters);
 
-            using (HttpClient client = GetClient(timeout))
+            int retryCount = 0, retryDelay = this.RetryDelayInSeconds;
+            do
             {
-                HttpResponseMessage response = await client.PostAsync(builder.ToString(), new StringContent(body, Encoding.UTF8, "application/json"), ct).ConfigureAwait(false);
-                _lastResponse = response;
+                try
+                {
+                    using (HttpClient client = GetClient(timeout))
+                    {
+                        string requestbody = _jsonConverter.Serialize(parameters);
+                        HttpResponseMessage response = await client.PostAsync(builder.ToString(), new StringContent(requestbody, Encoding.UTF8, "application/json"), ct).ConfigureAwait(false);
+                        this.LogHttpResponse(response);
 
-                body = await response.Content.ReadAsStringAsync();
-                _lastResponseBody = body;
+                        _lastResponse = response;
 
-                if (response.StatusCode != HttpStatusCode.OK)
-                    return new Result<T> { Code = response.GetResultCode(), Message = response.StatusCode.ToString() };
+                        string responsebody = await response.Content.ReadAsStringAsync();
+                        _lastResponseBody = responsebody;
 
-                var result = processResponse(response, body);
-                return new Result<T> { Value = result, Code = result != null ? ResultCode.ok : ResultCode.failed };
+                        ResultCode code = response.GetResultCode();
+                        if (code == ResultCode.unauthorized)
+                            return new Result<T> { Value = null, Code = ResultCode.unauthorized };
+
+                        if (code != ResultCode.failed)
+                        {
+                            var result = processResponse(response, responsebody);
+
+                            return new Result<T> { Value = result, Code = result != null ? ResultCode.ok : ResultCode.failed };
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                }
+                Thread.Sleep(TimeSpan.FromSeconds(retryCount < MaxRetryAttempts ? retryDelay : 0));
+                retryDelay *= this.RetryDelayFactor;
+                retryCount++;
             }
+            while (retryCount <= MaxRetryAttempts);
+
+            return new Result<T> { Value = null, Code = ResultCode.failed };
         }
 
         private async Task<Result<T>> ClientPut<T, TPostBody>(UriBuilder builder, TPostBody parameters, TimeSpan? timeout, CancellationToken ct, Func<HttpResponseMessage, string, T> processResponse) where T : class
         {
-            string body = _jsonConverter.Serialize(parameters);
 
-            using (HttpClient client = GetClient(timeout))
+            int retryCount = 0, retryDelay = this.RetryDelayInSeconds;
+            do
             {
-                HttpResponseMessage response = await client.PutAsync(builder.ToString(), new StringContent(body, Encoding.UTF8, "application/json"), ct).ConfigureAwait(false);
-                _lastResponse = response;
+                try
+                {
+                    using (HttpClient client = GetClient(timeout))
+                    {
+                        string body = _jsonConverter.Serialize(parameters);
+                        HttpResponseMessage response = await client.PutAsync(builder.ToString(), new StringContent(body, Encoding.UTF8, "application/json"), ct).ConfigureAwait(false);
+                        this.LogHttpResponse(response);
 
-                body = await response.Content.ReadAsStringAsync();
-                _lastResponseBody = body;
+                        _lastResponse = response;
 
-                if (response.StatusCode != HttpStatusCode.OK)
-                    return new Result<T> { Code = response.GetResultCode(), Message = response.StatusCode.ToString() };
+                        body = await response.Content.ReadAsStringAsync();
+                        _lastResponseBody = body;
 
-                var result = processResponse(response, body);
-                return new Result<T> { Value = result, Code = result != null ? ResultCode.ok : ResultCode.failed };
+                        ResultCode code = response.GetResultCode();
+                        if (code == ResultCode.unauthorized)
+                            return new Result<T> { Value = null, Code = ResultCode.unauthorized };
+
+                        if (code != ResultCode.failed)
+                        {
+                            var result = processResponse(response, body);
+
+                            return new Result<T> { Value = result, Code = result != null ? ResultCode.ok : ResultCode.failed };
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                }
+                Thread.Sleep(TimeSpan.FromSeconds(retryCount < MaxRetryAttempts ? retryDelay : 0));
+                retryDelay *= this.RetryDelayFactor;
+                retryCount++;
             }
+            while (retryCount <= MaxRetryAttempts);
+
+            return new Result<T> { Value = null, Code = ResultCode.failed };
         }
 
         public async Task<bool> IsSessionValid(TimeSpan? timeout = null)
@@ -226,7 +343,10 @@ namespace Imago.IO
                         return false;
 
                     HttpResponseMessage result = await client.GetAsync(_apiUrl + "/session").ConfigureAwait(false);
+                    this.LogHttpResponse(result);
                     _lastResponse = result;
+
+                    this.LogHttpResponse(result);
 
                     _lastResponseBody = null;
                     if (result.StatusCode != HttpStatusCode.OK)
@@ -251,9 +371,10 @@ namespace Imago.IO
                     if (client == null)
                         return false;
 
-                    HttpResponseMessage result = await client.DeleteAsync(_apiUrl + "/signout").ConfigureAwait(false);
+                    HttpResponseMessage result = await client.DeleteAsync(_apiUrl + "/session").ConfigureAwait(false);
+                    this.LogHttpResponse(result);
                     _lastResponse = result;
-                    _apiToken = null;
+                    
 
                     _lastResponseBody = null;
 
@@ -267,7 +388,20 @@ namespace Imago.IO
             }
             finally
             {
+                _apiToken = null;
+                LastSignInResultCode = null;
+                _uid = null;
             }
+        }
+
+        public void LogHttpResponse(HttpResponseMessage response)
+        {
+            string request = response.RequestMessage.Method.ToString() + ":" + response.RequestMessage.RequestUri.ToString();
+            this.LogTracer.TrackEvent(request, new Dictionary<string, string>()
+            {
+                { "Status Code", response.StatusCode.ToString() },
+                { "Message", response.ToString() },
+            });
         }
 
         private string BuildQueryString(NameValueCollection nvc)

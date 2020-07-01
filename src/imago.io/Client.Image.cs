@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
@@ -15,6 +15,7 @@ using System.Drawing;
 using System.Diagnostics;
 using System.IO;
 using Imago.IO.Classes;
+using Microsoft.Azure.Storage.Blob;
 
 namespace Imago.IO
 {
@@ -24,7 +25,8 @@ namespace Imago.IO
         {
             public Guid imageryId { get; set; } = Guid.Empty;
             public Guid imageTypeId { get; set; } = Guid.Empty;
-            public bool overwriteExisting { get; set; } = false;
+            public string imageTypeName { get; set; }
+            public string url { get; set; } = null;
             public int? resizeWidth { get; set; } = null;
             public int? resizeHeight { get; set; } = null;
         }
@@ -32,6 +34,9 @@ namespace Imago.IO
         {
             try
             {
+                if (!string.IsNullOrWhiteSpace(parameters.url))
+                    return await DownloadImageToFile(parameters.url, fileName, ct);
+
                 if (parameters.imageryId == Guid.Empty || parameters.imageTypeId == Guid.Empty)
                     return new Result<string> { Code = ResultCode.failed };
 
@@ -39,6 +44,8 @@ namespace Imago.IO
 
                 query["imageryid"] = parameters.imageryId.ToString();
                 query["imagetypeid"] = parameters.imageTypeId.ToString();
+                if (!string.IsNullOrWhiteSpace(parameters.imageTypeName))
+                    query["imagetypename"] = parameters.imageTypeName;
                 if (parameters.resizeHeight != null)
                     query["height"] = parameters.resizeHeight.Value.ToString();
                 if (parameters.resizeWidth != null)
@@ -51,6 +58,7 @@ namespace Imago.IO
                 using (HttpClient client = GetClient(timeout))
                 {
                     HttpResponseMessage response = await client.GetAsync(builder.ToString(), ct).ConfigureAwait(false);
+                    this.LogHttpResponse(response);
                     _lastResponse = response;
 
 
@@ -83,6 +91,30 @@ namespace Imago.IO
             finally
             {
 
+            }
+        }
+        public async Task<Result<string>> DownloadImageToFile(string path, string fileName, CancellationToken ct, TimeSpan? timeout = null)
+        {
+            try
+            {
+                CloudBlockBlob blob = new CloudBlockBlob(new Uri(path));
+                string uri = blob.Uri.AbsolutePath;
+                int ind = uri.LastIndexOf('.');
+                if(ind == -1)
+                    return new Result<string> { Code = ResultCode.failed };
+
+                string fsExt = uri.Substring(ind);
+                if (!fileName.EndsWith(fsExt))
+                    fileName += fsExt;
+
+                await blob.DownloadToFileAsync(fileName, FileMode.Create, ct);
+                return new Result<string> { Value = fileName, Code = ResultCode.ok};
+            }catch(Exception ex)
+            {
+                Console.WriteLine(ex.ToString() + "\n\n");//remove
+                Console.WriteLine(ex.StackTrace);//remove
+                this.LogTracer.TrackError(ex);
+                return new Result<string> { Code = ResultCode.failed };
             }
         }
         public class ImageUpdateParameters
@@ -167,6 +199,7 @@ namespace Imago.IO
                 using (HttpClient client = GetClient(timeout))
                 {
                     HttpResponseMessage response = await client.PostAsync(builder.ToString(), content, ct).ConfigureAwait(false);
+                    this.LogHttpResponse(response);
                     _lastResponse = response;
                     string body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     _lastResponseBody = body;

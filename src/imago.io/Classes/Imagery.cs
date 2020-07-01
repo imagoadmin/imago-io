@@ -3,14 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Imago.IO.Interfaces;
 
 namespace Imago.IO.Classes
 {
-    public class Imagery
+    public class Imagery : Interfaces.IImagery
     {
-        public class Image
+        public class Image : Interfaces.IImage
         {
             public Guid ImageTypeId { get; set; }
+            public string url { get; set; }
+            public DateTime? uploadedOn { get; set; }
+            public string uploadedBy { get; set; }
+            public string MimeType { get; set; }
+            public int? width { get; set; }
+            public int? height { get; set; }
+            public Int64? fileSize { get; set; }
         }
 
         public Guid Id { get; set; } = Guid.Empty;
@@ -24,7 +32,9 @@ namespace Imago.IO.Classes
         public double? StartDepth { get; set; }
         public double? EndDepth { get; set; }
 
-        public List<Image> Images { get; set; } = new List<Image>();
+        public List<Interfaces.IImage> Images { get; set; } = new List<Interfaces.IImage>();
+        public List<Interfaces.IFeature> Features { get; set; } = new List<Interfaces.IFeature>();
+        public List<Interfaces.IAttribute> AttributeDefinitions { get; set; } = new List<IAttribute>();
 
         public override string ToString()
         {

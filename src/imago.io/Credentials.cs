@@ -21,5 +21,7 @@ namespace Imago.IO
         public string ApiVersion { get; protected set; }
         public string UserName { get; set; }
         public string Password { get; set; }
+        public string Product { get; set; }
+        public string Version { get; set; }
     }
 }
