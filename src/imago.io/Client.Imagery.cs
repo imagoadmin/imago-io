@@ -124,7 +124,13 @@ namespace Imago.IO
             public class AttributeDefinition
             {
                 public string name { get; set; } = "Core Tray Box Numbers";
-                public Dictionary<string, object> attributeValues { get; set; } = new Dictionary<string, object>();
+                public AttributeType[] attributeTypes { get; set; } = null;
+            }
+            public class AttributeType
+            {
+                public string name { get; set; } = null;
+                public string value { get; set; } = null;
+
             }
 
             public class Image
@@ -143,7 +149,21 @@ namespace Imago.IO
                 public double y { get; set; }
                 public int pen { get; set; }
             }
+            public class Keys
+            {
+                public string collectionName { get; set; }
+                public string datasetName { get; set; }
+                public string workspaceName { get; set; }
+                public string imageryTypeName { get; set; }
+                public string name { get; set; }
+                public double? startDepth { get; set; }
+                public double? endDepth { get; set; }
+                public double? x { get; set; }
+                public double? y { get; set; }
+                public double? z { get; set; }
+            }
 
+            public Keys keys { get; set; }
             public Guid? id { get; set; }
             public string name { get; set; }
             public double? startDepth { get; set; }
@@ -180,6 +200,26 @@ namespace Imago.IO
                 return new Result<Imagery> { Code = ResultCode.failed };
             }
         }
+        public async Task<Result<List<Imagery>>> BulkUpdateImagery(List<ImageryUpdateParameters> parameters, CancellationToken ct, TimeSpan? timeout = null)
+        {
+            try
+            {
+                UriBuilder builder = new UriBuilder(_apiUrl);
+                builder.Path += "/imagery";
+
+                return await ClientPut(builder, parameters, timeout, ct, (response, body) =>
+                {
+                    this.LogHttpResponse(response);
+                    return _jsonConverter.Deserialize<List<Imagery>>(body);
+                });
+            }
+            catch (Exception ex)
+            {
+                this.LogTracer.TrackError(ex);
+                return new Result<List<Imagery>> { Code = ResultCode.failed };
+            }
+        }
+
         public class AttributeUpdateParameters : ImageryQueryParameters
         {
             //public Guid imageryId { get; set; }
