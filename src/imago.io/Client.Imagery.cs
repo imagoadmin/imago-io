@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
@@ -124,13 +124,7 @@ namespace Imago.IO
             public class AttributeDefinition
             {
                 public string name { get; set; } = "Core Tray Box Numbers";
-                public AttributeType[] attributeTypes { get; set; } = null;
-            }
-            public class AttributeType
-            {
-                public string name { get; set; } = null;
-                public string value { get; set; } = null;
-
+                public Dictionary<string, object> attributeValues { get; set; } = new Dictionary<string, object>();
             }
 
             public class Image
