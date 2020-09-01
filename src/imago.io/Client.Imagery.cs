@@ -201,7 +201,7 @@ namespace Imago.IO
                 UriBuilder builder = new UriBuilder(_apiUrl);
                 builder.Path += "/imagery";
 
-                return await ClientPut(builder, parameters, timeout, ct, (response, body) =>
+                return await ClientPost(builder, parameters, timeout, ct, (response, body) =>
                 {
                     this.LogHttpResponse(response);
                     return _jsonConverter.Deserialize<List<Imagery>>(body);
