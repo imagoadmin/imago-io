@@ -71,5 +71,23 @@ namespace Imago.IO
                 return new Result<string> { Code = ResultCode.failed };
             }
         }
+
+        public async Task<Result<string>> GetProfiles(TimeSpan? timeout = null)
+        {
+            try
+            {
+                var profiles = await ClientGet("/profile", new NameValueCollection(), new CancellationToken(false), timeout, (response, body) =>
+                {
+                    return body;
+                });
+
+                return profiles;
+            }
+            catch (Exception ex)
+            {
+                LogTracer.TrackError(ex);
+                return new Result<string> { Code = IO.ResultCode.failed };
+            }
+        }
     }
 }
