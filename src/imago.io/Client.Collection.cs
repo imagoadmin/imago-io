@@ -71,8 +71,10 @@ namespace Imago.IO
         public class CollectionUpdateParameters
         {
             public Guid? id { get; set; }
-            public Guid datasetId { get; set; }
+            public Guid? datasetId { get; set; }
             public string name { get; set; }
+            public string workspaceName { get; set; }
+            public string datasetName { get; set; }
         }
         public async Task<Result<Collection>> AddCollection(CollectionUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null)
         {
