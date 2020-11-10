@@ -100,7 +100,7 @@ namespace Imago.IO
                 CloudBlockBlob blob = new CloudBlockBlob(new Uri(path));
                 string uri = blob.Uri.AbsolutePath;
                 int ind = uri.LastIndexOf('.');
-                if(ind == -1)
+                if (ind == -1)
                     return new Result<string> { Code = ResultCode.failed };
 
                 string fsExt = uri.Substring(ind);
@@ -108,8 +108,9 @@ namespace Imago.IO
                     fileName += fsExt;
 
                 await blob.DownloadToFileAsync(fileName, FileMode.Create, ct);
-                return new Result<string> { Value = fileName, Code = ResultCode.ok};
-            }catch(Exception ex)
+                return new Result<string> { Value = fileName, Code = ResultCode.ok };
+            }
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString() + "\n\n");//remove
                 Console.WriteLine(ex.StackTrace);//remove
@@ -125,9 +126,14 @@ namespace Imago.IO
             public Stream dataStream { get; set; }
 
             public Guid? imageryId { get; set; }
+            public string workspaceName { get; set; }
+            public string datasetName { get; set; }
             public Guid? collectionId { get; set; }
+            public string collectionName { get; set; }
             public Guid? imageryTypeId { get; set; }
+            public string imageryTypeName { get; set; }
             public Guid imageTypeId { get; set; }
+            public string imageTypeName { get; set; }
             public string name { get; set; }
             public double? startDepth { get; set; }
             public double? endDepth { get; set; }
@@ -154,14 +160,19 @@ namespace Imago.IO
                 this.LogTracer.TrackEvent("Client.AddImagery()", new Dictionary<string, string> {
                     { "imageFileName", parameters.imageFileName },
                     { "imageryId", parameters.imageryId?.ToString() },
+                    { "workspaceName", parameters.workspaceName },
+                    { "datasetName", parameters.datasetName },
                     { "collectionId", parameters.collectionId?.ToString() },
+                    { "collectionName", parameters.collectionName },
                     { "imageryTypeId", parameters.imageryTypeId?.ToString() },
+                    { "imageryTypeName", parameters.imageryTypeName },
                     { "imageTypeId", parameters.imageTypeId.ToString() },
+                    {"imageTypeName", parameters.imageryTypeName },
                     { "mimeType", parameters.mimeType },
                     { "size", parameters.dataStream?.Length.ToString() },
                     { "x", parameters.x?.ToString() },
                     { "y", parameters.y?.ToString() },
-                    { "z", parameters.z?.ToString() },
+                    { "z", parameters.z?.ToString() }
                 });
 
                 if (parameters.imageryId == Guid.Empty || parameters.imageTypeId == Guid.Empty)
@@ -170,6 +181,12 @@ namespace Imago.IO
                 NameValueCollection query = new NameValueCollection();
 
                 if (parameters.imageryId.HasValue) query["imageryid"] = parameters.imageryId.ToString();
+                if (!string.IsNullOrEmpty(parameters.workspaceName)) query["workspaceName"] = parameters.workspaceName;
+                if (!string.IsNullOrEmpty(parameters.datasetName)) query["datasetName"] = parameters.workspaceName;
+                if (!string.IsNullOrEmpty(parameters.collectionName)) query["collectionName"] = parameters.workspaceName;
+                if (!string.IsNullOrEmpty(parameters.imageryTypeName)) query["imageryTypeName"] = parameters.workspaceName;
+                if (!string.IsNullOrEmpty(parameters.imageTypeName)) query["imageTypeName"] = parameters.workspaceName;
+
                 query["collectionid"] = parameters.collectionId?.ToString();
                 query["imagerytypeid"] = parameters.imageryTypeId?.ToString();
                 query["imagetypeid"] = parameters.imageTypeId.ToString();
@@ -277,7 +294,7 @@ namespace Imago.IO
                 {
                     var responseObject = JObject.Parse(body);
 
-                    var result =  responseObject["attributes"].ToString();
+                    var result = responseObject["attributes"].ToString();
 
                     return result;
                 });

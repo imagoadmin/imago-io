@@ -63,7 +63,7 @@ namespace Imago.IO
                     query["collectionid"] = parameters.collectionId.ToString();
                 if (parameters.datasetId != null)
                     query["datasetid"] = parameters.datasetId.ToString();
-                if  (parameters.imageryTypeId != null)
+                if (parameters.imageryTypeId != null)
                     query["imagerytypeid"] = parameters.imageryTypeId.ToString();
                 if (!String.IsNullOrWhiteSpace(parameters.collectionName))
                     query["collectionname"] = parameters.collectionName;
@@ -107,6 +107,10 @@ namespace Imago.IO
                 return new Result<List<Imagery>> { Code = ResultCode.failed };
             }
         }
+
+        /// <summary>
+        /// Use the cloud id to update an imagery or the combination of(workspaceName, datasetName, collectionName, iamgeryTypeName to create a new imagery.
+        /// </summary>
         public class ImageryUpdateParameters
         {
             public class FeatureDefinition
@@ -145,6 +149,11 @@ namespace Imago.IO
             }
 
             public Guid? id { get; set; }
+            public string workspaceName { get; set; }
+            public string datasetName { get; set; }
+            public string collectionName { get; set; }
+            public string imageryTypeName { get; set; }
+
             public string name { get; set; }
             public double? startDepth { get; set; }
             public double? endDepth { get; set; }
@@ -159,20 +168,36 @@ namespace Imago.IO
         {
             try
             {
-                if (parameters.id == null || parameters.id == Guid.Empty)
+                var isUpdate = parameters.id == null || parameters.id == Guid.Empty;
+                var isAdd = !string.IsNullOrEmpty(parameters.workspaceName) &&
+                    !string.IsNullOrEmpty(parameters.datasetName) &&
+                    !string.IsNullOrEmpty(parameters.collectionName) &&
+                    !string.IsNullOrEmpty(parameters.imageryTypeName);
+
+                if (!isAdd && !isUpdate)
                     return new Result<Imagery> { Code = ResultCode.failed };
 
                 UriBuilder builder = new UriBuilder(_apiUrl);
-                builder.Path += "/imagery/" + parameters.id.ToString();
+                builder.Path += "/imagery/";
 
-                if (parameters.featureDefinitions != null && parameters.featureDefinitions.Any(fd => string.IsNullOrWhiteSpace(fd.name) || fd.featureTypes.Any(ft => string.IsNullOrWhiteSpace(ft.name) || ft.images.Any(i=> string.IsNullOrWhiteSpace(i.name)))))
+                if (parameters.featureDefinitions != null && parameters.featureDefinitions.Any(fd => string.IsNullOrWhiteSpace(fd.name) || fd.featureTypes.Any(ft => string.IsNullOrWhiteSpace(ft.name) || ft.images.Any(i => string.IsNullOrWhiteSpace(i.name)))))
                     return new Result<Imagery> { Code = ResultCode.failed };
 
-                return await ClientPut(builder, parameters, timeout, ct, (response, body) =>
+                Func<HttpResponseMessage, string, Imagery> responseHandler = (HttpResponseMessage response, string body) =>
                 {
-                    this.LogHttpResponse(response);
+                    LogHttpResponse(response);
                     return _jsonConverter.Deserialize<Imagery>(body);
-                });
+                };
+
+                if (isUpdate)
+                {
+                    builder.Path += parameters.id.ToString();
+                    return await ClientPut(builder, parameters, timeout, ct, responseHandler);
+                }
+                else
+                {
+                    return await ClientPost(builder, parameters, timeout, ct, responseHandler);
+                }
             }
             catch (Exception ex)
             {
