@@ -245,6 +245,7 @@ namespace Imago.IO
             public string fileName { get; set; }
             public string fileExt { get; set; }
             public Int64 fileSize { get; set; } = 0;
+            public String checksum { get; set; }
         }
 
         public async Task<Result<ImageProperties>> GetImageProperties(Guid id, CancellationToken ct, TimeSpan? timeout = null)
