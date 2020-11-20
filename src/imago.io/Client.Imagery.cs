@@ -168,7 +168,7 @@ namespace Imago.IO
         {
             try
             {
-                var isUpdate = parameters.id == null || parameters.id == Guid.Empty;
+                var isUpdate = parameters.id != null && parameters.id != Guid.Empty;
                 var isAdd = !string.IsNullOrEmpty(parameters.workspaceName) &&
                     !string.IsNullOrEmpty(parameters.datasetName) &&
                     !string.IsNullOrEmpty(parameters.collectionName) &&
