@@ -1,19 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Net;
-using System.Web;
 using Newtonsoft.Json.Linq;
-using System.Globalization;
 using System.Threading;
-using System.Drawing;
-using System.Diagnostics;
-using System.IO;
 using Imago.IO.Classes;
 
 namespace Imago.IO
@@ -63,7 +53,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
-                this.LogTracer.TrackError(ex);
+                Telemetry.TelemetryLogger.Instance?.LogException(ex);
                 return new Result<List<Collection>> { Code = ResultCode.failed };
             }
         }
@@ -97,7 +87,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
-                this.LogTracer.TrackError(ex);
+                Telemetry.TelemetryLogger.Instance?.LogException(ex);
                 return new Result<Collection> { Code = ResultCode.failed, Message = ex.Message };
             }
         }
@@ -122,7 +112,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
-                this.LogTracer.TrackError(ex);
+                Telemetry.TelemetryLogger.Instance?.LogException(ex);
                 return new Result<List<Collection>> { Code = ResultCode.failed, Message = ex.Message };
             }
         }

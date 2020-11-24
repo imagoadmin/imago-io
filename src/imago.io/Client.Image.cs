@@ -1,20 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Net;
-using System.Web;
 using Newtonsoft.Json.Linq;
-using System.Globalization;
 using System.Threading;
-using System.Drawing;
-using System.Diagnostics;
 using System.IO;
-using Imago.IO.Classes;
 using Microsoft.Azure.Storage.Blob;
 
 namespace Imago.IO
@@ -85,7 +77,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
-                this.LogTracer.TrackError(ex);
+                Telemetry.TelemetryLogger.Instance?.LogException(ex);
                 return new Result<string> { Code = ResultCode.failed };
             }
             finally
@@ -112,9 +104,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString() + "\n\n");//remove
-                Console.WriteLine(ex.StackTrace);//remove
-                this.LogTracer.TrackError(ex);
+                Telemetry.TelemetryLogger.Instance?.LogException(ex);
                 return new Result<string> { Code = ResultCode.failed };
             }
         }
@@ -157,7 +147,7 @@ namespace Imago.IO
                 if (String.IsNullOrWhiteSpace(parameters.mimeType))
                     parameters.mimeType = "image/jpeg";
 
-                this.LogTracer.TrackEvent("Client.AddImagery()", new Dictionary<string, string> {
+                Telemetry.TelemetryLogger.Instance?.LogEvent(Telemetry.TelemetryEvents.ClientAddImagery, new Dictionary<string, string> {
                     { "imageFileName", parameters.imageFileName },
                     { "imageryId", parameters.imageryId?.ToString() },
                     { "workspaceName", parameters.workspaceName },
@@ -226,7 +216,23 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
-                this.LogTracer.TrackError(ex);
+                Telemetry.TelemetryLogger.Instance?.LogException(ex, new Dictionary<string, string> {
+                    { "imageFileName", parameters.imageFileName },
+                    { "imageryId", parameters.imageryId?.ToString() },
+                    { "workspaceName", parameters.workspaceName },
+                    { "datasetName", parameters.datasetName },
+                    { "collectionId", parameters.collectionId?.ToString() },
+                    { "collectionName", parameters.collectionName },
+                    { "imageryTypeId", parameters.imageryTypeId?.ToString() },
+                    { "imageryTypeName", parameters.imageryTypeName },
+                    { "imageTypeId", parameters.imageTypeId.ToString() },
+                    {"imageTypeName", parameters.imageryTypeName },
+                    { "mimeType", parameters.mimeType },
+                    { "size", parameters.dataStream?.Length.ToString() },
+                    { "x", parameters.x?.ToString() },
+                    { "y", parameters.y?.ToString() },
+                    { "z", parameters.z?.ToString() }
+                });
                 result = new Result<ImageUpdateResult> { Code = ResultCode.failed, Message = "Exception " + ex.Message + Environment.NewLine + ex.ToString() };
             }
             finally
@@ -272,7 +278,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
-                this.LogTracer.TrackError(ex);
+                Telemetry.TelemetryLogger.Instance?.LogException(ex);
                 return new Result<ImageProperties> { Code = ResultCode.failed };
             }
         }
@@ -302,7 +308,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
-                this.LogTracer.TrackError(ex);
+                Telemetry.TelemetryLogger.Instance?.LogException(ex);
                 return new Result<string> { Code = ResultCode.failed };
             }
         }
@@ -331,7 +337,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
-                this.LogTracer.TrackError(ex);
+                Telemetry.TelemetryLogger.Instance?.LogException(ex);
                 return new Result<object> { Code = ResultCode.failed };
             }
         }

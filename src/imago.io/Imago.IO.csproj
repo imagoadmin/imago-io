@@ -17,4 +17,7 @@
     <PackageReference Include="Microsoft.Azure.Storage.Blob" Version="11.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\imago-shared\src\Imago.Telemetry\Imago.Telemetry.csproj" />
+  </ItemGroup>
 </Project>
