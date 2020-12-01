@@ -159,6 +159,9 @@ namespace Imago.IO
                     { "imageTypeId", parameters.imageTypeId.ToString() },
                     { "mimeType", parameters.mimeType },
                     { "size", parameters.dataStream?.Length.ToString() },
+                    { "x", parameters.x?.ToString() },
+                    { "y", parameters.y?.ToString() },
+                    { "z", parameters.z?.ToString() },
                 });
 
                 if (parameters.imageryId == Guid.Empty || parameters.imageTypeId == Guid.Empty)

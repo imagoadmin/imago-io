@@ -1,6 +1,7 @@
 ﻿using Imago.IO.Classes;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -15,6 +16,10 @@ namespace Imago.IO
         int MaxRetryAttempts { get; set; }
         HttpClient Direct { get; }
         Task<bool> SignIn(Credentials credentials, TimeSpan? timeout = null);
+        Task<bool> SignOut(TimeSpan? timeout = null);
+        ResultCode? LastSignInResultCode { get; }
+        Task<bool> IsSessionValid(TimeSpan? timeout = null);
+        Guid UserId { get; }
         string APIUrl { get; }
 
         Task<Result<List<Imagery>>> SearchForImagery(ImageryQueryParameters parameters, CancellationToken ct, TimeSpan? timeout = null);
@@ -29,5 +34,7 @@ namespace Imago.IO
         Task<Result<Collection>> AddCollection(CollectionUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null);
         Task<Result<List<Collection>>> AddCollectionBulk(List<CollectionUpdateParameters> parameters, CancellationToken ct, TimeSpan? timeout = null);
         Task<Result<string>> GetWorkspaceSASUrl(Guid id, Guid? imageId = null, string mimeType = null, TimeSpan? timeout = null);
+        Task<Result<string>> GetProfiles(TimeSpan? timeout = null);
+        Task<Result<ImageProperties>> GetImageProperties(Guid id, CancellationToken ct, TimeSpan? timeout = null);
     }
 }
