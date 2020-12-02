@@ -155,11 +155,6 @@ namespace Imago.IO
 
             public Keys keys { get; set; }
             public Guid? id { get; set; }
-            public string workspaceName { get; set; }
-            public string datasetName { get; set; }
-            public string collectionName { get; set; }
-            public string imageryTypeName { get; set; }
-
             public string name { get; set; }
             public double? startDepth { get; set; }
             public double? endDepth { get; set; }
@@ -175,10 +170,10 @@ namespace Imago.IO
             try
             {
                 var isUpdate = parameters.id != null && parameters.id != Guid.Empty;
-                var isAdd = !string.IsNullOrEmpty(parameters.workspaceName) &&
-                    !string.IsNullOrEmpty(parameters.datasetName) &&
-                    !string.IsNullOrEmpty(parameters.collectionName) &&
-                    !string.IsNullOrEmpty(parameters.imageryTypeName);
+                var isAdd = !string.IsNullOrEmpty(parameters.keys?.workspaceName) &&
+                    !string.IsNullOrEmpty(parameters.keys?.datasetName) &&
+                    !string.IsNullOrEmpty(parameters.keys?.collectionName) &&
+                    !string.IsNullOrEmpty(parameters.keys?.imageryTypeName);
 
                 if (!isAdd && !isUpdate)
                     return new Result<Imagery> { Code = ResultCode.failed };
@@ -226,7 +221,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
-                this.LogTracer.TrackError(ex);
+                Telemetry.TelemetryLogger.Instance?.LogException(ex);
                 return new Result<List<Imagery>> { Code = ResultCode.failed };
             }
         }
