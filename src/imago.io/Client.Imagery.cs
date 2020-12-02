@@ -221,7 +221,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
-                Telemetry.TelemetryLogger.Instance?.LogException(ex);
+                //this.LogTracer.TrackError(ex);
                 return new Result<List<Imagery>> { Code = ResultCode.failed };
             }
         }
