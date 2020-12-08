@@ -165,23 +165,30 @@ namespace Imago.IO
                     { "z", parameters.z?.ToString() }
                 });
 
-                if (parameters.imageryId == Guid.Empty || parameters.imageTypeId == Guid.Empty)
-                    return new Result<ImageUpdateResult> { Code = ResultCode.failed };
+                var hasWorkspace = !string.IsNullOrEmpty(parameters.workspaceName);
+                var hasDataset = !string.IsNullOrEmpty(parameters.datasetName);
+                var hasCollection = !string.IsNullOrEmpty(parameters.collectionName);
+                var hasImageryType = !string.IsNullOrEmpty(parameters.imageryTypeName);
+                var hasImageType = !string.IsNullOrEmpty(parameters.imageTypeName);
+
+                var byId = parameters.imageryId != null && parameters.imageryId.Value != default;
+                var byName = hasWorkspace && hasDataset && hasCollection && hasImageryType && hasImageType;
+                    
+                if (!byId && !byName) return new Result<ImageUpdateResult> { Code = ResultCode.failed };
 
                 NameValueCollection query = new NameValueCollection();
 
-                if (parameters.imageryId.HasValue) query["imageryid"] = parameters.imageryId.ToString();
-                if (!string.IsNullOrEmpty(parameters.workspaceName)) query["workspaceName"] = parameters.workspaceName;
-                if (!string.IsNullOrEmpty(parameters.datasetName)) query["datasetName"] = parameters.workspaceName;
-                if (!string.IsNullOrEmpty(parameters.collectionName)) query["collectionName"] = parameters.workspaceName;
-                if (!string.IsNullOrEmpty(parameters.imageryTypeName)) query["imageryTypeName"] = parameters.workspaceName;
-                if (!string.IsNullOrEmpty(parameters.imageTypeName)) query["imageTypeName"] = parameters.workspaceName;
+                if (byId) query["imageryid"] = parameters.imageryId.ToString();
+                if (hasWorkspace) query["workspaceName"] = parameters.workspaceName;
+                if (hasDataset) query["datasetName"] = parameters.datasetName;
+                if (hasCollection) query["collectionName"] = parameters.collectionName;
+                if (hasImageryType) query["imageryTypeName"] = parameters.imageryTypeName;
+                if (hasImageType) query["imageTypeName"] = parameters.imageTypeName;
+                if (parameters.collectionId != default) query["collectionid"] = parameters.collectionId?.ToString();
+                if (parameters.imageryTypeId != default) query["imagerytypeid"] = parameters.imageryTypeId?.ToString();
+                if(parameters.imageryTypeId != default) query["imagetypeid"] = parameters.imageTypeId.ToString();
 
-                query["collectionid"] = parameters.collectionId?.ToString();
-                query["imagerytypeid"] = parameters.imageryTypeId?.ToString();
-                query["imagetypeid"] = parameters.imageTypeId.ToString();
                 query["mimetype"] = parameters.mimeType;
-
                 query["name"] = parameters.name?.ToString();
                 query["startdepth"] = parameters.startDepth?.ToString();
                 query["enddepth"] = parameters.endDepth?.ToString();
