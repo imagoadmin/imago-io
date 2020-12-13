@@ -9,5 +9,7 @@ namespace Imago.IO.Interfaces
         double X { get; set; }
         double Y { get; set; }
         int Pen { get; set; }
+
+        IPoint Clone();
     }
 }
