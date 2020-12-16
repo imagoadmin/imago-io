@@ -125,14 +125,15 @@ namespace Imago.IO
                 client.Timeout = timeout ?? new TimeSpan(0, 0, 30);
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                string productCode = product??credentials.Product;
+                string productCode = product ?? credentials.Product;
                 string productVersion = credentials.Version;
                 if (String.IsNullOrWhiteSpace(productVersion))
                 {
                     try
                     {
-                        Version version = Assembly.GetEntryAssembly().GetName().Version;
-                        productVersion = version.Major + "." + version.Minor + "." + version.Build + "." + version.MinorRevision;
+                        Version version = Assembly.GetEntryAssembly()?.GetName()?.Version;
+                        if (version != null)
+                            productVersion = version.Major + "." + version.Minor + "." + version.Build + "." + version.MinorRevision;
                     }
                     catch (System.Exception)
                     {
@@ -230,7 +231,7 @@ namespace Imago.IO
                         }
                     }
                 }
-                catch(OperationCanceledException)
+                catch (OperationCanceledException)
                 {
                     return new Result<T> { Value = null, Code = ResultCode.failed };
                 }
@@ -374,7 +375,7 @@ namespace Imago.IO
                     HttpResponseMessage result = await client.DeleteAsync(_apiUrl + "/session").ConfigureAwait(false);
                     this.LogHttpResponse(result);
                     _lastResponse = result;
-                    
+
 
                     _lastResponseBody = null;
 
