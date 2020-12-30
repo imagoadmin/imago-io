@@ -219,9 +219,8 @@ namespace Imago.IO
                     return _jsonConverter.Deserialize<List<Imagery>>(body);
                 });
             }
-            catch (Exception ex)
+            catch
             {
-                //this.LogTracer.TrackError(ex);
                 return new Result<List<Imagery>> { Code = ResultCode.failed };
             }
         }
