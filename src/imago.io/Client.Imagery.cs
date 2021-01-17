@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
@@ -143,7 +143,21 @@ namespace Imago.IO
                 public double y { get; set; }
                 public int pen { get; set; }
             }
+            public class Keys
+            {
+                public string collectionName { get; set; }
+                public string datasetName { get; set; }
+                public string workspaceName { get; set; }
+                public string imageryTypeName { get; set; }
+                public string name { get; set; }
+                public double? startDepth { get; set; }
+                public double? endDepth { get; set; }
+                public double? x { get; set; }
+                public double? y { get; set; }
+                public double? z { get; set; }
+            }
 
+            public Keys keys { get; set; }
             public Guid? id { get; set; }
             public string name { get; set; }
             public double? startDepth { get; set; }
@@ -180,6 +194,26 @@ namespace Imago.IO
                 return new Result<Imagery> { Code = ResultCode.failed };
             }
         }
+        public async Task<Result<List<Imagery>>> BulkUpdateImagery(List<ImageryUpdateParameters> parameters, CancellationToken ct, TimeSpan? timeout = null)
+        {
+            try
+            {
+                UriBuilder builder = new UriBuilder(_apiUrl);
+                builder.Path += "/imagery";
+
+                return await ClientPost(builder, parameters, timeout, ct, (response, body) =>
+                {
+                    this.LogHttpResponse(response);
+                    return _jsonConverter.Deserialize<List<Imagery>>(body);
+                });
+            }
+            catch (Exception ex)
+            {
+                this.LogTracer.TrackError(ex);
+                return new Result<List<Imagery>> { Code = ResultCode.failed };
+            }
+        }
+
         public class AttributeUpdateParameters : ImageryQueryParameters
         {
             //public Guid imageryId { get; set; }
