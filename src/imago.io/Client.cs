@@ -121,8 +121,9 @@ namespace Imago.IO
                 {
                     try
                     {
-                        Version version = Assembly.GetEntryAssembly().GetName().Version;
-                        productVersion = version.Major + "." + version.Minor + "." + version.Build + "." + version.MinorRevision;
+                        Version version = Assembly.GetEntryAssembly()?.GetName()?.Version;
+                        if (version != null)
+                            productVersion = version.Major + "." + version.Minor + "." + version.Build + "." + version.MinorRevision;
                     }
                     catch (Exception)
                     {
