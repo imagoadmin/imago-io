@@ -10,13 +10,8 @@ using System.Net;
 using System.Web;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using System.Globalization;
 using System.Threading;
 using System.Reflection;
-using System.Drawing;
-using System.Diagnostics;
-using System.IO;
-using Imago.IO.Classes;
 
 namespace Imago.IO
 {
@@ -36,17 +31,12 @@ namespace Imago.IO
         private HttpResponseMessage _lastResponse;
         private string _lastResponseBody;
 
-        public IEventLogger LogTracer { get; private set; } = IO.EventLogger.Default;
+        
 
         public ResultCode? LastSignInResultCode { get; private set; } = null;
 
         public Client()
         {
-            this.LogTracer = IO.EventLogger.Default;
-        }
-        public Client(IEventLogger logger)
-        {
-            this.LogTracer = (logger == null ? IO.EventLogger.Default : logger);
         }
 
         public string UserName
@@ -135,7 +125,7 @@ namespace Imago.IO
                         if (version != null)
                             productVersion = version.Major + "." + version.Minor + "." + version.Build + "." + version.MinorRevision;
                     }
-                    catch (System.Exception)
+                    catch (Exception)
                     {
                     }
                 }
@@ -168,7 +158,7 @@ namespace Imago.IO
             catch (Exception ex)
             {
                 LastSignInResultCode = ResultCode.failed;
-                this.LogTracer.TrackError(ex);
+                Telemetry.TelemetryLogger.Instance?.LogException(ex);
                 return false;
             }
         }
@@ -231,12 +221,14 @@ namespace Imago.IO
                         }
                     }
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException ex)
                 {
+                    Telemetry.TelemetryLogger.Instance?.LogException(ex);
                     return new Result<T> { Value = null, Code = ResultCode.failed };
                 }
                 catch (Exception ex)
                 {
+                    Telemetry.TelemetryLogger.Instance?.LogException(ex);
                 }
                 Thread.Sleep(TimeSpan.FromSeconds(retryCount < MaxRetryAttempts ? retryDelay : 0));
                 retryDelay *= this.RetryDelayFactor;
@@ -281,6 +273,7 @@ namespace Imago.IO
                 }
                 catch (Exception ex)
                 {
+                    Telemetry.TelemetryLogger.Instance?.LogException(ex);
                 }
                 Thread.Sleep(TimeSpan.FromSeconds(retryCount < MaxRetryAttempts ? retryDelay : 0));
                 retryDelay *= this.RetryDelayFactor;
@@ -324,6 +317,7 @@ namespace Imago.IO
                 }
                 catch (Exception ex)
                 {
+                    Telemetry.TelemetryLogger.Instance?.LogException(ex);
                 }
                 Thread.Sleep(TimeSpan.FromSeconds(retryCount < MaxRetryAttempts ? retryDelay : 0));
                 retryDelay *= this.RetryDelayFactor;
@@ -358,7 +352,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
-                this.LogTracer.TrackError(ex);
+                Telemetry.TelemetryLogger.Instance?.LogException(ex);
                 return false;
             }
         }
@@ -384,7 +378,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
-                this.LogTracer.TrackError(ex);
+                Telemetry.TelemetryLogger.Instance?.LogException(ex);
                 return false;
             }
             finally
@@ -398,10 +392,12 @@ namespace Imago.IO
         public void LogHttpResponse(HttpResponseMessage response)
         {
             string request = response.RequestMessage.Method.ToString() + ":" + response.RequestMessage.RequestUri.ToString();
-            this.LogTracer.TrackEvent(request, new Dictionary<string, string>()
+
+            Telemetry.TelemetryLogger.Instance?.LogEvent(Telemetry.TelemetryEvents.ClientHttpResponse, new Dictionary<string, string>()
             {
-                { "Status Code", response.StatusCode.ToString() },
-                { "Message", response.ToString() },
+                { "Request", request },
+                { "Status Code", response?.StatusCode.ToString() },
+                { "Message", response?.ToString() },
             });
         }
 

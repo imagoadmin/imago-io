@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -42,7 +38,8 @@ namespace Imago.IO
             Result<FeatureUpdateResult> result = null;
             try
             {
-                this.LogTracer.TrackEvent("Client.UploadFeatures()", new Dictionary<string, string> {
+                Telemetry.TelemetryLogger.Instance?.LogEvent(Telemetry.TelemetryEvents.ClientUploadFeatures,
+                     new Dictionary<string, string> {
                     { "features", parameters.features.Length.ToString() },
                     { "imageryId", string.Join(",",parameters.features.Select(x=>x.imageryId)) },
                     { "featureTypeId", string.Join(",",parameters.features.Select(x=>x.featureTypeId)) },
@@ -62,7 +59,12 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
-                this.LogTracer.TrackError(ex);
+                Telemetry.TelemetryLogger.Instance?.LogException(ex, new Dictionary<string, string> {
+                    { "features", parameters.features.Length.ToString() },
+                    { "imageryId", string.Join(",",parameters.features.Select(x=>x.imageryId)) },
+                    { "featureTypeId", string.Join(",",parameters.features.Select(x=>x.featureTypeId)) },
+                    { "imageTypeId", string.Join(",",parameters.features.Select(x=>x.imageTypeId)) },
+                });
                 result = new Result<FeatureUpdateResult> { Code = ResultCode.failed, Message = "Exception " + ex.Message + Environment.NewLine + ex.ToString() };
             }
             return result;

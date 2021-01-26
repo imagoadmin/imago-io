@@ -1,20 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Net;
-using System.Web;
 using Newtonsoft.Json.Linq;
-using System.Globalization;
 using System.Threading;
-using System.Drawing;
-using System.Diagnostics;
 using System.IO;
-using Imago.IO.Classes;
 using Microsoft.Azure.Storage.Blob;
 
 namespace Imago.IO
@@ -85,7 +77,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
-                this.LogTracer.TrackError(ex);
+                Telemetry.TelemetryLogger.Instance?.LogException(ex);
                 return new Result<string> { Code = ResultCode.failed };
             }
             finally
@@ -100,7 +92,7 @@ namespace Imago.IO
                 CloudBlockBlob blob = new CloudBlockBlob(new Uri(path));
                 string uri = blob.Uri.AbsolutePath;
                 int ind = uri.LastIndexOf('.');
-                if(ind == -1)
+                if (ind == -1)
                     return new Result<string> { Code = ResultCode.failed };
 
                 string fsExt = uri.Substring(ind);
@@ -108,12 +100,11 @@ namespace Imago.IO
                     fileName += fsExt;
 
                 await blob.DownloadToFileAsync(fileName, FileMode.Create, ct);
-                return new Result<string> { Value = fileName, Code = ResultCode.ok};
-            }catch(Exception ex)
+                return new Result<string> { Value = fileName, Code = ResultCode.ok };
+            }
+            catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString() + "\n\n");//remove
-                Console.WriteLine(ex.StackTrace);//remove
-                this.LogTracer.TrackError(ex);
+                Telemetry.TelemetryLogger.Instance?.LogException(ex);
                 return new Result<string> { Code = ResultCode.failed };
             }
         }
@@ -125,9 +116,14 @@ namespace Imago.IO
             public Stream dataStream { get; set; }
 
             public Guid? imageryId { get; set; }
+            public string workspaceName { get; set; }
+            public string datasetName { get; set; }
             public Guid? collectionId { get; set; }
+            public string collectionName { get; set; }
             public Guid? imageryTypeId { get; set; }
+            public string imageryTypeName { get; set; }
             public Guid imageTypeId { get; set; }
+            public string imageTypeName { get; set; }
             public string name { get; set; }
             public double? startDepth { get; set; }
             public double? endDepth { get; set; }
@@ -151,30 +147,48 @@ namespace Imago.IO
                 if (String.IsNullOrWhiteSpace(parameters.mimeType))
                     parameters.mimeType = "image/jpeg";
 
-                this.LogTracer.TrackEvent("Client.AddImagery()", new Dictionary<string, string> {
+                Telemetry.TelemetryLogger.Instance?.LogEvent(Telemetry.TelemetryEvents.ClientAddImagery, new Dictionary<string, string> {
                     { "imageFileName", parameters.imageFileName },
                     { "imageryId", parameters.imageryId?.ToString() },
+                    { "workspaceName", parameters.workspaceName },
+                    { "datasetName", parameters.datasetName },
                     { "collectionId", parameters.collectionId?.ToString() },
+                    { "collectionName", parameters.collectionName },
                     { "imageryTypeId", parameters.imageryTypeId?.ToString() },
+                    { "imageryTypeName", parameters.imageryTypeName },
                     { "imageTypeId", parameters.imageTypeId.ToString() },
+                    {"imageTypeName", parameters.imageryTypeName },
                     { "mimeType", parameters.mimeType },
                     { "size", parameters.dataStream?.Length.ToString() },
                     { "x", parameters.x?.ToString() },
                     { "y", parameters.y?.ToString() },
-                    { "z", parameters.z?.ToString() },
+                    { "z", parameters.z?.ToString() }
                 });
 
-                if (parameters.imageryId == Guid.Empty || parameters.imageTypeId == Guid.Empty)
-                    return new Result<ImageUpdateResult> { Code = ResultCode.failed };
+                var hasWorkspace = !string.IsNullOrEmpty(parameters.workspaceName);
+                var hasDataset = !string.IsNullOrEmpty(parameters.datasetName);
+                var hasCollection = !string.IsNullOrEmpty(parameters.collectionName);
+                var hasImageryType = !string.IsNullOrEmpty(parameters.imageryTypeName);
+                var hasImageType = !string.IsNullOrEmpty(parameters.imageTypeName);
+
+                var byId = parameters.imageryId != null && parameters.imageryId.Value != default;
+                var byName = hasWorkspace && hasDataset && hasCollection && hasImageryType && hasImageType;
+                    
+                if (!byId && !byName) return new Result<ImageUpdateResult> { Code = ResultCode.failed };
 
                 NameValueCollection query = new NameValueCollection();
 
-                if (parameters.imageryId.HasValue) query["imageryid"] = parameters.imageryId.ToString();
-                query["collectionid"] = parameters.collectionId?.ToString();
-                query["imagerytypeid"] = parameters.imageryTypeId?.ToString();
-                query["imagetypeid"] = parameters.imageTypeId.ToString();
-                query["mimetype"] = parameters.mimeType;
+                if (byId) query["imageryid"] = parameters.imageryId.ToString();
+                if (hasWorkspace) query["workspaceName"] = parameters.workspaceName;
+                if (hasDataset) query["datasetName"] = parameters.datasetName;
+                if (hasCollection) query["collectionName"] = parameters.collectionName;
+                if (hasImageryType) query["imageryTypeName"] = parameters.imageryTypeName;
+                if (hasImageType) query["imageTypeName"] = parameters.imageTypeName;
+                if (parameters.collectionId != default) query["collectionid"] = parameters.collectionId?.ToString();
+                if (parameters.imageryTypeId != default) query["imagerytypeid"] = parameters.imageryTypeId?.ToString();
+                if(parameters.imageryTypeId != default) query["imagetypeid"] = parameters.imageTypeId.ToString();
 
+                query["mimetype"] = parameters.mimeType;
                 query["name"] = parameters.name?.ToString();
                 query["startdepth"] = parameters.startDepth?.ToString();
                 query["enddepth"] = parameters.endDepth?.ToString();
@@ -209,7 +223,23 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
-                this.LogTracer.TrackError(ex);
+                Telemetry.TelemetryLogger.Instance?.LogException(ex, new Dictionary<string, string> {
+                    { "imageFileName", parameters.imageFileName },
+                    { "imageryId", parameters.imageryId?.ToString() },
+                    { "workspaceName", parameters.workspaceName },
+                    { "datasetName", parameters.datasetName },
+                    { "collectionId", parameters.collectionId?.ToString() },
+                    { "collectionName", parameters.collectionName },
+                    { "imageryTypeId", parameters.imageryTypeId?.ToString() },
+                    { "imageryTypeName", parameters.imageryTypeName },
+                    { "imageTypeId", parameters.imageTypeId.ToString() },
+                    {"imageTypeName", parameters.imageryTypeName },
+                    { "mimeType", parameters.mimeType },
+                    { "size", parameters.dataStream?.Length.ToString() },
+                    { "x", parameters.x?.ToString() },
+                    { "y", parameters.y?.ToString() },
+                    { "z", parameters.z?.ToString() }
+                });
                 result = new Result<ImageUpdateResult> { Code = ResultCode.failed, Message = "Exception " + ex.Message + Environment.NewLine + ex.ToString() };
             }
             finally
@@ -228,6 +258,7 @@ namespace Imago.IO
             public string fileName { get; set; }
             public string fileExt { get; set; }
             public Int64 fileSize { get; set; } = 0;
+            public String checksum { get; set; }
         }
 
         public async Task<Result<ImageProperties>> GetImageProperties(Guid id, CancellationToken ct, TimeSpan? timeout = null)
@@ -254,7 +285,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
-                this.LogTracer.TrackError(ex);
+                Telemetry.TelemetryLogger.Instance?.LogException(ex);
                 return new Result<ImageProperties> { Code = ResultCode.failed };
             }
         }
@@ -277,14 +308,14 @@ namespace Imago.IO
                 {
                     var responseObject = JObject.Parse(body);
 
-                    var result =  responseObject["attributes"].ToString();
+                    var result = responseObject["attributes"].ToString();
 
                     return result;
                 });
             }
             catch (Exception ex)
             {
-                this.LogTracer.TrackError(ex);
+                Telemetry.TelemetryLogger.Instance?.LogException(ex);
                 return new Result<string> { Code = ResultCode.failed };
             }
         }
@@ -313,7 +344,7 @@ namespace Imago.IO
             }
             catch (Exception ex)
             {
-                this.LogTracer.TrackError(ex);
+                Telemetry.TelemetryLogger.Instance?.LogException(ex);
                 return new Result<object> { Code = ResultCode.failed };
             }
         }

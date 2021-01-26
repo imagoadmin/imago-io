@@ -19,7 +19,9 @@ namespace Imago.IO
         Task<bool> SignOut(TimeSpan? timeout = null);
         ResultCode? LastSignInResultCode { get; }
         Task<bool> IsSessionValid(TimeSpan? timeout = null);
+        string UserName { get; }
         Guid UserId { get; }
+        Guid ApiToken { get; }
         string APIUrl { get; }
 
         Task<Result<List<Imagery>>> SearchForImagery(ImageryQueryParameters parameters, CancellationToken ct, TimeSpan? timeout = null);

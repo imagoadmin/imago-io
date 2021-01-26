@@ -13,6 +13,11 @@ namespace Imago.IO.Classes
             public double X { get; set; }
             public double Y { get; set; }
             public int Pen { get; set; }
+
+            public Interfaces.IPoint Clone()
+            {
+                return new Point() { X = this.X, Y = this.Y, Pen = this.Pen };
+            }
         }
         public Guid Id { get; set; } = Guid.Empty;
         public Guid ImageryId { get; set; } = Guid.Empty;
