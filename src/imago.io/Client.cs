@@ -105,7 +105,14 @@ namespace Imago.IO
 
                 HttpClientHandler responseHandler = null;
                 if (!String.IsNullOrWhiteSpace(credentials.ProxyUri))
-                    responseHandler = new HttpClientHandler { Proxy = new WebProxy(credentials.ProxyUri, false), UseProxy = true, UseDefaultCredentials = true };
+                    responseHandler = new HttpClientHandler { 
+                        Proxy = new WebProxy {
+                            Address = new Uri(credentials.ProxyUri), 
+                            Credentials = CredentialCache.DefaultCredentials, 
+                            BypassProxyOnLocal = false 
+                        }, 
+                        UseProxy = true
+                    };
                 else
                     responseHandler = new HttpClientHandler();
 
