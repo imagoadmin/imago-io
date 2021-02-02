@@ -36,7 +36,7 @@ namespace Imago.IO
         Task<Result<Collection>> AddCollection(CollectionUpdateParameters parameters, CancellationToken ct, TimeSpan? timeout = null);
         Task<Result<List<Collection>>> AddCollectionBulk(List<CollectionUpdateParameters> parameters, CancellationToken ct, TimeSpan? timeout = null);
         Task<Result<string>> GetWorkspaceSASUrl(Guid id, Guid? imageId = null, string mimeType = null, TimeSpan? timeout = null);
-        Task<Result<string>> GetProfiles(TimeSpan? timeout = null);
+        Task<Result<string>> GetProfiles(string filter = null, TimeSpan? timeout = null);
         Task<Result<ImageProperties>> GetImageProperties(Guid id, CancellationToken ct, TimeSpan? timeout = null);
     }
 }

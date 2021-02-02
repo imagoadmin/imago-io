@@ -62,11 +62,15 @@ namespace Imago.IO
             }
         }
 
-        public async Task<Result<string>> GetProfiles(TimeSpan? timeout = null)
+        public async Task<Result<string>> GetProfiles(string filter = null, TimeSpan? timeout = null)
         {
             try
             {
-                var profiles = await ClientGet("/profile", new NameValueCollection(), new CancellationToken(false), timeout, (response, body) =>
+                var query = new NameValueCollection();
+                if (!string.IsNullOrWhiteSpace(filter))
+                    query.Add("filter", filter);
+
+                var profiles = await ClientGet("/profile", query, new CancellationToken(false), timeout, (response, body) =>
                 {
                     return body;
                 });
