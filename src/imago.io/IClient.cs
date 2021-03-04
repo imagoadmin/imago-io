@@ -38,5 +38,7 @@ namespace Imago.IO
         Task<Result<string>> GetWorkspaceSASUrl(Guid id, Guid? imageId = null, string mimeType = null, TimeSpan? timeout = null);
         Task<Result<string>> GetProfiles(string filter = null, TimeSpan? timeout = null);
         Task<Result<ImageProperties>> GetImageProperties(Guid id, CancellationToken ct, TimeSpan? timeout = null);
+
+        Task<Result<List<SurveyStation>>> SearchForSurveyStation(SurveyStationQueryParameters parameters, CancellationToken ct, TimeSpan? timeout = null);
     }
 }
