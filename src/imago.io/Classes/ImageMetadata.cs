@@ -9,6 +9,11 @@ namespace Imago.IO.Classes
         public DateTimeOffset? DateTaken { get; set; }
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
+        public double? Altitude { get; set; }
+
+        public double? ImageDirection { get; set; }
+        public string ImageDirectionRef { get; set; }
+
         public string Model { get; set; }
         public string ExposureProgram { get; set; }
         public string ExposureTime { get; set; }
