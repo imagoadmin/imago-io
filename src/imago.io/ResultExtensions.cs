@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Imago.IO
 {
@@ -25,6 +29,7 @@ namespace Imago.IO
         CreateImageFailed,
         NoReadPermission,
         NoWritePermission,
+        UnknownError
     }
 
     internal class ApiErrorCodeMapping
@@ -53,6 +58,12 @@ namespace Imago.IO
             new ApiErrorCodeMapping { Message = "IMAGE_TRANSFER_FAILED", ErrorCode = ApiErrorCodes.ImageTransferFailed }
         };
 
+        public static ApiErrorCodes Parse(string message)
+        {
+            var mapping = Mappings.FirstOrDefault(x => String.Equals(x.Message, message, StringComparison.OrdinalIgnoreCase));
+            return mapping?.ErrorCode ?? ApiErrorCodes.UnknownError;
+        }
+
         public string Message { get; set; }
         public ApiErrorCodes ErrorCode { get; set; }
     }
@@ -61,7 +72,8 @@ namespace Imago.IO
     {
         public static Result<T> FromHttpStatusCode<T>(System.Net.HttpStatusCode statusCode) where T : class
         {
-            return new Result<T> {
+            return new Result<T>
+            {
                 Code = HttpStatusCodeToStatusCode(statusCode),
             };
         }
@@ -79,6 +91,59 @@ namespace Imago.IO
                 case System.Net.HttpStatusCode.OK: return ResultCode.ok;
                 default: return ResultCode.failed;
             }
+        }
+
+        /// <summary>
+        /// This wraps the ProcessResult result in a task for use with the async variant.
+        /// <see cref="ResultExtensions.ConvertToResult{T}(HttpResponseMessage, Func{HttpResponseMessage, string, Task{T}})"/>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="response"></param>
+        /// <param name="processResponse"></param>
+        /// <returns></returns>
+        public static async Task<Result<T>> ConvertToResult<T>(this HttpResponseMessage response, Func<HttpResponseMessage, string, T> processResponse) where T : class
+        {
+            return await response.ConvertToResult((httpResponse, body) =>
+            {
+                var result = processResponse(response, body);
+                return Task.FromResult(result);
+            });
+        }
+
+        /// <summary>
+        /// Process a http response and convert it to an api result.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="response"></param>
+        /// <param name="processResponse"></param>
+        /// <returns></returns>
+        public static async Task<Result<T>> ConvertToResult<T>(this HttpResponseMessage response, Func<HttpResponseMessage, string, Task<T>> processResponse) where T : class
+        {
+            string body = await response.Content.ReadAsStringAsync();
+            ResultCode code = response.GetResultCode();
+
+            var result = new Result<T>();
+
+            switch (code)
+            {
+                case ResultCode.ok:
+                    result.Value = await processResponse(response, body);
+                    if (result.Value == null)
+                    {
+                        result.Code = ResultCode.failed;
+                        result.Error = ApiErrorCodes.UnknownError;
+                    }
+                    break;
+                case ResultCode.unauthorized:
+                    result.Code = ResultCode.unauthorized;
+                    break;
+                default:
+                    result.Code = ResultCode.failed;
+                    result.Error = ApiErrorCodeMapping.Parse(body);
+                    break;
+            }
+
+            return result;
         }
     }
 }
