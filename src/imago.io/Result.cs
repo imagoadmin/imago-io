@@ -12,6 +12,7 @@ namespace Imago.IO
     {
         public T Value { get; set; }
         public ResultCode Code { get; set; } = ResultCode.ok;
+        public ApiErrorCodes Error { get; set; } = ApiErrorCodes.None;
         public string Message { get; set; }
     }
 }
