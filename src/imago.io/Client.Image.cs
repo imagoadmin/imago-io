@@ -76,7 +76,9 @@ namespace Imago.IO
                         }
 
                         return fileName;
-                    });
+                    },
+                    _jsonConverter
+                    );
                 }
             }
             catch (Exception ex)
@@ -220,7 +222,7 @@ namespace Imago.IO
                     this.LogHttpResponse(response);
                     _lastResponse = response;
 
-                    return await response.ConvertToResult((httpResponse, body) => _jsonConverter.Deserialize<ImageUpdateResult>(body));
+                    return await response.ConvertToResult((httpResponse, body) => _jsonConverter.Deserialize<ImageUpdateResult>(body), _jsonConverter);
                 }
             }
             catch (Exception ex)

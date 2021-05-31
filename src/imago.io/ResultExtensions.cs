@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Imago.IO.Classes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -29,7 +30,8 @@ namespace Imago.IO
         CreateImageFailed,
         NoReadPermission,
         NoWritePermission,
-        UnknownError
+        UnknownError,
+        OperationCancelled
     }
 
     internal class ApiErrorCodeMapping
@@ -101,13 +103,15 @@ namespace Imago.IO
         /// <param name="response"></param>
         /// <param name="processResponse"></param>
         /// <returns></returns>
-        public static async Task<Result<T>> ConvertToResult<T>(this HttpResponseMessage response, Func<HttpResponseMessage, string, T> processResponse) where T : class
+        public static async Task<Result<T>> ConvertToResult<T>(this HttpResponseMessage response, Func<HttpResponseMessage, string, T> processResponse, JavaScriptSerializer serializer) where T : class
         {
             return await response.ConvertToResult((httpResponse, body) =>
             {
                 var result = processResponse(response, body);
                 return Task.FromResult(result);
-            });
+            },
+            serializer
+            );
         }
 
         /// <summary>
@@ -117,7 +121,7 @@ namespace Imago.IO
         /// <param name="response"></param>
         /// <param name="processResponse"></param>
         /// <returns></returns>
-        public static async Task<Result<T>> ConvertToResult<T>(this HttpResponseMessage response, Func<HttpResponseMessage, string, Task<T>> processResponse) where T : class
+        public static async Task<Result<T>> ConvertToResult<T>(this HttpResponseMessage response, Func<HttpResponseMessage, string, Task<T>> processResponse, JavaScriptSerializer serializer) where T : class
         {
             string body = await response.Content.ReadAsStringAsync();
             ResultCode code = response.GetResultCode();
@@ -139,11 +143,24 @@ namespace Imago.IO
                     break;
                 default:
                     result.Code = ResultCode.failed;
-                    result.Error = ApiErrorCodeMapping.Parse(body);
+                    result.Error = ApiErrorCodeMapping.Parse(GetErrorMessage(serializer, body));
                     break;
             }
 
             return result;
+        }
+
+        private static string GetErrorMessage(JavaScriptSerializer serializer, string body)
+        {
+            try
+            {
+                var errorResponse = serializer.Deserialize<ApiErrorResponse>(body);
+                return errorResponse.Errors?.Select(x => x.Message).FirstOrDefault() ?? string.Empty;
+            }
+            catch
+            {
+                return body;
+            }          
         }
     }
 }

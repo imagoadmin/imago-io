@@ -23,5 +23,14 @@ namespace Imago.IO
                 Error = ApiErrorCodes.UnknownError
             };
         }
+
+        public static Result<T> Cancelled()
+        {
+            return new Result<T>
+            {
+                Code = ResultCode.failed,
+                Error = ApiErrorCodes.OperationCancelled
+            };
+        }
     }
 }

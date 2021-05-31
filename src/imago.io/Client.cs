@@ -209,13 +209,13 @@ namespace Imago.IO
                         this.LogHttpResponse(response);
 
                         _lastResponse = response;
-                        return await response.ConvertToResult(processResponse);
+                        return await response.ConvertToResult(processResponse, _jsonConverter);
                     }
                 }
                 catch (OperationCanceledException ex)
                 {
                     Telemetry.TelemetryLogger.Instance?.LogException(ex);
-                    return Result<T>.UnknownError();
+                    return Result<T>.Cancelled();
                 }
                 catch (Exception ex)
                 {
@@ -246,7 +246,7 @@ namespace Imago.IO
                         this.LogHttpResponse(response);
                         _lastResponse = response;
 
-                        return await response.ConvertToResult(processResponse);
+                        return await response.ConvertToResult(processResponse, _jsonConverter);
                     }
                 }
                 catch (Exception ex)
@@ -278,7 +278,7 @@ namespace Imago.IO
 
                         _lastResponse = response;
 
-                        return await response.ConvertToResult(processResponse);
+                        return await response.ConvertToResult(processResponse, _jsonConverter);
                     }
                 }
                 catch (Exception ex)
