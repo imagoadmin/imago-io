@@ -239,7 +239,7 @@ namespace Imago.IO
                     { "imageTypeId", parameters.imageTypeId.ToString() },
                     {"imageTypeName", parameters.imageryTypeName },
                     { "mimeType", parameters.mimeType },
-                    { "size", parameters.dataStream?.Length.ToString() },
+                    // { "size", parameters.dataStream?.Length.ToString() }, Causes errors when filestream is closed
                     { "x", parameters.x?.ToString() },
                     { "y", parameters.y?.ToString() },
                     { "z", parameters.z?.ToString() }
@@ -249,7 +249,7 @@ namespace Imago.IO
             finally
             {
                 if (fs != null)
-                    fs.Close();
+                    try { fs.Close(); } catch { }
 
             }
             return result;
