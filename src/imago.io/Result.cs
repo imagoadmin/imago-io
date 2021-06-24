@@ -12,6 +12,25 @@ namespace Imago.IO
     {
         public T Value { get; set; }
         public ResultCode Code { get; set; } = ResultCode.ok;
+        public ApiErrorCodes Error { get; set; } = ApiErrorCodes.None;
         public string Message { get; set; }
+
+        public static Result<T> UnknownError()
+        {
+            return new Result<T>
+            {
+                Code = ResultCode.failed,
+                Error = ApiErrorCodes.UnknownError
+            };
+        }
+
+        public static Result<T> Cancelled()
+        {
+            return new Result<T>
+            {
+                Code = ResultCode.failed,
+                Error = ApiErrorCodes.OperationCancelled
+            };
+        }
     }
 }

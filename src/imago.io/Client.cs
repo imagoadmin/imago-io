@@ -29,9 +29,6 @@ namespace Imago.IO
         private string _uid;
 
         private HttpResponseMessage _lastResponse;
-        private string _lastResponseBody;
-
-        
 
         public ResultCode? LastSignInResultCode { get; private set; } = null;
 
@@ -150,7 +147,6 @@ namespace Imago.IO
                 Task<string> reading = response.Content.ReadAsStringAsync();
                 reading.Wait();
                 body = reading.Result;
-                _lastResponseBody = body;
 
                 if (response.StatusCode != HttpStatusCode.OK)
                     return false;
@@ -213,25 +209,13 @@ namespace Imago.IO
                         this.LogHttpResponse(response);
 
                         _lastResponse = response;
-                        string body = await response.Content.ReadAsStringAsync();
-                        _lastResponseBody = body;
-
-                        ResultCode code = response.GetResultCode();
-                        if (code == ResultCode.unauthorized)
-                            return new Result<T> { Value = null, Code = ResultCode.unauthorized };
-
-                        if (code != ResultCode.failed)
-                        {
-                            var result = processResponse(response, body);
-
-                            return new Result<T> { Value = result, Code = result != null ? ResultCode.ok : ResultCode.failed };
-                        }
+                        return await response.ConvertToResult(processResponse, _jsonConverter);
                     }
                 }
                 catch (OperationCanceledException ex)
                 {
                     Telemetry.TelemetryLogger.Instance?.LogException(ex);
-                    return new Result<T> { Value = null, Code = ResultCode.failed };
+                    return Result<T>.Cancelled();
                 }
                 catch (Exception ex)
                 {
@@ -243,7 +227,7 @@ namespace Imago.IO
             }
             while (retryCount <= MaxRetryAttempts);
 
-            return new Result<T> { Value = null, Code = ResultCode.failed };
+            return Result<T>.UnknownError();
         }
 
 
@@ -260,22 +244,9 @@ namespace Imago.IO
                         string requestbody = _jsonConverter.Serialize(parameters);
                         HttpResponseMessage response = await client.PostAsync(builder.ToString(), new StringContent(requestbody, Encoding.UTF8, "application/json"), ct).ConfigureAwait(false);
                         this.LogHttpResponse(response);
-
                         _lastResponse = response;
 
-                        string responsebody = await response.Content.ReadAsStringAsync();
-                        _lastResponseBody = responsebody;
-
-                        ResultCode code = response.GetResultCode();
-                        if (code == ResultCode.unauthorized)
-                            return new Result<T> { Value = null, Code = ResultCode.unauthorized };
-
-                        if (code != ResultCode.failed)
-                        {
-                            var result = processResponse(response, responsebody);
-
-                            return new Result<T> { Value = result, Code = result != null ? ResultCode.ok : ResultCode.failed };
-                        }
+                        return await response.ConvertToResult(processResponse, _jsonConverter);
                     }
                 }
                 catch (Exception ex)
@@ -288,7 +259,7 @@ namespace Imago.IO
             }
             while (retryCount <= MaxRetryAttempts);
 
-            return new Result<T> { Value = null, Code = ResultCode.failed };
+            return Result<T>.UnknownError();
         }
 
         private async Task<Result<T>> ClientPut<T, TPostBody>(UriBuilder builder, TPostBody parameters, TimeSpan? timeout, CancellationToken ct, Func<HttpResponseMessage, string, T> processResponse) where T : class
@@ -307,19 +278,7 @@ namespace Imago.IO
 
                         _lastResponse = response;
 
-                        body = await response.Content.ReadAsStringAsync();
-                        _lastResponseBody = body;
-
-                        ResultCode code = response.GetResultCode();
-                        if (code == ResultCode.unauthorized)
-                            return new Result<T> { Value = null, Code = ResultCode.unauthorized };
-
-                        if (code != ResultCode.failed)
-                        {
-                            var result = processResponse(response, body);
-
-                            return new Result<T> { Value = result, Code = result != null ? ResultCode.ok : ResultCode.failed };
-                        }
+                        return await response.ConvertToResult(processResponse, _jsonConverter);
                     }
                 }
                 catch (Exception ex)
@@ -332,7 +291,7 @@ namespace Imago.IO
             }
             while (retryCount <= MaxRetryAttempts);
 
-            return new Result<T> { Value = null, Code = ResultCode.failed };
+            return Result<T>.UnknownError();
         }
 
         public async Task<bool> IsSessionValid(TimeSpan? timeout = null)
@@ -350,7 +309,6 @@ namespace Imago.IO
 
                     this.LogHttpResponse(result);
 
-                    _lastResponseBody = null;
                     if (result.StatusCode != HttpStatusCode.OK)
                         _apiToken = null;
 
@@ -376,9 +334,6 @@ namespace Imago.IO
                     HttpResponseMessage result = await client.DeleteAsync(_apiUrl + "/session").ConfigureAwait(false);
                     this.LogHttpResponse(result);
                     _lastResponse = result;
-
-
-                    _lastResponseBody = null;
 
                     return (result.StatusCode == HttpStatusCode.OK);
                 }

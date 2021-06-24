@@ -53,26 +53,32 @@ namespace Imago.IO
                     this.LogHttpResponse(response);
                     _lastResponse = response;
 
-
-                    if (response.StatusCode != HttpStatusCode.OK)
-                        return new Result<string> { Code = response.GetResultCode(), Message = response.StatusCode.ToString() };
-
-                    if (response.Content.Headers.ContentDisposition == null || String.IsNullOrWhiteSpace(response.Content.Headers.ContentDisposition.FileName) || response.StatusCode != HttpStatusCode.OK)
-                        return new Result<string> { Code = ResultCode.failed };
-
-                    string fsExt = Path.GetExtension(response.Content.Headers.ContentDisposition.FileName.Replace("\"", ""));
-                    if (String.IsNullOrWhiteSpace(fsExt))
-                        return new Result<string> { Code = ResultCode.failed };
-
-                    fileName += fsExt;
-                    using (FileStream imageFileStream = new FileStream(fileName, FileMode.Create))
-                    using (var httpStream = await response.Content.ReadAsStreamAsync())
+                    return await response.ConvertToResult(async (httpResponse, body) =>
                     {
-                        httpStream.CopyTo(imageFileStream);
-                        imageFileStream.Flush();
-                    }
+                        if (httpResponse.Content.Headers.ContentDisposition == null || string.IsNullOrWhiteSpace(response.Content.Headers.ContentDisposition.FileName))
+                        {
+                            return null;
+                        }
 
-                    return new Result<string> { Value = fileName, Code = response.GetResultCode() };
+                        string fsExt = Path.GetExtension(response.Content.Headers.ContentDisposition.FileName.Replace("\"", ""));
+                        if (string.IsNullOrWhiteSpace(fsExt))
+                        {
+                            return null;
+                        }
+
+                        // file name comes from a closure.
+                        fileName += fsExt;
+                        using (FileStream imageFileStream = new FileStream(fileName, FileMode.Create))
+                        using (var httpStream = await response.Content.ReadAsStreamAsync())
+                        {
+                            httpStream.CopyTo(imageFileStream);
+                            imageFileStream.Flush();
+                        }
+
+                        return fileName;
+                    },
+                    _jsonConverter
+                    );
                 }
             }
             catch (Exception ex)
@@ -173,7 +179,7 @@ namespace Imago.IO
 
                 var byId = parameters.imageryId != null && parameters.imageryId.Value != default;
                 var byName = hasWorkspace && hasDataset && hasCollection && hasImageryType && hasImageType;
-                    
+
                 if (!byId && !byName) return new Result<ImageUpdateResult> { Code = ResultCode.failed };
 
                 NameValueCollection query = new NameValueCollection();
@@ -186,7 +192,7 @@ namespace Imago.IO
                 if (hasImageType) query["imageTypeName"] = parameters.imageTypeName;
                 if (parameters.collectionId != default) query["collectionid"] = parameters.collectionId?.ToString();
                 if (parameters.imageryTypeId != default) query["imagerytypeid"] = parameters.imageryTypeId?.ToString();
-                if(parameters.imageryTypeId != default) query["imagetypeid"] = parameters.imageTypeId.ToString();
+                if (parameters.imageryTypeId != default) query["imagetypeid"] = parameters.imageTypeId.ToString();
 
                 query["mimetype"] = parameters.mimeType;
                 query["name"] = parameters.name?.ToString();
@@ -215,10 +221,8 @@ namespace Imago.IO
                     HttpResponseMessage response = await client.PostAsync(builder.ToString(), content, ct).ConfigureAwait(false);
                     this.LogHttpResponse(response);
                     _lastResponse = response;
-                    string body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    _lastResponseBody = body;
-                    ImageUpdateResult imageResult = _jsonConverter.Deserialize<ImageUpdateResult>(body);
-                    result = new Result<ImageUpdateResult> { Value = imageResult, Code = imageResult == null || response.StatusCode != HttpStatusCode.OK ? response.GetResultCode() : ResultCode.ok, Message = $"HTTP error {response.StatusCode} {body}" };
+
+                    return await response.ConvertToResult((httpResponse, body) => _jsonConverter.Deserialize<ImageUpdateResult>(body), _jsonConverter);
                 }
             }
             catch (Exception ex)
@@ -235,7 +239,7 @@ namespace Imago.IO
                     { "imageTypeId", parameters.imageTypeId.ToString() },
                     {"imageTypeName", parameters.imageryTypeName },
                     { "mimeType", parameters.mimeType },
-                    { "size", parameters.dataStream?.Length.ToString() },
+                    // { "size", parameters.dataStream?.Length.ToString() }, Causes errors when filestream is closed
                     { "x", parameters.x?.ToString() },
                     { "y", parameters.y?.ToString() },
                     { "z", parameters.z?.ToString() }
@@ -245,7 +249,7 @@ namespace Imago.IO
             finally
             {
                 if (fs != null)
-                    fs.Close();
+                    try { fs.Close(); } catch { }
 
             }
             return result;
